@@ -7,7 +7,6 @@ Additional code from contributors and libraries in this export are licenced as f
 MIT:
 
 - glmatrix by toji (https://github.com/toji/gl-matrix)
-- opentype (https://github.com/opentypejs/opentype.js)
 
 Public Domain:
 
@@ -18,7 +17,3 @@ Apache License:
 
 - BabylonJS Shader Code by Babylon.js (https://github.com/BabylonJS/Babylon.js/blob/master/license.md)
 - Filament Code by google (https://github.com/google/filament/blob/main/LICENSE)
-
-ISC:
-
-- earcut.js (https://github.com/mapbox/earcut)
