@@ -1,0 +1,3 @@
+title: KFC
+category: commercial
+tags: KFC

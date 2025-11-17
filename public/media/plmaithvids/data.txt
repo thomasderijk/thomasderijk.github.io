@@ -1,0 +1,9 @@
+title: P.L.M.A.I.T.H. vids
+category: visual, audio,
+tags: video, ai, audio
+description: messed up latent self portraits
+dropbox: https://www.dropbox.com/scl/fi/n3hp9bkt3jcq7y2mpoo8g/1-please-v2.mp4?rlkey=jt2fr5c2yn6cq28n6jz1624bs&dl=0
+dropbox: https://www.dropbox.com/scl/fi/yxe1x1eoavkgq7mp2ieh3/2-let-me-v2.mp4?rlkey=2577gw728s1q62ie3onm7lnk6&dl=0
+dropbox: https://www.dropbox.com/scl/fi/wko7jrvyeu1buf63ikd9u/3-assimilate-v2.mp4?rlkey=87xi9z9egszmtkxy2rfv7hvyc&dl=0
+
+
