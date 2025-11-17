@@ -1,4 +1,0 @@
-title: Travis Scott viz
-category: visual
-tags: 3d, animation, visuals
-description: with Human Person and a whole team

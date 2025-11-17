@@ -1,0 +1,4 @@
+title: Smite
+category: visual
+tags: 3d, animation
+dropbox: https://www.dropbox.com/scl/fi/61dumbjq3ojpyypwm2l48/smite_compress.mov?rlkey=aarm3xxha09ez6csn26m4jp4y&dl=0

@@ -1,5 +1,0 @@
-title: Duran Lantink - LFW digi show
-category: visual
-tags: 2d, animation, compositing 
-description: With Daan Couzijn, music by Angel Ho
-dropbox: https://www.dropbox.com/scl/fi/y3f2qu6v378vwzzuhmhtk/angel_ho_x_duran_lantink_v1-1080p.mp4?rlkey=9u4l9ittgbbd5b61hze8x52j5&dl=0

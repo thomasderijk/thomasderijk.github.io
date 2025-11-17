@@ -1,4 +1,0 @@
-title: Eel
-category: visual, audio
-tags: 3d, animation, modeling, texturing, unreal
-dropbox: https://www.dropbox.com/scl/fi/y5nwrx8cu4nrp9xmmydo7/eel-compress.mov?rlkey=spstm2sqx43il31a9xt86lj0l&dl=0
