@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
+import { HashRouter, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
 import { X, Shuffle } from "lucide-react";
 import { useProjectSort } from "@/hooks/use-project-sort";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
@@ -28,10 +28,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { isProjectOpen, closeHandler } = useProjectDetail();
   const showShuffleButton = location.pathname === '/audio' || location.pathname === '/visual';
   const allowScroll = location.pathname === '/audio' || location.pathname === '/visual';
-  const [iframeSrc, setIframeSrc] = useState("https://thomasderijk.com/patches");
+  const [iframeSrc, setIframeSrc] = useState("/patches/");
 
   const reloadIframe = () => {
-    setIframeSrc(`https://thomasderijk.com/patches?ts=${Date.now()}`);
+    setIframeSrc(`/patches/?ts=${Date.now()}`);
   };
 
   return (
@@ -130,7 +130,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <HashRouter>
         <CommercialProvider>
           <ProjectDetailProvider>
             <Layout>
@@ -147,7 +147,7 @@ const App = () => (
             </Layout>
           </ProjectDetailProvider>
         </CommercialProvider>
-      </BrowserRouter>
+      </HashRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
