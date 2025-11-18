@@ -188,8 +188,7 @@ const Audio = () => {
           onClick={() => setSelectedProject(null)}
         >
           <div className="relative pointer-events-auto">
-            <div className="relative">
-              <div className="relative container mx-auto px-4 py-4">
+              <div className="container mx-auto px-4 py-4">
                 <div className="flex flex-col max-w-[95vw] mx-auto relative px-6">
                   {/* Content */}
                   <div
@@ -254,7 +253,6 @@ const Audio = () => {
                   )}
                 </div>
               </div>
-            </div>
           </div>
         </div>
       ) : (
@@ -339,7 +337,7 @@ const Audio = () => {
                               <GridCardTitle
                                 text={project.title}
                                 isHovered={isHovered}
-                                className="text-sm font-sans font-medium text-white text-center leading-tight"
+                                className="text-sm font-sans font-medium text-foreground text-center leading-tight"
                               />
                             </div>
                           )}

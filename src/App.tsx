@@ -48,11 +48,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <div className="relative">
             <div className="py-2 md:py-4 px-2 md:px-4 invisible">
               {/* Invisible placeholder to create same height as nav */}
-              <span className="text-base sm:text-xl md:text-2xl lg:text-3xl font-display font-bold">placeholder</span>
+              <span className="text-2xl md:text-4xl font-display font-bold">placeholder</span>
             </div>
             <button
               onClick={reloadIframe}
-              className="absolute top-1/2 -translate-y-1/2 left-2 md:left-4 p-2 md:p-3 text-white hover:text-white/80 pointer-events-auto transition-colors"
+              className="absolute top-1/2 -translate-y-1/2 left-2 md:left-4 p-2 md:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-colors"
               style={{ filter: 'drop-shadow(0 1.25px 10px rgba(0,0,0,.05)) drop-shadow(0 3.75px 40px rgba(0,0,0,.2))' }}
               aria-label="Reload background"
               title="Reload background"
@@ -68,7 +68,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             {showShuffleButton && (
             <button
               onClick={toggleRandomize}
-              className="absolute top-1/2 -translate-y-1/2 left-2 md:left-4 p-2 md:p-3 text-white hover:text-white/80 pointer-events-auto transition-colors"
+              className="absolute top-1/2 -translate-y-1/2 left-2 md:left-4 p-2 md:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-colors"
               style={{ filter: 'drop-shadow(0 1.25px 10px rgba(0,0,0,.05)) drop-shadow(0 3.75px 40px rgba(0,0,0,.2))' }}
               aria-label="Randomize projects"
               title={isRandomized ? 'Sorted randomly' : 'Sort by date'}
@@ -77,7 +77,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </button>
           )}
           <div
-            className="flex items-center justify-center gap-2 sm:gap-2.5 md:gap-3 text-xl sm:text-2xl md:text-[26px] lg:text-3xl py-2 md:py-4 px-2 md:px-4"
+            className="flex items-center justify-center gap-2 sm:gap-2.5 md:gap-3 text-2xl md:text-4xl py-2 md:py-4 px-2 md:px-4"
             style={{
               filter: 'drop-shadow(0 1.25px 10px rgba(0,0,0,.05)) drop-shadow(0 3.75px 40px rgba(0,0,0,.2))',
               textShadow: '0 0 8px rgba(0,0,0,0.6)'

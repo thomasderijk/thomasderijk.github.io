@@ -9,6 +9,7 @@ interface StaggeredMirrorTextProps {
 interface GlitchEffect {
   isCaps: boolean;
   isMirror: boolean;
+  isItalic: boolean;
 }
 
 export const StaggeredMirrorText = ({ text, className = '', isActive = false }: StaggeredMirrorTextProps) => {
@@ -34,78 +35,72 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false }: 
       const randomIndex = Math.floor(Math.random() * letters.length);
       
       // Apply random effect to this letter
-      const rand = Math.random();
-      let isCaps = false;
-      let isMirror = false;
-      
-      if (rand < 0.33) {
-        // Caps only
-        isCaps = true;
-      } else if (rand < 0.66) {
-        // Mirror only
-        isMirror = true;
-      } else {
-        // Both caps and mirror
-        isCaps = true;
-        isMirror = true;
-      }
-      
+      // Each effect (caps, mirror, italic) has independent 50% chance
+      const isCaps = Math.random() < 0.5;
+      const isMirror = Math.random() < 0.5;
+      const isItalic = Math.random() < 0.5;
+
+      // Ensure at least one effect is active
+      const hasAnyEffect = isCaps || isMirror || isItalic;
+      const finalCaps = hasAnyEffect ? isCaps : true; // Default to caps if none selected
+
       const newGlitchEffects = [...glitchEffects];
-      newGlitchEffects[randomIndex] = { isCaps, isMirror };
+      newGlitchEffects[randomIndex] = { isCaps: finalCaps, isMirror, isItalic };
       
       setGlitchEffects(newGlitchEffects);
       
       // Duration: 3-20 frames (48-320ms)
       const frames = Math.floor(Math.random() * 18) + 3; // 3-20 frames
       const baseDuration = frames * 16;
-      
-      // If both effects are active, make one linger 2-10 frames longer
-      if (isCaps && isMirror) {
-        const lingerFrames = Math.floor(Math.random() * 9) + 2; // 2-10 frames
-        const lingerDuration = lingerFrames * 16;
-        const whichLingers = Math.random() < 0.5 ? 'caps' : 'mirror';
-        
-        if (whichLingers === 'caps') {
-          // Mirror ends first, caps lingers
-          setTimeout(() => {
-            setGlitchEffects(prev => {
-              const cleared = [...prev];
-              if (cleared[randomIndex]) {
-                cleared[randomIndex] = { isCaps: true, isMirror: false };
-              }
-              return cleared;
-            });
-          }, baseDuration);
-          
-          // Clear caps after linger
-          setTimeout(() => {
-            setGlitchEffects(prev => {
-              const cleared = [...prev];
-              cleared[randomIndex] = null;
-              return cleared;
-            });
-          }, baseDuration + lingerDuration);
-        } else {
-          // Caps ends first, mirror lingers
-          setTimeout(() => {
-            setGlitchEffects(prev => {
-              const cleared = [...prev];
-              if (cleared[randomIndex]) {
-                cleared[randomIndex] = { isCaps: false, isMirror: true };
-              }
-              return cleared;
-            });
-          }, baseDuration);
-          
-          // Clear mirror after linger
-          setTimeout(() => {
-            setGlitchEffects(prev => {
-              const cleared = [...prev];
-              cleared[randomIndex] = null;
-              return cleared;
-            });
-          }, baseDuration + lingerDuration);
-        }
+
+      // Count active effects
+      const activeEffects: ('caps' | 'mirror' | 'italic')[] = [];
+      if (finalCaps) activeEffects.push('caps');
+      if (isMirror) activeEffects.push('mirror');
+      if (isItalic) activeEffects.push('italic');
+
+      if (activeEffects.length > 1) {
+        // Multiple effects - each ends at a different time with lingering
+        // Shuffle to randomize which effects end first
+        const shuffled = [...activeEffects].sort(() => Math.random() - 0.5);
+
+        let currentDuration = baseDuration;
+        let currentCaps = finalCaps;
+        let currentMirror = isMirror;
+        let currentItalic = isItalic;
+
+        // End effects one by one
+        shuffled.forEach((effect, idx) => {
+          if (idx < shuffled.length - 1) {
+            // Not the last effect - end it and linger
+            const lingerFrames = Math.floor(Math.random() * 9) + 2; // 2-10 frames
+            const lingerDuration = lingerFrames * 16;
+
+            setTimeout(() => {
+              setGlitchEffects(prev => {
+                const cleared = [...prev];
+                if (cleared[randomIndex]) {
+                  if (effect === 'caps') currentCaps = false;
+                  if (effect === 'mirror') currentMirror = false;
+                  if (effect === 'italic') currentItalic = false;
+                  cleared[randomIndex] = { isCaps: currentCaps, isMirror: currentMirror, isItalic: currentItalic };
+                }
+                return cleared;
+              });
+            }, currentDuration);
+
+            currentDuration += lingerDuration;
+          } else {
+            // Last effect - clear everything
+            setTimeout(() => {
+              setGlitchEffects(prev => {
+                const cleared = [...prev];
+                cleared[randomIndex] = null;
+                return cleared;
+              });
+            }, currentDuration);
+          }
+        });
       } else {
         // Single effect, just clear after duration
         setTimeout(() => {
@@ -256,13 +251,16 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false }: 
         {letters.map((letter, index) => {
           const glitch = glitchEffects[index];
           const isFlipped = flippedLetters[index];
-          
+
           // Determine if letter should be mirrored (from hover/active OR glitch)
           const shouldMirror = (isHovered || isActive) || (glitch?.isMirror ?? false);
-          
+
           // Determine if letter should be caps (from flip OR glitch)
           const shouldBeCaps = isFlipped || (glitch?.isCaps ?? false);
-          
+
+          // Determine if letter should be italic (from glitch only)
+          const shouldBeItalic = glitch?.isItalic ?? false;
+
           return (
             <span
               key={index}
@@ -270,6 +268,7 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false }: 
               style={{
                 transform: shouldMirror ? 'scaleX(-1)' : 'scaleX(1)',
                 transitionDelay: `${letterDelays[index] || 0}ms`,
+                fontStyle: shouldBeItalic ? 'italic' : 'normal',
               }}
             >
               {shouldBeCaps ? letter.toUpperCase() : letter}

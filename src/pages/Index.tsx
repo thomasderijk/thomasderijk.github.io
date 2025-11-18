@@ -5,7 +5,9 @@ const Index = () => {
   return (
     <div
       className="relative z-10 flex flex-col items-center justify-center min-h-screen gap-0 text-center px-4 pointer-events-none"
-      style={{ filter: 'drop-shadow(0 2.5px 10px rgba(0,0,0,.05)) drop-shadow(0 7.5px 40px rgba(0,0,0,.2))' }}
+      style={{
+        textShadow: '0 0 8px rgba(0,0,0,0.6)'
+      }}
     >
       <Link to="/audio" className="text-2xl md:text-4xl font-display font-bold text-foreground pointer-events-auto">
         <StaggeredMirrorText text="audio" />
