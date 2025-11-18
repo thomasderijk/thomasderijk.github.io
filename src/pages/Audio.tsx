@@ -140,6 +140,18 @@ const Audio = () => {
     };
   }, [audioProjects, selectedProject]);
 
+  // Handle wheel events for scroll container with pointer-events: none
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (!selectedProject && scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop += e.deltaY;
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, [selectedProject]);
+
   // Filter out thumbnail files from detail view, BUT keep single images
   const getDetailMedia = (project: Project) => {
     const allImages = project.media.filter(m => m.type === 'image');
@@ -158,19 +170,6 @@ const Audio = () => {
     <>
       {/* Top container: transparent spacer for menubar area */}
       <div style={{ height: '64px' }} />
-
-      {/* Fixed grey background */}
-      <div
-        className="fixed pointer-events-none"
-        style={{
-          background: 'rgb(26, 26, 26)',
-          top: '64px',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 5,
-        }}
-      />
 
       {selectedProject ? (
         /* Project Detail View - Full Page */
@@ -258,25 +257,27 @@ const Audio = () => {
       ) : (
         /* Grid content container with fixed viewport clip */
         <div
+          ref={scrollContainerRef}
           className="fixed"
           style={{
             top: '64px',
             left: 0,
             right: 0,
             bottom: 0,
-            overflow: 'auto',
+            overflowY: 'scroll',
             zIndex: 6,
+            pointerEvents: 'none',
           }}
         >
           <div
-            className="relative pointer-events-auto"
+            className="relative pointer-events-none"
             style={{
               marginTop: '-64px',
               paddingTop: '64px',
               minHeight: 'calc(100vh + 64px)',
             }}
           >
-            <div className="relative min-h-screen" ref={scrollContainerRef}>
+            <div className="relative min-h-screen">
               <div className="relative container mx-auto px-4 pt-4 pb-12 pointer-events-none">
                 {/* Scroll indicator for grid */}
                 {showScrollIndicator && !selectedProject && (

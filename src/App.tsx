@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,18 +28,32 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { isProjectOpen, closeHandler } = useProjectDetail();
   const showShuffleButton = location.pathname === '/audio' || location.pathname === '/visual';
   const allowScroll = location.pathname === '/audio' || location.pathname === '/visual';
+  const shouldBlurBackground = location.pathname === '/audio' || location.pathname === '/visual';
   const [iframeSrc, setIframeSrc] = useState("/patches/");
 
   const reloadIframe = () => {
     setIframeSrc(`/patches/?ts=${Date.now()}`);
   };
 
+
   return (
     <div className={`relative ${allowScroll ? 'min-h-screen' : 'h-screen overflow-hidden'} bg-[hsl(var(--background))]`}>
-      <iframe 
+      <iframe
         src={iframeSrc}
-        className="fixed inset-0 w-full h-full pointer-events-auto bg-[hsl(var(--background))]"
-        style={{ border: 'none', touchAction: 'auto', backgroundColor: 'hsl(var(--background))' }}
+        className="fixed pointer-events-auto bg-[hsl(var(--background))]"
+        style={{
+          border: 'none',
+          touchAction: 'auto',
+          backgroundColor: 'hsl(var(--background))',
+          filter: shouldBlurBackground ? 'blur(20px) grayscale(100%)' : 'none',
+          transition: 'filter 0.3s ease',
+          top: shouldBlurBackground ? '-40px' : '0',
+          left: shouldBlurBackground ? '-40px' : '0',
+          right: shouldBlurBackground ? '-40px' : '0',
+          bottom: shouldBlurBackground ? '-40px' : '0',
+          width: shouldBlurBackground ? 'calc(100% + 80px)' : '100%',
+          height: shouldBlurBackground ? 'calc(100% + 80px)' : '100%'
+        }}
         title="Background Scene"
       />
       
