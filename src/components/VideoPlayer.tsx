@@ -15,7 +15,23 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
     const video = videoRef.current;
     if (!video) return;
 
-    const handlePlay = () => setIsPaused(false);
+    const handlePlay = () => {
+      setIsPaused(false);
+      // Pause all other video elements when this one plays
+      const allVideoElements = document.querySelectorAll('video');
+      allVideoElements.forEach((otherVideo) => {
+        if (otherVideo !== video && !otherVideo.paused) {
+          otherVideo.pause();
+        }
+      });
+      // Also pause all audio elements
+      const allAudioElements = document.querySelectorAll('audio');
+      allAudioElements.forEach((audio) => {
+        if (!audio.paused) {
+          audio.pause();
+        }
+      });
+    };
     const handlePause = () => setIsPaused(true);
     const handleLoadedMetadata = () => {
       if (video.videoWidth && video.videoHeight) {

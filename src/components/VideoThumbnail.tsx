@@ -13,11 +13,28 @@ export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }:
   const imageRef = useRef<HTMLImageElement>(null);
   const hasPlayedRef = useRef(false);
   const pauseTimeoutRef = useRef<NodeJS.Timeout>();
-  const [shouldAutoplay, setShouldAutoplay] = useState(true);
+  const [shouldAutoplay, setShouldAutoplay] = useState(false); // Changed to false - only play on hover
   const [metadataLoaded, setMetadataLoaded] = useState(false);
-  
+
   // Determine if this is an image or video based on file extension
   const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(src);
+
+  // Handle hover play/pause
+  const handleMouseEnter = () => {
+    const video = videoRef.current;
+    if (video && metadataLoaded) {
+      video.play().catch(() => {
+        // Ignore play errors
+      });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    const video = videoRef.current;
+    if (video) {
+      video.pause();
+    }
+  };
   
   // Use queue-based loading
   const { shouldLoad, notifyLoadComplete } = useVideoLoadQueue(src, () => {
@@ -201,7 +218,11 @@ export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }:
   }, [isImage, src, shouldLoad, notifyLoadComplete]);
 
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {shouldLoad && (
         isImage ? (
           <img
@@ -231,13 +252,6 @@ export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }:
             }}
           />
         )
-      )}
-      {!shouldAutoplay && shouldLoad && !isImage && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-          <span className="text-white text-xs px-2 py-1 bg-black/60 rounded">
-            Slow connection - click to play
-          </span>
-        </div>
       )}
     </div>
   );

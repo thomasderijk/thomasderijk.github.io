@@ -133,14 +133,14 @@ All colors MUST be HSL.
   body {
     @apply text-foreground;
     background-color: hsl(var(--background));
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'Inter', sans-serif;
     color: #ffffff;
   }
-  
+
   .font-display {
     text-shadow: none;
-    /* prefer Tiepolo (self-hosted) then Roboto then system sans */
-    font-family: 'Tiepolo', 'Roboto', sans-serif;
+    /* prefer Tiepolo (self-hosted) then Inter then system sans */
+    font-family: 'Tiepolo', 'Inter', sans-serif;
   }
 
   /* Custom scrollbar - hidden globally */

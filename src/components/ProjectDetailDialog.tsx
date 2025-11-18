@@ -74,7 +74,7 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
       <DialogContent className="max-h-[95vh] !p-0">
         <div className="flex flex-col max-h-[95vh] relative p-6">
           <DialogHeader className="text-left flex-shrink-0">
-            <DialogTitle className="text-xl sm:text-3xl font-display font-black">
+            <DialogTitle className="text-xl sm:text-3xl font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
               {project.title}
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -109,7 +109,7 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
               {/* Tags moved to bottom after description */}
               <div className="flex flex-wrap gap-1 mt-4">
                 {project.tags.map((tag, index) => (
-                  <span key={tag} className="text-xs font-mono text-muted-foreground">
+                  <span key={tag} className="text-xs font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {index > 0 && " / "}
                     {tag.toLowerCase()}
                   </span>
@@ -118,7 +118,7 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
 
               {/* Year */}
               <div className="flex flex-wrap gap-1">
-                <span className="text-xs font-mono text-muted-foreground">
+                <span className="text-xs font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {new Date(project.date).getFullYear()}
                 </span>
               </div>

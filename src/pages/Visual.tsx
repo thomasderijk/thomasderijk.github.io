@@ -207,7 +207,7 @@ const Visual = () => {
 
                         {/* Title */}
                         <div className="text-left flex-shrink-0">
-                          <h2 className="text-xl font-display font-black text-foreground">
+                          <h2 className="text-xl font-semibold text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                             {selectedProject.title}
                           </h2>
                         </div>
@@ -223,7 +223,7 @@ const Visual = () => {
                         {/* Tags */}
                         <div className="flex flex-wrap gap-1">
                           {selectedProject.tags.map((tag, index) => (
-                            <span key={tag} className="text-xs font-mono text-muted-foreground">
+                            <span key={tag} className="text-xs font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                               {index > 0 && " / "}
                               {tag.toLowerCase()}
                             </span>
@@ -232,7 +232,7 @@ const Visual = () => {
 
                         {/* Year */}
                         <div className="flex flex-wrap gap-1">
-                          <span className="text-xs font-mono text-muted-foreground">
+                          <span className="text-xs font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                             {new Date(selectedProject.date).getFullYear()}
                           </span>
                         </div>
@@ -330,13 +330,13 @@ const Visual = () => {
                         )}
 
                         {/* Overlay: absolute so it doesn't affect layout; title always visible, tags on hover */}
-                        <div className="absolute inset-0 flex items-end justify-center pointer-events-none pb-2">
+                        <div className="absolute inset-0 flex items-end justify-center pointer-events-none pb-1">
                           {isHovered && (
-                            <div className="bg-background px-3 py-2">
+                            <div className="bg-background px-1.5 py-1">
                               <GridCardTitle
                                 text={project.title}
                                 isHovered={isHovered}
-                                className="text-xl font-display font-black text-white text-center leading-tight"
+                                className="text-sm font-sans font-medium text-white text-center leading-tight"
                               />
                             </div>
                           )}

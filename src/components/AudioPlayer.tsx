@@ -30,6 +30,13 @@ export const AudioPlayer = ({ url, thumbnail }: AudioPlayerProps) => {
           audio.pause();
         }
       });
+      // Also pause all video elements
+      const allVideoElements = document.querySelectorAll('video');
+      allVideoElements.forEach((video) => {
+        if (!video.paused) {
+          video.pause();
+        }
+      });
     };
 
     audioElement.addEventListener('play', handlePlay);

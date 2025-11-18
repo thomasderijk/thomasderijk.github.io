@@ -14,10 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        // Primary monospace for body
-        sans: ['Roboto Mono', 'monospace'],
-        // Prefer Tiepolo for display headings when available, fallback to Roboto then system sans
-        display: ['Tiepolo', 'Roboto', 'sans-serif'],
+        // Primary font for body text
+        sans: ['Inter', 'sans-serif'],
+        // Prefer Tiepolo for display headings when available, fallback to Inter then system sans
+        display: ['Tiepolo', 'Inter', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
