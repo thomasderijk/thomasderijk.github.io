@@ -1,1 +1,4 @@
 node_modules
+
+# Thumbnail backup files (original .mov files before conversion)
+.thumbnail-backups
