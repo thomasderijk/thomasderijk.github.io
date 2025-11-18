@@ -210,7 +210,7 @@ const Visual = () => {
 
                         {/* Title */}
                         <div className="text-left flex-shrink-0 mt-4">
-                          <h2 className="text-xl font-semibold text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                             {selectedProject.title}
                           </h2>
                         </div>
@@ -226,7 +226,7 @@ const Visual = () => {
                         {/* Tags */}
                         <div className="flex flex-wrap gap-1 mt-4">
                           {selectedProject.tags.map((tag, index) => (
-                            <span key={tag} className="text-sm font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            <span key={tag} className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                               {index > 0 && " / "}
                               {tag.toLowerCase()}
                             </span>
@@ -235,7 +235,7 @@ const Visual = () => {
 
                         {/* Year */}
                         <div className="flex flex-wrap gap-1 mt-4">
-                          <span className="text-sm font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          <span className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                             {new Date(selectedProject.date).getFullYear()}
                           </span>
                         </div>
@@ -338,7 +338,7 @@ const Visual = () => {
                               <GridCardTitle
                                 text={project.title}
                                 isHovered={isHovered}
-                                className="text-sm font-sans font-medium text-foreground text-center leading-tight"
+                                className="text-sm font-sans font-normal text-foreground text-center leading-tight"
                               />
                             </div>
                           )}

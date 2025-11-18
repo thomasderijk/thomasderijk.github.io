@@ -79,8 +79,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <div
             className="flex items-center justify-center gap-2 sm:gap-2.5 md:gap-3 text-2xl md:text-4xl py-2 md:py-4 px-2 md:px-4"
             style={{
-              filter: 'drop-shadow(0 1.25px 10px rgba(0,0,0,.05)) drop-shadow(0 3.75px 40px rgba(0,0,0,.2))',
-              textShadow: '0 0 8px rgba(0,0,0,0.6)'
+              filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.2))'
             }}
           >
             <Link to="/audio" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">

@@ -6,7 +6,7 @@ const Index = () => {
     <div
       className="relative z-10 flex flex-col items-center justify-center min-h-screen gap-0 text-center px-4 pointer-events-none"
       style={{
-        textShadow: '0 0 8px rgba(0,0,0,0.6)'
+        filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.2))'
       }}
     >
       <Link to="/audio" className="text-2xl md:text-4xl font-display font-bold text-foreground pointer-events-auto">
