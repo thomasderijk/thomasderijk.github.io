@@ -10,30 +10,26 @@ const Links = () => {
   ];
 
   return (
-    <div className="relative z-10 h-screen overflow-hidden px-4 pt-4">
-      <div className="w-full max-w-2xl mx-auto">
-        <div className="p-8 bg-background">
-          <div className="prose prose-sm max-w-none">
-            <div className="flex flex-col items-center space-y-2">
-              {links.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <a
-                    key={link.name}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group inline-flex items-center justify-center gap-3 hover:text-foreground/80 transition-colors"
-                  >
-                    <Icon className="w-4 h-4 text-foreground flex-shrink-0" />
-                    <span className="text-foreground leading-relaxed">
-                      {link.name}
-                    </span>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
+    <div className="relative z-10 flex items-center justify-center px-4" style={{ height: 'calc(100vh - 64px)' }}>
+      <div className="w-full max-w-md">
+        <div className="flex flex-col items-center">
+          {links.map((link) => {
+            const Icon = link.icon;
+            return (
+              <a
+                key={link.name}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center justify-center gap-3 hover:text-foreground/80 transition-colors"
+              >
+                <Icon className="w-4 h-4 text-foreground flex-shrink-0" />
+                <span className="text-foreground leading-relaxed">
+                  {link.name}
+                </span>
+              </a>
+            );
+          })}
         </div>
       </div>
     </div>

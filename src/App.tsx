@@ -61,6 +61,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         }}
         title="Background Scene"
       />
+
+      {/* Dark overlay for blurred background */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          opacity: shouldBlurBackground ? 1 : 0,
+          transition: 'opacity 0.3s ease',
+        }}
+      />
       
       {isHome && (
         <div className="fixed top-0 left-0 right-0 z-20 pointer-events-none">
