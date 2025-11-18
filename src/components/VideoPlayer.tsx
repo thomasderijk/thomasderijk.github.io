@@ -9,7 +9,8 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+  const [aspectRatio, setAspectRatio] = useState<number>(16/9); // Default to 16:9 to prevent layout shift
+  const [metadataLoaded, setMetadataLoaded] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -36,8 +37,15 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
     const handleLoadedMetadata = () => {
       if (video.videoWidth && video.videoHeight) {
         setAspectRatio(video.videoWidth / video.videoHeight);
+        setMetadataLoaded(true);
       }
     };
+
+    // Check if metadata is already loaded (from browser cache)
+    if (video.readyState >= 1 && video.videoWidth && video.videoHeight) {
+      setAspectRatio(video.videoWidth / video.videoHeight);
+      setMetadataLoaded(true);
+    }
 
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
@@ -51,12 +59,12 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
   }, []);
 
   const showControls = isHovered || isPaused;
-  
+
   // Categorize by aspect ratio
-  const isWideLandscape = aspectRatio && aspectRatio >= 1.7; // 16:9 and wider
-  const is4by3Landscape = aspectRatio && aspectRatio >= 1.2 && aspectRatio < 1.7; // 4:3 range
-  const isSquare = aspectRatio && aspectRatio >= 0.9 && aspectRatio < 1.2; // Square-ish
-  const isPortrait = aspectRatio && aspectRatio < 0.9; // Portrait/standing
+  const isWideLandscape = aspectRatio >= 1.7; // 16:9 and wider
+  const is4by3Landscape = aspectRatio >= 1.2 && aspectRatio < 1.7; // 4:3 range
+  const isSquare = aspectRatio >= 0.9 && aspectRatio < 1.2; // Square-ish
+  const isPortrait = aspectRatio < 0.9; // Portrait/standing
 
   return (
     <div className="flex justify-center w-full">

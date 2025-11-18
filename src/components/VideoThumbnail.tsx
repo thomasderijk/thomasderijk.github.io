@@ -27,6 +27,37 @@ export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }:
         // Ignore play errors
       });
     }
+
+    // Preload project video metadata on hover (for faster detail page load)
+    if (projectVideos.length > 0) {
+      projectVideos.forEach((videoUrl) => {
+        // Skip if it's the same as thumbnail
+        if (videoUrl === src) return;
+
+        // Check if external video (dropbox, etc)
+        if (videoUrl.startsWith('http://') || videoUrl.startsWith('https://')) {
+          // Create hidden video element to preload metadata
+          const preloadVideo = document.createElement('video');
+          preloadVideo.src = videoUrl;
+          preloadVideo.preload = 'metadata';
+          preloadVideo.style.display = 'none';
+          document.body.appendChild(preloadVideo);
+
+          // Remove after metadata is loaded or on error
+          const cleanup = () => {
+            if (preloadVideo.parentNode) {
+              preloadVideo.parentNode.removeChild(preloadVideo);
+            }
+          };
+
+          preloadVideo.addEventListener('loadedmetadata', cleanup, { once: true });
+          preloadVideo.addEventListener('error', cleanup, { once: true });
+
+          // Fallback cleanup after 10 seconds
+          setTimeout(cleanup, 10000);
+        }
+      });
+    }
   };
 
   const handleMouseLeave = () => {
@@ -82,38 +113,7 @@ export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }:
             clearTimeout(pauseTimeoutRef.current);
             pauseTimeoutRef.current = undefined;
           }
-          
-          // Preload metadata for all project videos when thumbnail comes into view
-          if (projectVideos.length > 0 && shouldAutoplay) {
-            projectVideos.forEach((videoUrl) => {
-              // Skip if it's the same as thumbnail or if already preloading
-              if (videoUrl === src) return;
-              
-              // Check if external video (dropbox, etc)
-              if (videoUrl.startsWith('http://') || videoUrl.startsWith('https://')) {
-                // Create hidden video element to preload metadata
-                const preloadVideo = document.createElement('video');
-                preloadVideo.src = videoUrl;
-                preloadVideo.preload = 'metadata';
-                preloadVideo.style.display = 'none';
-                document.body.appendChild(preloadVideo);
-                
-                // Remove after metadata is loaded or on error
-                const cleanup = () => {
-                  if (preloadVideo.parentNode) {
-                    preloadVideo.parentNode.removeChild(preloadVideo);
-                  }
-                };
-                
-                preloadVideo.addEventListener('loadedmetadata', cleanup, { once: true });
-                preloadVideo.addEventListener('error', cleanup, { once: true });
-                
-                // Fallback cleanup after 10 seconds
-                setTimeout(cleanup, 10000);
-              }
-            });
-          }
-          
+
           // Only autoplay if network conditions allow
           if (shouldAutoplay && metadataLoaded) {
             hasPlayedRef.current = true;
@@ -153,7 +153,7 @@ export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }:
       }
       observer.disconnect();
     };
-  }, [shouldAutoplay, projectVideos, src, shouldLoad, metadataLoaded, isImage]); // Re-run if network conditions change
+  }, [shouldAutoplay, shouldLoad, metadataLoaded, isImage]); // Re-run if network conditions change
 
   // Handle metadata loading for images
   useEffect(() => {

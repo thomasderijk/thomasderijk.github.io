@@ -48,7 +48,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <div className="relative">
             <div className="py-2 md:py-4 px-2 md:px-4 invisible">
               {/* Invisible placeholder to create same height as nav */}
-              <span className="text-base sm:text-xl md:text-2xl lg:text-3xl font-display font-black">placeholder</span>
+              <span className="text-base sm:text-xl md:text-2xl lg:text-3xl font-display font-bold">placeholder</span>
             </div>
             <button
               onClick={reloadIframe}
@@ -83,23 +83,23 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               textShadow: '0 0 8px rgba(0,0,0,0.6)'
             }}
           >
-            <Link to="/audio" className="font-display font-black text-foreground pointer-events-auto whitespace-nowrap">
+            <Link to="/audio" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
               <StaggeredMirrorText text="audio" isActive={location.pathname === '/audio'} />
             </Link>
             <NavDot className="text-foreground" />
-            <Link to="/visual" className="font-display font-black text-foreground pointer-events-auto whitespace-nowrap">
+            <Link to="/visual" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
               <StaggeredMirrorText text="visual" isActive={location.pathname === '/visual'} />
             </Link>
             <NavDot className="text-foreground" />
-            <Link to="/about" className="font-display font-black text-foreground pointer-events-auto whitespace-nowrap">
+            <Link to="/about" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
               <StaggeredMirrorText text="about" isActive={location.pathname === '/about'} />
             </Link>
             <NavDot className="text-foreground" />
-            <Link to="/links" className="font-display font-black text-foreground pointer-events-auto whitespace-nowrap">
+            <Link to="/links" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
               <StaggeredMirrorText text="links" isActive={location.pathname === '/links'} />
             </Link>
             <NavDot className="text-foreground" />
-            <a href="mailto:thomasderijk@me.com" className="font-display font-black text-foreground pointer-events-auto whitespace-nowrap">
+            <a href="mailto:thomasderijk@me.com" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
               <StaggeredMirrorText text="contact" />
             </a>
           </div>

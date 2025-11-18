@@ -99,8 +99,8 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
               ))}
 
               {project.description && (
-                <div className="prose prose-sm max-w-none">
-                  <p className="text-foreground leading-relaxed">
+                <div className="prose prose-sm max-w-none mt-4">
+                  <p className="text-foreground leading-relaxed text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {project.description}
                   </p>
                 </div>
@@ -109,7 +109,7 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
               {/* Tags moved to bottom after description */}
               <div className="flex flex-wrap gap-1 mt-4">
                 {project.tags.map((tag, index) => (
-                  <span key={tag} className="text-xs font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <span key={tag} className="text-sm font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {index > 0 && " / "}
                     {tag.toLowerCase()}
                   </span>
@@ -117,8 +117,8 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
               </div>
 
               {/* Year */}
-              <div className="flex flex-wrap gap-1">
-                <span className="text-xs font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <div className="flex flex-wrap gap-1 mt-4">
+                <span className="text-sm font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {new Date(project.date).getFullYear()}
                 </span>
               </div>

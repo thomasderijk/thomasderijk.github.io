@@ -60,11 +60,21 @@ const Audio = () => {
     resetVideoLoadQueue(); // Reset the queue when shuffling
   }, [isRandomized]);
 
+  // Ref for the detail view scroll container
+  const detailScrollRef = useRef<HTMLDivElement>(null);
+
   // Update project detail context when selectedProject changes
   useEffect(() => {
     setIsProjectOpen(selectedProject !== null);
     setCloseHandler(selectedProject !== null ? () => setSelectedProject(null) : null);
   }, [selectedProject, setIsProjectOpen, setCloseHandler]);
+
+  // Reset detail view scroll position when opening project
+  useEffect(() => {
+    if (selectedProject !== null && detailScrollRef.current) {
+      detailScrollRef.current.scrollTop = 0;
+    }
+  }, [selectedProject]);
   
   // Store random media for each project, re-randomize when isRandomized changes
   const audioProjects = useMemo(() => {
@@ -165,6 +175,7 @@ const Audio = () => {
       {selectedProject ? (
         /* Project Detail View - Full Page */
         <div
+          ref={detailScrollRef}
           className="fixed"
           style={{
             top: '64px',
@@ -176,17 +187,10 @@ const Audio = () => {
           }}
           onClick={() => setSelectedProject(null)}
         >
-          <div
-            className="relative pointer-events-auto"
-            style={{
-              marginTop: '-64px',
-              paddingTop: '64px',
-              minHeight: 'calc(100vh + 64px)',
-            }}
-          >
-            <div className="relative min-h-screen">
-              <div className="relative container mx-auto px-4 pb-12">
-                <div className="flex flex-col max-w-[95vw] mx-auto relative pt-4 px-6 pb-6">
+          <div className="relative pointer-events-auto">
+            <div className="relative">
+              <div className="relative container mx-auto px-4 py-4">
+                <div className="flex flex-col max-w-[95vw] mx-auto relative px-6">
                   {/* Content */}
                   <div
                     className="overflow-y-auto flex-1 min-h-0 relative scrollbar-hide flex justify-center"
@@ -206,24 +210,24 @@ const Audio = () => {
                         ))}
 
                         {/* Title */}
-                        <div className="text-left flex-shrink-0">
+                        <div className="text-left flex-shrink-0 mt-4">
                           <h2 className="text-xl font-semibold text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                             {selectedProject.title}
                           </h2>
                         </div>
 
                         {selectedProject.description && (
-                          <div className="prose prose-sm max-w-none">
-                            <p className="text-foreground leading-relaxed">
+                          <div className="prose prose-sm max-w-none mt-4">
+                            <p className="text-foreground leading-relaxed text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
                               {selectedProject.description}
                             </p>
                           </div>
                         )}
 
                         {/* Tags */}
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1 mt-4">
                           {selectedProject.tags.map((tag, index) => (
-                            <span key={tag} className="text-xs font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            <span key={tag} className="text-sm font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                               {index > 0 && " / "}
                               {tag.toLowerCase()}
                             </span>
@@ -231,8 +235,8 @@ const Audio = () => {
                         </div>
 
                         {/* Year */}
-                        <div className="flex flex-wrap gap-1">
-                          <span className="text-xs font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        <div className="flex flex-wrap gap-1 mt-4">
+                          <span className="text-sm font-normal text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                             {new Date(selectedProject.date).getFullYear()}
                           </span>
                         </div>
