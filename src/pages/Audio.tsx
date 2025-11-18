@@ -144,11 +144,12 @@ const Audio = () => {
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (!selectedProject && scrollContainerRef.current) {
+        e.preventDefault();
         scrollContainerRef.current.scrollTop += e.deltaY;
       }
     };
 
-    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
   }, [selectedProject]);
 
@@ -246,7 +247,7 @@ const Audio = () => {
                   {showScrollIndicator && (
                     <div className="absolute bottom-8 left-0 right-0 flex justify-center pointer-events-none z-[100]">
                       <div className="animate-bounce">
-                        <ChevronDown className="w-6 h-6 text-foreground drop-shadow-lg" />
+                        <ChevronDown className="w-6 h-6 text-foreground" />
                       </div>
                     </div>
                   )}

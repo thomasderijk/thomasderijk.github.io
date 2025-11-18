@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
 import { X, Shuffle } from "lucide-react";
 import { useProjectSort } from "@/hooks/use-project-sort";
+import { useThumbnailPreload } from "@/hooks/use-thumbnail-preload";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
 import { NavDot } from "@/components/NavDot";
 import { CommercialProvider } from "@/contexts/CommercialContext";
@@ -31,6 +32,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const shouldBlurBackground = location.pathname === '/audio' || location.pathname === '/visual';
   const [iframeSrc, setIframeSrc] = useState("/patches/");
 
+  // Preload all thumbnail metadata on app initialization
+  useThumbnailPreload();
+
   const reloadIframe = () => {
     setIframeSrc(`/patches/?ts=${Date.now()}`);
   };
@@ -40,19 +44,20 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     <div className={`relative ${allowScroll ? 'min-h-screen' : 'h-screen overflow-hidden'} bg-[hsl(var(--background))]`}>
       <iframe
         src={iframeSrc}
-        className="fixed pointer-events-auto bg-[hsl(var(--background))]"
+        className="fixed bg-[hsl(var(--background))]"
         style={{
           border: 'none',
           touchAction: 'auto',
           backgroundColor: 'hsl(var(--background))',
           filter: shouldBlurBackground ? 'blur(20px) grayscale(100%)' : 'none',
           transition: 'filter 0.3s ease',
-          top: shouldBlurBackground ? '-40px' : '0',
-          left: shouldBlurBackground ? '-40px' : '0',
-          right: shouldBlurBackground ? '-40px' : '0',
-          bottom: shouldBlurBackground ? '-40px' : '0',
-          width: shouldBlurBackground ? 'calc(100% + 80px)' : '100%',
-          height: shouldBlurBackground ? 'calc(100% + 80px)' : '100%'
+          top: '-40px',
+          left: '-40px',
+          right: '-40px',
+          bottom: '-40px',
+          width: 'calc(100% + 80px)',
+          height: 'calc(100% + 80px)',
+          pointerEvents: shouldBlurBackground ? 'none' : 'auto'
         }}
         title="Background Scene"
       />
@@ -67,7 +72,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <button
               onClick={reloadIframe}
               className="absolute top-1/2 -translate-y-1/2 left-2 md:left-4 p-2 md:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-colors"
-              style={{ filter: 'drop-shadow(0 1.25px 10px rgba(0,0,0,.05)) drop-shadow(0 3.75px 40px rgba(0,0,0,.2))' }}
               aria-label="Reload background"
               title="Reload background"
             >
@@ -83,7 +87,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <button
               onClick={toggleRandomize}
               className="absolute top-1/2 -translate-y-1/2 left-2 md:left-4 p-2 md:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-colors"
-              style={{ filter: 'drop-shadow(0 1.25px 10px rgba(0,0,0,.05)) drop-shadow(0 3.75px 40px rgba(0,0,0,.2))' }}
               aria-label="Randomize projects"
               title={isRandomized ? 'Sorted randomly' : 'Sort by date'}
             >
@@ -92,9 +95,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           )}
           <div
             className="flex items-center justify-center gap-2 sm:gap-2.5 md:gap-3 text-2xl md:text-4xl py-2 md:py-4 px-2 md:px-4"
-            style={{
-              filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.2))'
-            }}
           >
             <Link to="/audio" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
               <StaggeredMirrorText text="audio" isActive={location.pathname === '/audio'} />
@@ -125,7 +125,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               }
             }}
             className="absolute top-1/2 -translate-y-1/2 right-2 md:right-4 p-2 md:p-3 text-foreground hover:text-foreground/80 pointer-events-auto"
-            style={{ filter: 'drop-shadow(0 1.25px 10px rgba(0,0,0,.05)) drop-shadow(0 3.75px 40px rgba(0,0,0,.2))' }}
             aria-label={isProjectOpen ? "Close project" : "Close and return home"}
           >
             <X className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" strokeWidth={3} />

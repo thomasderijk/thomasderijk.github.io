@@ -129,7 +129,7 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
           {showScrollIndicator && (
             <div className="absolute bottom-8 left-0 right-0 flex justify-center pointer-events-none z-[100]">
               <div className="animate-bounce">
-                <ChevronDown className="w-6 h-6 text-foreground drop-shadow-lg animate-in fade-in duration-300" />
+                <ChevronDown className="w-6 h-6 text-foreground animate-in fade-in duration-300" />
               </div>
             </div>
           )}
