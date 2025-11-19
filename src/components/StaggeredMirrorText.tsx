@@ -4,6 +4,8 @@ interface StaggeredMirrorTextProps {
   text: string;
   className?: string;
   isActive?: boolean;
+  animateOnLoad?: boolean;
+  animationSchedule?: number[]; // Array of delays for each letter, provided externally
 }
 
 interface GlitchEffect {
@@ -12,21 +14,85 @@ interface GlitchEffect {
   isItalic: boolean;
 }
 
-export const StaggeredMirrorText = ({ text, className = '', isActive = false }: StaggeredMirrorTextProps) => {
+export const StaggeredMirrorText = ({ text, className = '', isActive = false, animateOnLoad = false, animationSchedule }: StaggeredMirrorTextProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [letterDelays, setLetterDelays] = useState<number[]>([]);
   const [flippedLetters, setFlippedLetters] = useState<boolean[]>([]);
   const [glitchEffects, setGlitchEffects] = useState<(GlitchEffect | null)[]>([]);
+  const [loadAnimationEffects, setLoadAnimationEffects] = useState<(GlitchEffect | null)[]>([]);
+  const [visibleLetters, setVisibleLetters] = useState<boolean[]>([]);
   const letters = text.split('');
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const residualTimerRef = useRef<NodeJS.Timeout | null>(null);
   const glitchTimerRef = useRef<NodeJS.Timeout | null>(null);
   const prevActiveRef = useRef(isActive);
+  const loadAnimationTimersRef = useRef<NodeJS.Timeout[]>([]);
+  const visibilityTimersRef = useRef<NodeJS.Timeout[]>([]);
 
   // Initialize glitch effects array
   useEffect(() => {
     setGlitchEffects(new Array(letters.length).fill(null));
   }, [letters.length]);
+
+  // Load animation effect - letters appear with random glitch effects
+  useEffect(() => {
+    if (!animateOnLoad) {
+      // If not animating, all letters are visible
+      setVisibleLetters(new Array(letters.length).fill(true));
+      return;
+    }
+
+    // Start with all letters invisible
+    setVisibleLetters(new Array(letters.length).fill(false));
+
+    // Initialize all letters with random glitch effects
+    const initialEffects: (GlitchEffect | null)[] = letters.map(() => {
+      const isMirror = Math.random() < 0.5;
+      const isItalic = Math.random() < 0.5;
+      // Ensure at least one effect is active
+      const hasEffect = isMirror || isItalic;
+      return hasEffect ? { isCaps: false, isMirror, isItalic } : { isCaps: false, isMirror: true, isItalic: false };
+    });
+
+    setLoadAnimationEffects(initialEffects);
+
+    // Make each letter visible with timing from schedule or generate random
+    const visibilityTimers: NodeJS.Timeout[] = [];
+    const effectTimers: NodeJS.Timeout[] = [];
+
+    letters.forEach((_, index) => {
+      // Use provided schedule or fallback to random timing
+      const appearDelay = animationSchedule?.[index] ?? (index * (50 + Math.random() * 100));
+
+      const visTimer = setTimeout(() => {
+        setVisibleLetters(prev => {
+          const updated = [...prev];
+          updated[index] = true;
+          return updated;
+        });
+      }, appearDelay);
+      visibilityTimers.push(visTimer);
+
+      // Clear glitch effect after letter appears + random duration (500-2000ms from appear)
+      const effectDuration = appearDelay + 500 + Math.random() * 1500;
+      const effectTimer = setTimeout(() => {
+        setLoadAnimationEffects(prev => {
+          const updated = [...prev];
+          updated[index] = null;
+          return updated;
+        });
+      }, effectDuration);
+      effectTimers.push(effectTimer);
+    });
+
+    visibilityTimersRef.current = visibilityTimers;
+    loadAnimationTimersRef.current = effectTimers;
+
+    return () => {
+      visibilityTimersRef.current.forEach(timer => clearTimeout(timer));
+      loadAnimationTimersRef.current.forEach(timer => clearTimeout(timer));
+    };
+  }, [animateOnLoad, letters.length, animationSchedule]);
 
   // Random glitch effect that runs independently
   useEffect(() => {
@@ -250,16 +316,21 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false }: 
       <span className="absolute inset-0 flex items-center justify-center">
         {letters.map((letter, index) => {
           const glitch = glitchEffects[index];
+          const loadEffect = loadAnimationEffects[index];
           const isFlipped = flippedLetters[index];
+          const isVisible = visibleLetters[index] ?? true;
 
-          // Determine if letter should be mirrored (from hover/active OR glitch)
-          const shouldMirror = (isHovered || isActive) || (glitch?.isMirror ?? false);
+          // Don't render letter if not visible yet
+          if (!isVisible) return null;
+
+          // Determine if letter should be mirrored (from hover/active OR glitch OR load animation)
+          const shouldMirror = (isHovered || isActive) || (glitch?.isMirror ?? false) || (loadEffect?.isMirror ?? false);
 
           // Determine if letter should be caps (from flip OR glitch)
           const shouldBeCaps = isFlipped || (glitch?.isCaps ?? false);
 
-          // Determine if letter should be italic (from glitch only)
-          const shouldBeItalic = glitch?.isItalic ?? false;
+          // Determine if letter should be italic (from glitch OR load animation)
+          const shouldBeItalic = (glitch?.isItalic ?? false) || (loadEffect?.isItalic ?? false);
 
           return (
             <span

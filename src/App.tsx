@@ -31,9 +31,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const allowScroll = location.pathname === '/audio' || location.pathname === '/visual';
   const shouldBlurBackground = location.pathname === '/audio' || location.pathname === '/visual';
   const [iframeSrc, setIframeSrc] = useState("/patches/");
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
   // Preload all thumbnail metadata on app initialization
   useThumbnailPreload();
+
+  const handleIframeLoad = () => {
+    setIframeLoaded(true);
+  };
 
   const reloadIframe = () => {
     setIframeSrc(`/patches/?ts=${Date.now()}`);
@@ -48,7 +53,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         style={{
           border: 'none',
           touchAction: 'auto',
-          backgroundColor: 'hsl(var(--background))',
+          backgroundColor: 'rgb(26, 26, 26)',
           filter: shouldBlurBackground ? 'blur(20px) grayscale(100%)' : 'none',
           transition: 'filter 0.3s ease',
           top: '-40px',
@@ -60,6 +65,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           pointerEvents: shouldBlurBackground ? 'none' : 'auto'
         }}
         title="Background Scene"
+        onLoad={handleIframeLoad}
       />
 
       {/* Dark overlay for blurred background */}
@@ -71,7 +77,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           transition: 'opacity 0.3s ease',
         }}
       />
-      
+
+      {iframeLoaded && (
+        <>
       {isHome && (
         <div className="fixed top-0 left-0 right-0 z-20 pointer-events-none">
           <div className="relative">
@@ -141,8 +149,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </button>
         </nav>
       )}
-      
+
       {children}
+        </>
+      )}
     </div>
   );
 };
