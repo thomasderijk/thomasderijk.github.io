@@ -259,27 +259,13 @@ const Visual = () => {
         /* Grid content container with fixed viewport clip */
         <div
           ref={scrollContainerRef}
-          className="fixed"
-          style={{
-            top: '64px',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            overflowY: 'scroll',
-            zIndex: 6,
-            pointerEvents: 'none',
-          }}
+          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-y-scroll z-[6] pointer-events-none"
         >
           <div
-            className="relative pointer-events-none"
-            style={{
-              marginTop: '-64px',
-              paddingTop: '64px',
-              minHeight: 'calc(100vh + 64px)',
-            }}
+            className="relative pointer-events-none -mt-8 pt-8 min-h-[calc(100vh+32px)] sm:-mt-10 sm:pt-10 sm:min-h-[calc(100vh+40px)] md:-mt-12 md:pt-12 md:min-h-[calc(100vh+48px)] lg:-mt-16 lg:pt-16 lg:min-h-[calc(100vh+64px)]"
           >
             <div className="relative min-h-screen">
-              <div className="relative container mx-auto px-4 pt-4 pb-12 pointer-events-none">
+              <div className="relative container mx-auto px-2 sm:px-3 md:px-4 pt-2 sm:pt-3 md:pt-4 pb-12 pointer-events-none">
                 {/* Scroll indicator for grid */}
                 {showScrollIndicator && !selectedProject && (
                   <div className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-[100]">

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useVideoLoadQueue } from '@/hooks/use-video-load-queue';
+import { useVideoLoadQueue, useAllVideosLoaded } from '@/hooks/use-video-load-queue';
 
 interface VideoThumbnailProps {
   src: string;
@@ -13,8 +13,9 @@ export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }:
   const imageRef = useRef<HTMLImageElement>(null);
   const hasPlayedRef = useRef(false);
   const pauseTimeoutRef = useRef<NodeJS.Timeout>();
-  const [shouldAutoplay, setShouldAutoplay] = useState(false); // Changed to false - only play on hover
+  const [shouldAutoplay, setShouldAutoplay] = useState(false);
   const [metadataLoaded, setMetadataLoaded] = useState(false);
+  const allVideosLoaded = useAllVideosLoaded();
 
   // Determine if this is an image or video based on file extension
   const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(src);
@@ -72,31 +73,54 @@ export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }:
     // Media is now allowed to start loading
   });
 
-  // Detect network conditions and disable autoplay on slow connections
+  // Enable autoplay only on mobile when all videos have loaded
   useEffect(() => {
-    // Check for Network Information API support
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
-    
-    if (connection) {
-      const effectiveType = connection.effectiveType;
-      // Disable autoplay on 2G or slow-2g connections
-      if (effectiveType === 'slow-2g' || effectiveType === '2g') {
+    if (allVideosLoaded && metadataLoaded) {
+      // Check if mobile/touch device
+      const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+      // Only autoplay on mobile
+      if (!isMobile) {
         setShouldAutoplay(false);
+        return;
       }
-      
-      // Listen for connection changes
+
+      // Check for Network Information API support
+      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+
+      if (connection) {
+        const effectiveType = connection.effectiveType;
+        // Disable autoplay on 2G or slow-2g connections
+        if (effectiveType === 'slow-2g' || effectiveType === '2g') {
+          setShouldAutoplay(false);
+          return;
+        }
+      }
+
+      // Enable autoplay for mobile
+      setShouldAutoplay(true);
+    }
+  }, [allVideosLoaded, metadataLoaded]);
+
+  // Listen for network changes
+  useEffect(() => {
+    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+
+    if (connection) {
       const handleConnectionChange = () => {
         const newType = connection.effectiveType;
-        setShouldAutoplay(newType !== 'slow-2g' && newType !== '2g');
+        if (allVideosLoaded && metadataLoaded) {
+          setShouldAutoplay(newType !== 'slow-2g' && newType !== '2g');
+        }
       };
-      
+
       connection.addEventListener('change', handleConnectionChange);
-      
+
       return () => {
         connection.removeEventListener('change', handleConnectionChange);
       };
     }
-  }, []);
+  }, [allVideosLoaded, metadataLoaded]);
 
   // Handle intersection observer with lazy unmount (keep video in memory briefly)
   useEffect(() => {

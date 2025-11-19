@@ -4,8 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 class VideoLoadQueue {
   private queue: Array<() => void> = [];
   private isLoading = false;
+  private totalRegistered = 0;
+  private totalLoaded = 0;
+  private allLoadedCallbacks: Array<() => void> = [];
 
   enqueue(callback: () => void) {
+    this.totalRegistered++;
     this.queue.push(callback);
     this.processQueue();
   }
@@ -24,12 +28,35 @@ class VideoLoadQueue {
 
   notifyComplete() {
     this.isLoading = false;
+    this.totalLoaded++;
+
+    // Check if all videos have loaded
+    if (this.totalLoaded >= this.totalRegistered && this.totalRegistered > 0) {
+      this.allLoadedCallbacks.forEach(cb => cb());
+    }
+
     this.processQueue();
+  }
+
+  onAllLoaded(callback: () => void) {
+    // If already all loaded, call immediately
+    if (this.totalLoaded >= this.totalRegistered && this.totalRegistered > 0) {
+      callback();
+    } else {
+      this.allLoadedCallbacks.push(callback);
+    }
+  }
+
+  removeAllLoadedCallback(callback: () => void) {
+    this.allLoadedCallbacks = this.allLoadedCallbacks.filter(cb => cb !== callback);
   }
 
   clear() {
     this.queue = [];
     this.isLoading = false;
+    this.totalRegistered = 0;
+    this.totalLoaded = 0;
+    this.allLoadedCallbacks = [];
   }
 }
 
@@ -64,4 +91,20 @@ export function useVideoLoadQueue(videoId: string, onLoad: () => void) {
 // Function to reset the queue (useful when navigating or shuffling)
 export function resetVideoLoadQueue() {
   globalVideoQueue.clear();
+}
+
+// Hook to subscribe to when all videos have loaded
+export function useAllVideosLoaded() {
+  const [allLoaded, setAllLoaded] = useState(false);
+
+  useEffect(() => {
+    const callback = () => setAllLoaded(true);
+    globalVideoQueue.onAllLoaded(callback);
+
+    return () => {
+      globalVideoQueue.removeAllLoadedCallback(callback);
+    };
+  }, []);
+
+  return allLoaded;
 }
