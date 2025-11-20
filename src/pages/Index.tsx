@@ -15,7 +15,7 @@ const Index = () => {
   }
   // Generate coordinated animation schedule for all letters across all words
   const animationSchedules = useMemo(() => {
-    const words = ['audio', 'visual', 'about', 'links', 'contact'];
+    const words = ['audio', 'visual', 'about', 'links'];
 
     // Create a flat list of all letters with their word index
     const allLetters: { wordIndex: number; letterIndex: number }[] = [];
@@ -60,9 +60,6 @@ const Index = () => {
       </Link>
       <Link to="/links" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
         <StaggeredMirrorText text="links" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[3]} />
-      </Link>
-      <Link to="/contact" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
-        <StaggeredMirrorText text="contact" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[4]} />
       </Link>
     </div>
   );

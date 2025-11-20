@@ -19,7 +19,6 @@ import Links from "./pages/Links";
 import About from "./pages/About";
 import Commercial from "./pages/Commercial";
 import NotFound from "./pages/NotFound";
-import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -123,10 +122,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <Link to="/links" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
                 <StaggeredMirrorText text="links" isActive={location.pathname === '/links'} />
               </Link>
-              <NavDot className="text-foreground" />
-              <Link to="/contact" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
-                <StaggeredMirrorText text="contact" isActive={location.pathname === '/contact'} />
-              </Link>
             </div>
             {showShuffleButton && (
               <button
@@ -205,7 +200,6 @@ const App = () => (
                   <Route path="/links" element={<Links />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/commercial" element={<Commercial />} />
-                  <Route path="/contact" element={<Contact />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
