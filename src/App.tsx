@@ -106,7 +106,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <nav className="sticky top-0 z-20 pointer-events-none">
           <div className="relative">
             <div
-              className="flex items-center justify-center gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 text-lg sm:text-xl md:text-2xl lg:text-4xl py-1.5 sm:py-2 md:py-3 lg:py-4 px-1.5 sm:px-2 md:px-3 lg:px-4"
+              className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 text-base sm:text-lg md:text-xl lg:text-4xl py-1.5 sm:py-2 md:py-3 lg:py-4 px-1.5 sm:px-2 md:px-3 lg:px-4"
             >
               <Link to="/audio" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
                 <StaggeredMirrorText text="audio" isActive={location.pathname === '/audio'} />

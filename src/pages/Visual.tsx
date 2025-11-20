@@ -153,6 +153,36 @@ const Visual = () => {
     return () => window.removeEventListener('wheel', handleWheel);
   }, [selectedProject]);
 
+  // Handle touch events for mobile scrolling
+  useEffect(() => {
+    let touchStartY = 0;
+    let touchStartScrollTop = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (!selectedProject && scrollContainerRef.current) {
+        touchStartY = e.touches[0].clientY;
+        touchStartScrollTop = scrollContainerRef.current.scrollTop;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!selectedProject && scrollContainerRef.current) {
+        e.preventDefault();
+        const touchCurrentY = e.touches[0].clientY;
+        const deltaY = touchStartY - touchCurrentY;
+        scrollContainerRef.current.scrollTop = touchStartScrollTop + deltaY;
+      }
+    };
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [selectedProject]);
+
   // Filter out thumbnail files from detail view, BUT keep single images
   const getDetailMedia = (project: Project) => {
     const allImages = project.media.filter(m => m.type === 'image');

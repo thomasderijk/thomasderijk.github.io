@@ -49,19 +49,19 @@ const Index = () => {
     <div
       className="relative z-10 flex flex-col items-center justify-center min-h-screen gap-0 text-center px-4 pointer-events-none"
     >
-      <Link to="/audio" className="text-2xl md:text-4xl font-display font-bold text-foreground pointer-events-auto">
+      <Link to="/audio" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
         <StaggeredMirrorText text="audio" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[0]} />
       </Link>
-      <Link to="/visual" className="text-2xl md:text-4xl font-display font-bold text-foreground pointer-events-auto">
+      <Link to="/visual" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
         <StaggeredMirrorText text="visual" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[1]} />
       </Link>
-      <Link to="/about" className="text-2xl md:text-4xl font-display font-bold text-foreground pointer-events-auto">
+      <Link to="/about" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
         <StaggeredMirrorText text="about" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[2]} />
       </Link>
-      <Link to="/links" className="text-2xl md:text-4xl font-display font-bold text-foreground pointer-events-auto">
+      <Link to="/links" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
         <StaggeredMirrorText text="links" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[3]} />
       </Link>
-      <Link to="/contact" className="text-2xl md:text-4xl font-display font-bold text-foreground pointer-events-auto">
+      <Link to="/contact" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
         <StaggeredMirrorText text="contact" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[4]} />
       </Link>
     </div>
