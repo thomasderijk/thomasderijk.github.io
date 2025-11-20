@@ -3,6 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 interface LetterState {
   char: string;
   isCopiedText: boolean; // true = from "copied to clipboard" (Tiepolo), false = email (Inter)
+  isMirror: boolean;
+  isItalic: boolean;
+  isCaps: boolean;
 }
 
 const Contact = () => {
@@ -16,7 +19,10 @@ const Contact = () => {
   useEffect(() => {
     setLetterStates(email.split('').map(char => ({
       char,
-      isCopiedText: false
+      isCopiedText: false,
+      isMirror: false,
+      isItalic: false,
+      isCaps: false
     })));
   }, []);
 
@@ -55,46 +61,64 @@ const Contact = () => {
     transformOrder.forEach((charIndex, orderIndex) => {
       const progress = orderIndex / (transformOrder.length - 1);
       const easedProgress = progress * progress;
-      const delay = 50 + easedProgress * 800;
+      const delay = 33 + easedProgress * 533;
 
       const timer = setTimeout(() => {
         setLetterStates(prev => {
           const updated = [...prev];
           // Ensure we have enough slots
           while (updated.length <= charIndex) {
-            updated.push({ char: '', isCopiedText: false });
+            updated.push({ char: '', isCopiedText: false, isMirror: false, isItalic: false, isCaps: false });
           }
 
           if (charIndex < targetChars.length) {
             updated[charIndex] = {
               char: targetChars[charIndex],
-              isCopiedText: true
+              isCopiedText: true,
+              isMirror: Math.random() < 0.5,
+              isItalic: Math.random() < 0.5,
+              isCaps: Math.random() < 0.3
             };
           } else {
             // Remove extra characters
-            updated[charIndex] = { char: '', isCopiedText: false };
+            updated[charIndex] = { char: '', isCopiedText: false, isMirror: false, isItalic: false, isCaps: false };
           }
 
-          // Trim empty characters from end
-          while (updated.length > 0 && updated[updated.length - 1].char === '') {
-            updated.pop();
-          }
+          // Don't trim - preserve all characters including spaces
 
           return updated;
         });
       }, delay);
 
       timersRef.current.push(timer);
+
+      // Clear effects 0.5s after this letter appears
+      const clearTimer = setTimeout(() => {
+        setLetterStates(prev => {
+          const updated = [...prev];
+          if (charIndex < updated.length && updated[charIndex].isCopiedText) {
+            updated[charIndex] = {
+              ...updated[charIndex],
+              isMirror: false,
+              isItalic: false,
+              isCaps: false
+            };
+          }
+          return updated;
+        });
+      }, delay + 500);
+
+      timersRef.current.push(clearTimer);
     });
 
     // Phase 2: Transform back to email
-    const phase2Start = 10000;
+    const phase2Start = 3333;
     const emailOrder = [...Array(Math.max(emailChars.length, targetChars.length)).keys()].sort(() => Math.random() - 0.5);
 
     emailOrder.forEach((charIndex, orderIndex) => {
       const progress = orderIndex / (emailOrder.length - 1);
       const easedProgress = progress * progress;
-      const delay = phase2Start + 50 + easedProgress * 800;
+      const delay = phase2Start + 33 + easedProgress * 533;
 
       const timer = setTimeout(() => {
         setLetterStates(prev => {
@@ -102,16 +126,19 @@ const Contact = () => {
 
           // Ensure we have enough slots
           while (updated.length <= charIndex) {
-            updated.push({ char: '', isCopiedText: false });
+            updated.push({ char: '', isCopiedText: false, isMirror: false, isItalic: false, isCaps: false });
           }
 
           if (charIndex < emailChars.length) {
             updated[charIndex] = {
               char: emailChars[charIndex],
-              isCopiedText: false
+              isCopiedText: false,
+              isMirror: false,
+              isItalic: false,
+              isCaps: false
             };
           } else {
-            updated[charIndex] = { char: '', isCopiedText: false };
+            updated[charIndex] = { char: '', isCopiedText: false, isMirror: false, isItalic: false, isCaps: false };
           }
 
           // Trim to email length
@@ -129,33 +156,48 @@ const Contact = () => {
     // End animation
     const endTimer = setTimeout(() => {
       setIsAnimating(false);
-      setLetterStates(email.split('').map(char => ({
-        char,
-        isCopiedText: false
-      })));
-    }, phase2Start + 1000);
+    }, phase2Start + 666);
 
     timersRef.current.push(endTimer);
   };
 
   return (
-    <div className="relative z-10 flex items-center justify-center px-4" style={{ height: 'calc(100vh - 64px)' }}>
+    <div className="relative z-10 flex items-start justify-center px-4" style={{ height: 'calc(100vh - 64px)', paddingTop: 'calc(50vh - 32px - 1em)' }}>
       <div className="w-full max-w-xs text-center">
         <p
-          className="text-foreground leading-relaxed cursor-pointer hover:opacity-80 transition-opacity"
+          className="cursor-pointer hover:opacity-80 transition-opacity"
           onClick={handleClick}
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignContent: 'flex-start',
+            lineHeight: '1.84em',
+          }}
         >
-          {letterStates.map((state, index) => (
-            <span
-              key={index}
-              style={{
-                fontFamily: state.isCopiedText ? 'Tiepolo, serif' : 'Inter, sans-serif',
-                fontStyle: 'normal',
-              }}
-            >
-              {state.char}
-            </span>
-          ))}
+          {letterStates.map((state, index) => {
+            const displayChar = state.isCaps ? state.char.toUpperCase() : state.char;
+
+            return (
+              <span
+                key={index}
+                className={state.isCopiedText ? 'font-display text-foreground' : 'text-foreground'}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '1.84em',
+                  lineHeight: '1.84em',
+                  fontWeight: state.isCopiedText ? 600 : 400,
+                  fontSize: state.isCopiedText ? '1.15em' : '1em',
+                  fontStyle: state.isItalic ? 'italic' : 'normal',
+                  transform: state.isMirror ? 'scaleX(-1)' : 'scaleX(1)',
+                }}
+              >
+                {displayChar === ' ' ? '\u00A0' : displayChar}
+              </span>
+            );
+          })}
         </p>
       </div>
     </div>
