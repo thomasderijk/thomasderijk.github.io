@@ -26,8 +26,12 @@ export const AudioPlaylistMinimal = ({ urls }: AudioPlaylistMinimalProps) => {
   const getFileName = (url: string) => {
     const parts = url.split('/');
     const filename = parts[parts.length - 1];
-    return decodeURIComponent(filename.replace(/\.[^.]+$/, ''));
+    // Remove extension, then strip leading number prefixes like "01_", "1_", "01-", "1-"
+    const name = decodeURIComponent(filename.replace(/\.[^.]+$/, ''));
+    return name.replace(/^\d+[-_]\s*/, '');
   };
+
+  const isSingleTrack = urls.length === 1;
 
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return '0:00';
@@ -162,9 +166,11 @@ export const AudioPlaylistMinimal = ({ urls }: AudioPlaylistMinimalProps) => {
         <span className="text-foreground/50 text-xs">{formatTime(currentTime)}</span>
 
         <div className="flex items-center gap-3">
-          <button onClick={prevTrack} disabled={currentTrack === 0} className="disabled:opacity-30">
-            <SkipBack className="w-4 h-4 text-foreground" strokeWidth={1.5} />
-          </button>
+          {!isSingleTrack && (
+            <button onClick={prevTrack} disabled={currentTrack === 0} className="disabled:opacity-30">
+              <SkipBack className="w-4 h-4 text-foreground" strokeWidth={1.5} />
+            </button>
+          )}
           <button onClick={togglePlay} className="w-8 h-8 flex items-center justify-center rounded-full bg-foreground/10">
             {isPlaying ? (
               <Pause className="w-4 h-4 text-foreground" strokeWidth={1.5} />
@@ -172,31 +178,35 @@ export const AudioPlaylistMinimal = ({ urls }: AudioPlaylistMinimalProps) => {
               <Play className="w-4 h-4 text-foreground ml-0.5" strokeWidth={1.5} />
             )}
           </button>
-          <button onClick={nextTrack} disabled={currentTrack === urls.length - 1} className="disabled:opacity-30">
-            <SkipForward className="w-4 h-4 text-foreground" strokeWidth={1.5} />
-          </button>
+          {!isSingleTrack && (
+            <button onClick={nextTrack} disabled={currentTrack === urls.length - 1} className="disabled:opacity-30">
+              <SkipForward className="w-4 h-4 text-foreground" strokeWidth={1.5} />
+            </button>
+          )}
         </div>
 
         <span className="text-foreground/50 text-xs">{formatTime(duration)}</span>
       </div>
 
-      {/* Track list */}
-      <div className="space-y-0 border-t border-foreground/10 pt-2 min-w-0">
-        {urls.map((url, index) => (
-          <button
-            key={url}
-            onClick={() => { setHasUserInteracted(true); setCurrentTrack(index); }}
-            className={`w-full flex items-center px-2 py-1 text-xs rounded transition-colors ${
-              index === currentTrack
-                ? 'bg-foreground/10 text-foreground'
-                : 'text-foreground/60 hover:text-foreground hover:bg-foreground/5'
-            }`}
-          >
-            <span className="opacity-50 w-6 text-left flex-shrink-0">{index + 1}.</span>
-            <span className="truncate">{getFileName(url)}</span>
-          </button>
-        ))}
-      </div>
+      {/* Track list - hidden for single track */}
+      {!isSingleTrack && (
+        <div className="space-y-0 border-t border-foreground/10 pt-2 min-w-0">
+          {urls.map((url, index) => (
+            <button
+              key={url}
+              onClick={() => { setHasUserInteracted(true); setCurrentTrack(index); }}
+              className={`w-full flex items-center px-2 py-1 text-xs rounded transition-colors ${
+                index === currentTrack
+                  ? 'bg-foreground/10 text-foreground'
+                  : 'text-foreground/60 hover:text-foreground hover:bg-foreground/5'
+              }`}
+            >
+              <span className="opacity-50 w-6 text-left flex-shrink-0">{index + 1}.</span>
+              <span className="truncate">{getFileName(url)}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

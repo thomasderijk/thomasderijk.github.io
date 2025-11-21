@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 // Global queue manager for video loading
+// Allows parallel loading in batches for faster grid appearance
 class VideoLoadQueue {
   private queue: Array<() => void> = [];
-  private isLoading = false;
+  private activeCount = 0;
+  private readonly MAX_CONCURRENT = 6; // Load 6 videos at a time
   private totalRegistered = 0;
   private totalLoaded = 0;
   private allLoadedCallbacks: Array<() => void> = [];
@@ -15,19 +17,18 @@ class VideoLoadQueue {
   }
 
   private processQueue() {
-    if (this.isLoading || this.queue.length === 0) {
-      return;
-    }
-
-    this.isLoading = true;
-    const nextCallback = this.queue.shift();
-    if (nextCallback) {
-      nextCallback();
+    // Process multiple items in parallel up to MAX_CONCURRENT
+    while (this.activeCount < this.MAX_CONCURRENT && this.queue.length > 0) {
+      this.activeCount++;
+      const nextCallback = this.queue.shift();
+      if (nextCallback) {
+        nextCallback();
+      }
     }
   }
 
   notifyComplete() {
-    this.isLoading = false;
+    this.activeCount--;
     this.totalLoaded++;
 
     // Check if all videos have loaded
@@ -53,7 +54,7 @@ class VideoLoadQueue {
 
   clear() {
     this.queue = [];
-    this.isLoading = false;
+    this.activeCount = 0;
     this.totalRegistered = 0;
     this.totalLoaded = 0;
     this.allLoadedCallbacks = [];

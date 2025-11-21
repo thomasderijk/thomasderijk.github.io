@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
+import { getCachedVideoDimensions } from '@/hooks/use-video-preloader';
 
 interface VideoPlayerProps {
   url: string;
@@ -10,8 +11,16 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState<number>(16/9); // Default to 16:9 to prevent layout shift
-  const [metadataLoaded, setMetadataLoaded] = useState(false);
+
+  // Try to get cached dimensions immediately for instant sizing
+  const cachedDimensions = getCachedVideoDimensions(url);
+  const initialAspectRatio = cachedDimensions
+    ? cachedDimensions.width / cachedDimensions.height
+    : 16/9;
+
+  const [aspectRatio, setAspectRatio] = useState<number>(initialAspectRatio);
+  const [metadataLoaded, setMetadataLoaded] = useState(!!cachedDimensions);
+  const [hasFirstFrame, setHasFirstFrame] = useState(false);
   const { pauseForMedia, resumeAfterMedia } = useAudioPlayer();
 
   // Use ref to always have access to latest functions
@@ -50,11 +59,18 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
         setMetadataLoaded(true);
       }
     };
+    const handleLoadedData = () => {
+      setHasFirstFrame(true);
+    };
 
     // Check if metadata is already loaded (from browser cache)
     if (video.readyState >= 1 && video.videoWidth && video.videoHeight) {
       setAspectRatio(video.videoWidth / video.videoHeight);
       setMetadataLoaded(true);
+    }
+    // Check if first frame is already available (from browser cache)
+    if (video.readyState >= 2) {
+      setHasFirstFrame(true);
     }
 
     // If video is already playing (autoPlay fired before effect), pause main audio
@@ -65,11 +81,13 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener('loadeddata', handleLoadedData);
 
     return () => {
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener('loadeddata', handleLoadedData);
       // Resume main audio when component unmounts (modal closes)
       resumeAfterMediaRef.current();
     };
@@ -86,10 +104,17 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
   return (
     <div className="flex justify-center w-full">
       <div
-        className="inline-block max-w-full rounded-lg overflow-hidden"
+        className="inline-block max-w-full rounded-lg overflow-hidden relative"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
+        {/* Loading placeholder - shown until first frame is ready */}
+        {!hasFirstFrame && (
+          <div
+            className={`bg-foreground/5 ${isWideLandscape ? 'min-w-[65vw]' : ''}`}
+            style={{ aspectRatio: aspectRatio }}
+          />
+        )}
         <video
           ref={videoRef}
           src={url}
@@ -97,9 +122,9 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
           autoPlay={autoPlay}
           loop
           controlsList="nodownload noplaybackrate"
-          className={`block w-full h-auto ${isWideLandscape ? 'min-w-[65vw] max-h-[80vh]' : ''} ${is4by3Landscape ? 'max-h-[80vh]' : ''} ${isSquare ? 'max-h-[70vh]' : ''} ${isPortrait ? 'max-h-[75vh]' : ''}`}
+          className={`block w-full h-auto ${isWideLandscape ? 'min-w-[65vw] max-h-[80vh]' : ''} ${is4by3Landscape ? 'max-h-[80vh]' : ''} ${isSquare ? 'max-h-[70vh]' : ''} ${isPortrait ? 'max-h-[75vh]' : ''} ${!hasFirstFrame ? 'absolute inset-0 opacity-0' : ''}`}
           style={{ display: 'block', maxWidth: '100%' }}
-          preload="auto" // Full preload for modal viewing
+          preload="auto"
           playsInline
         >
           Your browser does not support the video tag.

@@ -7,6 +7,7 @@ import { HashRouter, Routes, Route, useLocation, Link, useNavigate } from "react
 import { X, Shuffle, Play, Pause, SkipForward, Eclipse } from "lucide-react";
 import { useProjectSort } from "@/hooks/use-project-sort";
 import { useThumbnailPreload } from "@/hooks/use-thumbnail-preload";
+import { useVideoPreloader } from "@/hooks/use-video-preloader";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
 import { NavDot } from "@/components/NavDot";
 import { CommercialProvider } from "@/contexts/CommercialContext";
@@ -40,9 +41,30 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   // Preload all thumbnail metadata on app initialization
   useThumbnailPreload();
 
+  // Preload video metadata for faster detail view loading
+  useVideoPreloader();
+
   const handleIframeLoad = () => {
     setIframeLoaded(true);
   };
+
+  // Dispatch grid view events to iframe based on route changes
+  useEffect(() => {
+    const iframe = document.querySelector('iframe');
+    const isGridView = location.pathname === '/audio' || location.pathname === '/visual';
+    const page = location.pathname.replace('/', '') as 'audio' | 'visual';
+
+    if (iframe?.contentWindow && isGridView) {
+      iframe.contentWindow.dispatchEvent(new CustomEvent('gridViewOpen', { detail: { page } }));
+    }
+
+    return () => {
+      // Fire gridViewClosed when leaving a grid view page
+      if (iframe?.contentWindow && isGridView) {
+        iframe.contentWindow.dispatchEvent(new CustomEvent('gridViewClosed', { detail: { page } }));
+      }
+    };
+  }, [location.pathname]);
 
   const reloadIframe = () => {
     setIframeSrc(`/patches/?ts=${Date.now()}`);

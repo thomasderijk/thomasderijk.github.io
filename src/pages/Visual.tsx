@@ -141,48 +141,6 @@ const Visual = () => {
     };
   }, [visualProjects, selectedProject]);
 
-  // Handle wheel events for scroll container with pointer-events: none
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (!selectedProject && scrollContainerRef.current) {
-        e.preventDefault();
-        scrollContainerRef.current.scrollTop += e.deltaY;
-      }
-    };
-
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, [selectedProject]);
-
-  // Handle touch events for mobile scrolling
-  useEffect(() => {
-    let touchStartY = 0;
-    let touchStartScrollTop = 0;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (!selectedProject && scrollContainerRef.current) {
-        touchStartY = e.touches[0].clientY;
-        touchStartScrollTop = scrollContainerRef.current.scrollTop;
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!selectedProject && scrollContainerRef.current) {
-        e.preventDefault();
-        const touchCurrentY = e.touches[0].clientY;
-        const deltaY = touchStartY - touchCurrentY;
-        scrollContainerRef.current.scrollTop = touchStartScrollTop + deltaY;
-      }
-    };
-
-    window.addEventListener('touchstart', handleTouchStart, { passive: false });
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, [selectedProject]);
 
   // Filter out thumbnail files from detail view, BUT keep single images
   const getDetailMedia = (project: Project) => {
@@ -229,44 +187,102 @@ const Visual = () => {
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="inline-block max-w-full">
+                    <div className={`inline-block max-w-full ${selectedProject.layout === 'sidebyside' ? 'md:min-w-[900px] lg:min-w-[1100px] xl:min-w-[1300px]' : ''}`}>
                       <div className="space-y-3">
                         {(() => {
                           const { audioMedia, nonAudioMedia, hasMultipleAudio } = getDetailMedia(selectedProject);
                           const audioUrls = audioMedia.map(m => m.url);
+                          const useSideBySide = selectedProject.layout === 'sidebyside' && nonAudioMedia.length > 0;
+
                           return (
                             <>
-                              {/* Non-audio media first */}
-                              {nonAudioMedia.map((mediaItem, index) => (
-                                <div key={index}>
-                                  <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} />
+                              {useSideBySide ? (
+                                /* Side-by-side layout */
+                                <div className="flex flex-col md:flex-row gap-4">
+                                  {/* First visual media */}
+                                  <div className="w-full md:w-1/2 flex-shrink-0">
+                                    <MediaRenderer media={nonAudioMedia[0]} isFirstVideo={nonAudioMedia[0].type === 'video'} />
+                                  </div>
+                                  {/* Rest of content: remaining visuals + audio */}
+                                  <div className="w-full md:w-1/2 flex flex-col justify-center min-w-0 space-y-3">
+                                    {/* Remaining visual media */}
+                                    {nonAudioMedia.slice(1).map((mediaItem, index) => (
+                                      <div key={`visual-${index}`}>
+                                        <MediaRenderer media={mediaItem} isFirstVideo={false} />
+                                      </div>
+                                    ))}
+                                    {/* Title before playlist */}
+                                    <div className="text-left flex-shrink-0">
+                                      <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                        {selectedProject.title}
+                                      </h2>
+                                    </div>
+                                    {/* Audio */}
+                                    {hasMultipleAudio ? (
+                                      <AudioPlaylistMinimal urls={audioUrls} />
+                                    ) : (
+                                      audioMedia.map((mediaItem, index) => (
+                                        <div key={`audio-${index}`}>
+                                          <MediaRenderer media={mediaItem} />
+                                        </div>
+                                      ))
+                                    )}
+                                    {/* Description */}
+                                    {selectedProject.description && (
+                                      <p className="text-foreground leading-relaxed text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                        {selectedProject.description}
+                                      </p>
+                                    )}
+                                    {/* Tags */}
+                                    <div className="flex flex-wrap gap-1">
+                                      {selectedProject.tags.map((tag, index) => (
+                                        <span key={tag} className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                          {index > 0 && " / "}
+                                          {tag.toLowerCase()}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    {/* Year */}
+                                    <span className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                      {new Date(selectedProject.date).getFullYear()}
+                                    </span>
+                                  </div>
                                 </div>
-                              ))}
-
-                              {/* Audio playlist with title above */}
-                              {hasMultipleAudio ? (
-                                <>
-                                  {/* Title before playlist */}
-                                  <div className="text-left flex-shrink-0 mt-4">
-                                    <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                      {selectedProject.title}
-                                    </h2>
-                                  </div>
-                                  <AudioPlaylistMinimal urls={audioUrls} />
-                                </>
                               ) : (
-                                audioMedia.map((mediaItem, index) => (
-                                  <div key={`audio-${index}`}>
-                                    <MediaRenderer media={mediaItem} />
-                                  </div>
-                                ))
+                                <>
+                                  {/* Default layout: Non-audio media first */}
+                                  {nonAudioMedia.map((mediaItem, index) => (
+                                    <div key={index}>
+                                      <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} />
+                                    </div>
+                                  ))}
+
+                                  {/* Audio playlist with title above */}
+                                  {hasMultipleAudio ? (
+                                    <>
+                                      {/* Title before playlist */}
+                                      <div className="text-left flex-shrink-0 mt-4">
+                                        <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                          {selectedProject.title}
+                                        </h2>
+                                      </div>
+                                      <AudioPlaylistMinimal urls={audioUrls} />
+                                    </>
+                                  ) : (
+                                    audioMedia.map((mediaItem, index) => (
+                                      <div key={`audio-${index}`}>
+                                        <MediaRenderer media={mediaItem} />
+                                      </div>
+                                    ))
+                                  )}
+                                </>
                               )}
                             </>
                           );
                         })()}
 
-                        {/* Title (only shown when not using playlist) */}
-                        {!getDetailMedia(selectedProject).hasMultipleAudio && (
+                        {/* Title (only shown when not using playlist AND not sidebyside) */}
+                        {!getDetailMedia(selectedProject).hasMultipleAudio && selectedProject.layout !== 'sidebyside' && (
                           <div className="text-left flex-shrink-0 mt-4">
                             <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                               {selectedProject.title}
@@ -274,30 +290,35 @@ const Visual = () => {
                           </div>
                         )}
 
-                        {selectedProject.description && (
-                          <div className="prose prose-sm max-w-none mt-4">
-                            <p className="text-foreground leading-relaxed text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
-                              {selectedProject.description}
-                            </p>
-                          </div>
+                        {/* Description, Tags, Year - only show here for non-sidebyside layouts */}
+                        {selectedProject.layout !== 'sidebyside' && (
+                          <>
+                            {selectedProject.description && (
+                              <div className="prose prose-sm max-w-none mt-4">
+                                <p className="text-foreground leading-relaxed text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                  {selectedProject.description}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Tags */}
+                            <div className="flex flex-wrap gap-1 mt-4">
+                              {selectedProject.tags.map((tag, index) => (
+                                <span key={tag} className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                  {index > 0 && " / "}
+                                  {tag.toLowerCase()}
+                                </span>
+                              ))}
+                            </div>
+
+                            {/* Year */}
+                            <div className="flex flex-wrap gap-1 mt-4">
+                              <span className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                {new Date(selectedProject.date).getFullYear()}
+                              </span>
+                            </div>
+                          </>
                         )}
-
-                        {/* Tags */}
-                        <div className="flex flex-wrap gap-1 mt-4">
-                          {selectedProject.tags.map((tag, index) => (
-                            <span key={tag} className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                              {index > 0 && " / "}
-                              {tag.toLowerCase()}
-                            </span>
-                          ))}
-                        </div>
-
-                        {/* Year */}
-                        <div className="flex flex-wrap gap-1 mt-4">
-                          <span className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            {new Date(selectedProject.date).getFullYear()}
-                          </span>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -318,13 +339,14 @@ const Visual = () => {
         /* Grid content container with fixed viewport clip */
         <div
           ref={scrollContainerRef}
-          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-y-scroll z-[6] pointer-events-none"
+          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-y-scroll z-[6]"
+          style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <div
-            className="relative pointer-events-none -mt-8 pt-8 min-h-[calc(100vh+32px)] sm:-mt-10 sm:pt-10 sm:min-h-[calc(100vh+40px)] md:-mt-12 md:pt-12 md:min-h-[calc(100vh+48px)] lg:-mt-16 lg:pt-16 lg:min-h-[calc(100vh+64px)]"
+            className="relative -mt-8 pt-8 min-h-[calc(100vh+32px)] sm:-mt-10 sm:pt-10 sm:min-h-[calc(100vh+40px)] md:-mt-12 md:pt-12 md:min-h-[calc(100vh+48px)] lg:-mt-16 lg:pt-16 lg:min-h-[calc(100vh+64px)]"
           >
             <div className="relative min-h-screen">
-              <div className="relative container mx-auto px-2 sm:px-3 md:px-4 pt-2 sm:pt-3 md:pt-4 pb-12 pointer-events-none">
+              <div className="relative container mx-auto px-2 sm:px-3 md:px-4 pt-2 sm:pt-3 md:pt-4 pb-12">
                 {/* Scroll indicator for grid */}
                 {showScrollIndicator && !selectedProject && (
                   <div className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-[100]">
@@ -344,7 +366,7 @@ const Visual = () => {
                         onClick={() => setSelectedProject(project)}
                         onMouseEnter={() => setHoveredCard(key)}
                         onMouseLeave={() => setHoveredCard(null)}
-                        className="group relative overflow-hidden cursor-pointer mb-4 break-inside-avoid transition-transform duration-200 pointer-events-auto"
+                        className="group relative overflow-hidden cursor-pointer mb-4 break-inside-avoid transition-transform duration-200"
                         style={{
                           transform: isHovered ? 'scale(1.05)' : 'scale(1)',
                           contain: 'layout style paint',

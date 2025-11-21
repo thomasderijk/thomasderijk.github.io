@@ -155,6 +155,7 @@ function inferMediaType(filename) {
       let dropboxUrls = [];
       let youtubeUrl = null;
       let yearFromFile = null;
+      let layoutFromFile = null;
       
       try {
         const dataPath = path.join(folderPath, 'data.txt');
@@ -200,6 +201,8 @@ function inferMediaType(filename) {
               }
             } else if (trimmed.startsWith('youtube:')) {
               youtubeUrl = trimmed.substring(8).trim();
+            } else if (trimmed.startsWith('layout:')) {
+              layoutFromFile = trimmed.substring(7).trim();
             }
           }
         }
@@ -374,6 +377,7 @@ function inferMediaType(filename) {
         date: finalDate,
         media,
         ...(description ? { description } : {}),
+        ...(layoutFromFile ? { layout: layoutFromFile } : {}),
       };
 
       projects.push(project);

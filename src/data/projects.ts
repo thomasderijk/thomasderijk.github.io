@@ -259,14 +259,15 @@ export const projects: Project[] = [
       },
       {
         "type": "audio",
-        "url": "/media/djbtazed/side A.m4a"
+        "url": "/media/djbtazed/1_side A.m4a"
       },
       {
         "type": "audio",
-        "url": "/media/djbtazed/side B.m4a"
+        "url": "/media/djbtazed/2_side B.m4a"
       }
     ],
-    "description": "Syphon Filter (1 and 2) OST remixes"
+    "description": "Syphon Filter (1 and 2) OST remixes",
+    "layout": "sidebyside"
   },
   {
     "title": "djb - ~~~",
@@ -284,50 +285,51 @@ export const projects: Project[] = [
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/01 Lots of Oil.mp3"
+        "url": "/media/djbuntitled/01_Lots of Oil.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/02 Atlantic.mp3"
+        "url": "/media/djbuntitled/02_Atlantic.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/03 NYSE.mp3"
+        "url": "/media/djbuntitled/03_NYSE.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/04 40,000k Vanilla.mp3"
+        "url": "/media/djbuntitled/04_40,000k Vanilla.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/05 Multiple Mishaps.mp3"
+        "url": "/media/djbuntitled/05_Multiple Mishaps.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/06 XMTR.mp3"
+        "url": "/media/djbuntitled/06_XMTR.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/07 Below Average.mp3"
+        "url": "/media/djbuntitled/07_Below Average.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/08 Slow Rise.mp3"
+        "url": "/media/djbuntitled/08_Slow Rise.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/09 Procter & Gamble.mp3"
+        "url": "/media/djbuntitled/09_Procter & Gamble.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/10 DJX.mp3"
+        "url": "/media/djbuntitled/10_DJX.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/djbuntitled/11 Above Average.mp3"
+        "url": "/media/djbuntitled/11_Above Average.mp3"
       }
     ],
-    "description": "All one take op-1 jams"
+    "description": "All one take op-1 jams",
+    "layout": "sidebyside"
   },
   {
     "title": "djb - dood & verderf",
@@ -347,45 +349,46 @@ export const projects: Project[] = [
       },
       {
         "type": "audio",
-        "url": "/media/doodverderf/mp3/a1 I Am Thou.mp3"
+        "url": "/media/doodverderf/mp3/01_I Am Thou.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/doodverderf/mp3/a2 ondersteboven.mp3"
+        "url": "/media/doodverderf/mp3/02_ondersteboven.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/doodverderf/mp3/a3 I wish for feathers to sprout from my skin.mp3"
+        "url": "/media/doodverderf/mp3/03_I wish for feathers to sprout from my skin.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/doodverderf/mp3/a4 sterven = leven.mp3"
+        "url": "/media/doodverderf/mp3/04_sterven = leven.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/doodverderf/mp3/a5 manoeuvre.mp3"
+        "url": "/media/doodverderf/mp3/05_manoeuvre.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/doodverderf/mp3/b1 core stability.mp3"
+        "url": "/media/doodverderf/mp3/06_core stability.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/doodverderf/mp3/b2 stoffelijk overschot.mp3"
+        "url": "/media/doodverderf/mp3/07_stoffelijk overschot.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/doodverderf/mp3/b3 release your inhibitions, feel the acid rain on your skin.mp3"
+        "url": "/media/doodverderf/mp3/08_release your inhibitions, feel the acid rain on your skin.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/doodverderf/mp3/b4 foraging.mp3"
+        "url": "/media/doodverderf/mp3/09_foraging.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/doodverderf/mp3/b5 Thou Art I.mp3"
+        "url": "/media/doodverderf/mp3/10_Thou Art I.mp3"
       }
-    ]
+    ],
+    "layout": "sidebyside"
   },
   {
     "title": "Duran Lantink - LFW digi show",
@@ -486,8 +489,7 @@ export const projects: Project[] = [
       "animation"
     ],
     "categories": [
-      "visual",
-      "audio"
+      "visual"
     ],
     "date": "2025",
     "media": [
@@ -747,7 +749,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025-11-06",
+    "date": "2025",
     "media": [
       {
         "type": "video",
@@ -962,55 +964,28 @@ export const projects: Project[] = [
         "url": "/media/plmaith/plmaith_3_thumbnail.mp4"
       },
       {
-        "type": "image",
-        "url": "/media/plmaith/djb_plmaith_1.jpg"
-      },
-      {
-        "type": "image",
-        "url": "/media/plmaith/djb_plmaith_2.jpg"
-      },
-      {
-        "type": "image",
-        "url": "/media/plmaith/djb_plmaith_3.jpg"
-      },
-      {
-        "type": "image",
-        "url": "/media/plmaith/djb_plmaith_4.jpg"
-      },
-      {
-        "type": "image",
-        "url": "/media/plmaith/djb_plmaith_5.jpg"
-      },
-      {
-        "type": "image",
-        "url": "/media/plmaith/djb_plmaith_6.jpg"
-      },
-      {
-        "type": "image",
-        "url": "/media/plmaith/djb_plmaith_7.jpg"
+        "type": "audio",
+        "url": "/media/plmaith/mp3/01_Please.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/plmaith/mp3/1_Please_master.mp3"
+        "url": "/media/plmaith/mp3/02_Let Me.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/plmaith/mp3/2_Let Me_master.mp3"
+        "url": "/media/plmaith/mp3/03_Assimilate.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/plmaith/mp3/3_Assimilate_master.mp3"
+        "url": "/media/plmaith/mp3/04_Into The.mp3"
       },
       {
         "type": "audio",
-        "url": "/media/plmaith/mp3/4_Into The_master.mp3"
-      },
-      {
-        "type": "audio",
-        "url": "/media/plmaith/mp3/5_Hivemind_master.mp3"
+        "url": "/media/plmaith/mp3/05_Hivemind.mp3"
       }
     ],
-    "description": "pls let me assimilate into the hivemind"
+    "description": "pls let me assimilate into the hivemind",
+    "layout": "sidebyside"
   },
   {
     "title": "P.L.M.A.I.T.H. vids",

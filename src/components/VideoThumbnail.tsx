@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useVideoLoadQueue, useAllVideosLoaded } from '@/hooks/use-video-load-queue';
+import { getCachedThumbnailDimensions } from '@/hooks/use-thumbnail-preload';
 
 interface VideoThumbnailProps {
   src: string;
@@ -247,6 +248,17 @@ export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }:
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
+      {/* Placeholder while loading */}
+      {!shouldLoad && (() => {
+        const cached = getCachedThumbnailDimensions(src);
+        const aspectRatio = cached ? cached.width / cached.height : 1;
+        return (
+          <div
+            className={className}
+            style={{ aspectRatio, backgroundColor: 'hsl(0, 0%, 10%)' }}
+          />
+        );
+      })()}
       {shouldLoad && (
         isImage ? (
           <img
@@ -265,11 +277,10 @@ export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }:
             loop
             muted
             playsInline
-            preload="metadata" // Always preload metadata for dimensions and first frame
+            preload="metadata"
             disablePictureInPicture
             disableRemotePlayback
             aria-label={alt}
-            // Performance optimizations
             style={{
               objectFit: 'cover',
               backgroundColor: 'transparent'

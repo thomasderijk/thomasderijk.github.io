@@ -10,4 +10,5 @@ export interface Project {
   media: MediaItem[];
   description?: string;
   date: string; // ISO date string for sorting (YYYY-MM-DD)
+  layout?: 'default' | 'sidebyside'; // Optional layout mode for detail view
 }

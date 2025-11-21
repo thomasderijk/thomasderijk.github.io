@@ -162,8 +162,8 @@ const Links = () => {
   };
 
   return (
-    <div className="relative z-10 flex items-start justify-center px-4" style={{ height: 'calc(100vh - 64px)', paddingTop: 'calc(50vh - 32px - 6em)' }}>
-      <div className="w-full max-w-md">
+    <div className="relative z-10 flex items-start justify-center px-4 pointer-events-none" style={{ height: 'calc(100vh - 64px)', paddingTop: 'calc(50vh - 32px - 6em)' }}>
+      <div className="w-full max-w-md pointer-events-auto">
         <div className="flex flex-col items-center gap-8">
           <div className="flex flex-col items-center">
             {links.map((link) => {

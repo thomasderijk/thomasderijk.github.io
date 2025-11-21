@@ -76,9 +76,12 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
   const hasMultipleAudio = audioMedia.length > 1;
   const audioUrls = audioMedia.map(m => m.url);
 
+  // Determine if we should use side-by-side layout
+  const useSideBySide = project.layout === 'sidebyside';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[95vh] !p-0">
+      <DialogContent className={`max-h-[95vh] !p-0 ${useSideBySide ? 'md:!min-w-[800px] lg:!min-w-[900px]' : ''}`}>
         <div className="flex flex-col max-h-[95vh] relative p-6">
           <DialogHeader className="text-left flex-shrink-0">
             <DialogTitle className="text-xl sm:text-3xl font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -99,23 +102,54 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
             }}
           >
             <div className="space-y-3 mt-6">
-              {/* Render non-audio media first */}
-              {nonAudioMedia.map((mediaItem, index) => (
-                <div key={index}>
-                  <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} />
-                </div>
-              ))}
-
-              {/* Audio playlist */}
-              {hasMultipleAudio ? (
-                <AudioPlaylistMinimal urls={audioUrls} />
-              ) : (
-                // Single audio file - use regular MediaRenderer
-                audioMedia.map((mediaItem, index) => (
-                  <div key={`audio-${index}`}>
-                    <MediaRenderer media={mediaItem} />
+              {useSideBySide && nonAudioMedia.length > 0 ? (
+                /* Side-by-side layout: first visual on left, rest on right */
+                <div className="flex flex-col md:flex-row gap-4">
+                  {/* First visual media */}
+                  <div className="w-full md:w-1/2 flex-shrink-0">
+                    <MediaRenderer media={nonAudioMedia[0]} isFirstVideo={nonAudioMedia[0].type === 'video'} />
                   </div>
-                ))
+                  {/* Rest of content: remaining visuals + audio */}
+                  <div className="w-full md:w-1/2 flex flex-col justify-center min-w-0 space-y-3">
+                    {/* Remaining visual media */}
+                    {nonAudioMedia.slice(1).map((mediaItem, index) => (
+                      <div key={`visual-${index}`}>
+                        <MediaRenderer media={mediaItem} isFirstVideo={false} />
+                      </div>
+                    ))}
+                    {/* Audio */}
+                    {hasMultipleAudio ? (
+                      <AudioPlaylistMinimal urls={audioUrls} />
+                    ) : (
+                      audioMedia.map((mediaItem, index) => (
+                        <div key={`audio-${index}`}>
+                          <MediaRenderer media={mediaItem} />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Default layout: Render non-audio media first */}
+                  {nonAudioMedia.map((mediaItem, index) => (
+                    <div key={index}>
+                      <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} />
+                    </div>
+                  ))}
+
+                  {/* Audio playlist */}
+                  {hasMultipleAudio ? (
+                    <AudioPlaylistMinimal urls={audioUrls} />
+                  ) : (
+                    // Single audio file - use regular MediaRenderer
+                    audioMedia.map((mediaItem, index) => (
+                      <div key={`audio-${index}`}>
+                        <MediaRenderer media={mediaItem} />
+                      </div>
+                    ))
+                  )}
+                </>
               )}
 
               {project.description && (
