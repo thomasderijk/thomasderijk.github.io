@@ -2,7 +2,8 @@ import { Project } from '@/types/project';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { MediaRenderer } from './MediaRenderer';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown } from 'react-bootstrap-icons';
+import { ChevronDown } from 'lucide-react';
+import { AudioPlaylistMinimal } from './AudioPlaylistMinimal';
 
 interface ProjectDetailDialogProps {
   project: Project | null;
@@ -69,6 +70,12 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
     return true;
   });
 
+  // Separate audio files from other media
+  const audioMedia = nonThumbnailMedia.filter(m => m.type === 'audio');
+  const nonAudioMedia = nonThumbnailMedia.filter(m => m.type !== 'audio');
+  const hasMultipleAudio = audioMedia.length > 1;
+  const audioUrls = audioMedia.map(m => m.url);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[95vh] !p-0">
@@ -92,11 +99,24 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
             }}
           >
             <div className="space-y-3 mt-6">
-              {nonThumbnailMedia.map((mediaItem, index) => (
+              {/* Render non-audio media first */}
+              {nonAudioMedia.map((mediaItem, index) => (
                 <div key={index}>
                   <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} />
                 </div>
               ))}
+
+              {/* Audio playlist */}
+              {hasMultipleAudio ? (
+                <AudioPlaylistMinimal urls={audioUrls} />
+              ) : (
+                // Single audio file - use regular MediaRenderer
+                audioMedia.map((mediaItem, index) => (
+                  <div key={`audio-${index}`}>
+                    <MediaRenderer media={mediaItem} />
+                  </div>
+                ))
+              )}
 
               {project.description && (
                 <div className="prose prose-sm max-w-none mt-4">
@@ -129,7 +149,7 @@ export const ProjectDetailDialog = ({ project, open, onOpenChange }: ProjectDeta
           {showScrollIndicator && (
             <div className="absolute bottom-8 left-0 right-0 flex justify-center pointer-events-none z-[100]">
               <div className="animate-bounce">
-                <ChevronDown className="w-6 h-6 text-foreground animate-in fade-in duration-300" />
+                <ChevronDown className="w-6 h-6 text-foreground animate-in fade-in duration-300" strokeWidth={1.5} />
               </div>
             </div>
           )}

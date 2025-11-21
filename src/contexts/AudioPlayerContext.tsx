@@ -87,6 +87,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       setCurrentTrack(track);
       audioRef.current.src = track;
     }
+    // Note: Don't reset src if track exists - this would reset playback position
 
     audioRef.current.play().then(() => {
       setIsPlaying(true);

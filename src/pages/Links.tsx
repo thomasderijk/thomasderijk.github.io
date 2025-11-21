@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Github, Instagram, Youtube, MusicNoteBeamed, Disc } from 'react-bootstrap-icons';
+import { Github, Instagram, Youtube, Music, Disc } from 'lucide-react';
+import { useInvert } from '@/contexts/InvertContext';
 
 interface LetterState {
   char: string;
@@ -10,6 +11,7 @@ interface LetterState {
 }
 
 const Links = () => {
+  const { isInverted } = useInvert();
   const [letterStates, setLetterStates] = useState<LetterState[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const timersRef = useRef<NodeJS.Timeout[]>([]);
@@ -19,7 +21,7 @@ const Links = () => {
   const links = [
     { name: 'Instagram', icon: Instagram, url: 'https://instagram.com/thomas_djb' },
     { name: 'YouTube', icon: Youtube, url: 'https://youtube.com/thomasderijk' },
-    { name: 'SoundCloud', icon: MusicNoteBeamed, url: 'https://soundcloud.com/djbdjbdjb' },
+    { name: 'SoundCloud', icon: Music, url: 'https://soundcloud.com/djbdjbdjb' },
     { name: 'Bandcamp', icon: Disc, url: 'https://djbdjbdjb.bandcamp.com/' },
     { name: 'GitHub', icon: Github, url: 'https://github.com/thomasderijk' },
   ];
@@ -172,10 +174,10 @@ const Links = () => {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center justify-center gap-3 hover:text-foreground/80 transition-colors"
+                  className={`group inline-flex items-center justify-center gap-3 ${isInverted ? 'hover:text-black/80' : 'hover:text-foreground/80'} transition-colors`}
                 >
-                  <Icon className="w-4 h-4 text-foreground flex-shrink-0" />
-                  <span className="text-foreground leading-relaxed">
+                  <Icon className={`w-4 h-4 ${isInverted ? 'text-black' : 'text-foreground'} flex-shrink-0`} strokeWidth={1.5} />
+                  <span className={`${isInverted ? 'text-black' : 'text-foreground'} leading-relaxed`}>
                     {link.name}
                   </span>
                 </a>
@@ -201,7 +203,7 @@ const Links = () => {
                 return (
                   <span
                     key={index}
-                    className={state.isCopiedText ? 'font-display text-foreground' : 'text-foreground'}
+                    className={state.isCopiedText ? `font-display ${isInverted ? 'text-black' : 'text-foreground'}` : `${isInverted ? 'text-black' : 'text-foreground'}`}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',

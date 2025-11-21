@@ -1,4 +1,4 @@
 title: Fly like a bird
-category: visual, audio
+category: visual
 tags: 3d, animation, 
 dropbox: https://www.dropbox.com/scl/fi/j03u0rkm0tcr4n9yvrxt7/fly_like_a_bird-Original.mp4?rlkey=qt9m49ro25jadh15havpwgsy2&dl=0

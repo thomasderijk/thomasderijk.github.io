@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
-import { XLg, Shuffle, Play, Pause, SkipEnd } from "react-bootstrap-icons";
+import { X, Shuffle, Play, Pause, SkipForward, Eclipse } from "lucide-react";
 import { useProjectSort } from "@/hooks/use-project-sort";
 import { useThumbnailPreload } from "@/hooks/use-thumbnail-preload";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
@@ -12,6 +12,7 @@ import { NavDot } from "@/components/NavDot";
 import { CommercialProvider } from "@/contexts/CommercialContext";
 import { ProjectDetailProvider, useProjectDetail } from "@/contexts/ProjectDetailContext";
 import { AudioPlayerProvider, useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { InvertProvider, useInvert } from "@/contexts/InvertContext";
 import Index from "./pages/Index";
 import Audio from "./pages/Audio";
 import Visual from "./pages/Visual";
@@ -29,6 +30,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { isRandomized, toggleRandomize } = useProjectSort();
   const { isProjectOpen, closeHandler } = useProjectDetail();
   const { isPlaying, togglePlay, nextTrack } = useAudioPlayer();
+  const { isInverted, toggleInvert } = useInvert();
   const showShuffleButton = location.pathname === '/audio' || location.pathname === '/visual';
   const allowScroll = location.pathname === '/audio' || location.pathname === '/visual';
   const shouldBlurBackground = location.pathname === '/audio' || location.pathname === '/visual';
@@ -48,7 +50,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
 
   return (
-    <div className={`relative ${allowScroll ? 'min-h-screen' : 'h-screen overflow-hidden'} bg-[hsl(var(--background))]`}>
+    <div className={`relative ${allowScroll ? 'min-h-screen' : 'h-screen overflow-hidden'} ${isInverted ? 'bg-white text-black' : 'bg-[hsl(var(--background))]'}`}>
       <iframe
         src={iframeSrc}
         className="fixed bg-[hsl(var(--background))]"
@@ -56,7 +58,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           border: 'none',
           touchAction: 'auto',
           backgroundColor: 'rgb(26, 26, 26)',
-          filter: shouldBlurBackground ? 'blur(20px) grayscale(100%)' : 'none',
+          filter: `${shouldBlurBackground ? 'blur(20px) grayscale(100%)' : ''} ${isInverted ? 'invert(1)' : ''}`.trim() || 'none',
           transition: 'filter 0.3s ease',
           top: '-40px',
           left: '-40px',
@@ -91,11 +93,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
             <button
               onClick={reloadIframe}
-              className="absolute top-1/2 -translate-y-1/2 left-2 md:left-4 p-2 md:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-colors"
+              className={`absolute top-1/2 -translate-y-1/2 left-2 md:left-4 p-2 md:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
               aria-label="Reload background"
               title="Reload background"
             >
-              <Shuffle className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+              <Shuffle className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" strokeWidth={1.5} />
             </button>
           </div>
         </div>
@@ -107,30 +109,30 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <div
               className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 text-base sm:text-lg md:text-xl lg:text-4xl py-1.5 sm:py-2 md:py-3 lg:py-4 px-1.5 sm:px-2 md:px-3 lg:px-4"
             >
-              <Link to="/audio" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
+              <Link to="/audio" className={`font-display font-bold ${isInverted ? 'text-black' : 'text-foreground'} pointer-events-auto whitespace-nowrap`}>
                 <StaggeredMirrorText text="audio" isActive={location.pathname === '/audio'} />
               </Link>
-              <NavDot className="text-foreground" />
-              <Link to="/visual" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
+              <NavDot className={isInverted ? 'text-black' : 'text-foreground'} />
+              <Link to="/visual" className={`font-display font-bold ${isInverted ? 'text-black' : 'text-foreground'} pointer-events-auto whitespace-nowrap`}>
                 <StaggeredMirrorText text="visual" isActive={location.pathname === '/visual'} />
               </Link>
-              <NavDot className="text-foreground" />
-              <Link to="/about" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
+              <NavDot className={isInverted ? 'text-black' : 'text-foreground'} />
+              <Link to="/about" className={`font-display font-bold ${isInverted ? 'text-black' : 'text-foreground'} pointer-events-auto whitespace-nowrap`}>
                 <StaggeredMirrorText text="about" isActive={location.pathname === '/about'} />
               </Link>
-              <NavDot className="text-foreground" />
-              <Link to="/links" className="font-display font-bold text-foreground pointer-events-auto whitespace-nowrap">
+              <NavDot className={isInverted ? 'text-black' : 'text-foreground'} />
+              <Link to="/links" className={`font-display font-bold ${isInverted ? 'text-black' : 'text-foreground'} pointer-events-auto whitespace-nowrap`}>
                 <StaggeredMirrorText text="links" isActive={location.pathname === '/links'} />
               </Link>
             </div>
             {showShuffleButton && (
               <button
                 onClick={toggleRandomize}
-                className="absolute top-1/2 -translate-y-1/2 left-1.5 sm:left-2 md:left-3 lg:left-4 p-1.5 sm:p-2 md:p-2.5 lg:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-colors"
+                className={`absolute top-1/2 -translate-y-1/2 left-1.5 sm:left-2 md:left-3 lg:left-4 p-1.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
                 aria-label="Randomize projects"
                 title={isRandomized ? 'Sorted randomly' : 'Sort by date'}
               >
-                <Shuffle className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
+                <Shuffle className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
               </button>
             )}
             <button
@@ -141,10 +143,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   navigate('/');
                 }
               }}
-              className="absolute top-1/2 -translate-y-1/2 right-1.5 sm:right-2 md:right-3 lg:right-4 p-1.5 sm:p-2 md:p-2.5 lg:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-colors"
+              className={`absolute top-1/2 -translate-y-1/2 right-1.5 sm:right-2 md:right-3 lg:right-4 p-1.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
               aria-label={isProjectOpen ? "Close project" : "Close and return home"}
             >
-              <XLg className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
+              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
             </button>
           </div>
         </nav>
@@ -156,27 +158,37 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <div className="fixed bottom-1.5 sm:bottom-2 md:bottom-3 lg:bottom-4 left-1.5 sm:left-2 md:left-3 lg:left-4 z-20 flex flex-col-reverse items-start -space-y-reverse -space-y-1">
         <button
           onClick={togglePlay}
-          className="p-1.5 sm:p-2 md:p-2.5 lg:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-colors"
+          className={`p-1.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
-            <Pause className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
+            <Pause className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
           ) : (
-            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
+            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
           )}
         </button>
         <button
           onClick={nextTrack}
-          className={`p-1.5 sm:p-2 md:p-2.5 lg:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-all duration-300 ease-out ${
+          className={`p-1.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-all duration-300 ease-out ${
             isPlaying
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 translate-y-full pointer-events-none'
           }`}
           aria-label="Next track"
         >
-          <SkipEnd className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
+          <SkipForward className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
         </button>
       </div>
+
+{/* Invert toggle - bottom right (hidden, functionality preserved)
+      <button
+        onClick={toggleInvert}
+        className={`fixed bottom-1.5 sm:bottom-2 md:bottom-3 lg:bottom-4 right-1.5 sm:right-2 md:right-3 lg:right-4 z-20 p-1.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
+        aria-label="Toggle color inversion"
+      >
+        <Eclipse className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
+      </button>
+      */}
         </>
       )}
     </div>
@@ -189,24 +201,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <HashRouter>
-        <AudioPlayerProvider>
-          <CommercialProvider>
-            <ProjectDetailProvider>
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/audio" element={<Audio />} />
-                  <Route path="/visual" element={<Visual />} />
-                  <Route path="/links" element={<Links />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/commercial" element={<Commercial />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Layout>
-            </ProjectDetailProvider>
-          </CommercialProvider>
-        </AudioPlayerProvider>
+        <InvertProvider>
+          <AudioPlayerProvider>
+            <CommercialProvider>
+              <ProjectDetailProvider>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/audio" element={<Audio />} />
+                    <Route path="/visual" element={<Visual />} />
+                    <Route path="/links" element={<Links />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/commercial" element={<Commercial />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Layout>
+              </ProjectDetailProvider>
+            </CommercialProvider>
+          </AudioPlayerProvider>
+        </InvertProvider>
       </HashRouter>
     </TooltipProvider>
   </QueryClientProvider>

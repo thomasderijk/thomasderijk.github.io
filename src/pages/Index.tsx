@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useMemo, useRef } from 'react';
 import { StaggeredMirrorText } from '@/components/StaggeredMirrorText';
+import { useInvert } from '@/contexts/InvertContext';
 
 // Track if initial load animation has been shown (persists across remounts)
 let hasShownInitialAnimation = false;
 
 const Index = () => {
+  const { isInverted } = useInvert();
   // Check if this is the first load
   const isFirstLoad = useRef(!hasShownInitialAnimation);
 
@@ -49,16 +51,16 @@ const Index = () => {
     <div
       className="relative z-10 flex flex-col items-center justify-center min-h-screen gap-0 text-center px-4 pointer-events-none"
     >
-      <Link to="/audio" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
+      <Link to="/audio" className={`text-4xl font-display font-bold ${isInverted ? 'text-black' : 'text-foreground'} pointer-events-auto`}>
         <StaggeredMirrorText text="audio" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[0]} />
       </Link>
-      <Link to="/visual" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
+      <Link to="/visual" className={`text-4xl font-display font-bold ${isInverted ? 'text-black' : 'text-foreground'} pointer-events-auto`}>
         <StaggeredMirrorText text="visual" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[1]} />
       </Link>
-      <Link to="/about" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
+      <Link to="/about" className={`text-4xl font-display font-bold ${isInverted ? 'text-black' : 'text-foreground'} pointer-events-auto`}>
         <StaggeredMirrorText text="about" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[2]} />
       </Link>
-      <Link to="/links" className="text-4xl font-display font-bold text-foreground pointer-events-auto">
+      <Link to="/links" className={`text-4xl font-display font-bold ${isInverted ? 'text-black' : 'text-foreground'} pointer-events-auto`}>
         <StaggeredMirrorText text="links" animateOnLoad={isFirstLoad.current} animationSchedule={animationSchedules[3]} />
       </Link>
     </div>

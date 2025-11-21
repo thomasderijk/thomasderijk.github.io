@@ -8,7 +8,10 @@ import { useProjectSort } from '@/hooks/use-project-sort';
 import { useCommercial } from '@/contexts/CommercialContext';
 import { useProjectDetail } from '@/contexts/ProjectDetailContext';
 import { resetVideoLoadQueue } from '@/hooks/use-video-load-queue';
-import { X, ChevronDown } from 'react-bootstrap-icons';
+import { X, ChevronDown } from 'lucide-react';
+import { AudioPlaylistMinimal } from '@/components/AudioPlaylistMinimal';
+
+// Unused playlist options removed - keeping only AudioPlaylistMinimal
 
 // Helper function to get thumbnail media from project
 const getThumbnailMedia = (project: Project): MediaItem | null => {
@@ -189,32 +192,30 @@ const Audio = () => {
     const hasAudio = project.media.some(m => m.type === 'audio');
     const isSingleImageWithAudio = allImages.length === 1 && hasAudio;
 
-    return project.media.filter(mediaItem => {
+    const filtered = project.media.filter(mediaItem => {
       const isThumbnail = mediaItem.url.toLowerCase().includes('_thumbnail.');
       if (isThumbnail) return false;
       if (isSingleImageWithAudio && mediaItem.type === 'image') return true;
       return true;
     });
+
+    // Separate audio from non-audio media
+    const audioMedia = filtered.filter(m => m.type === 'audio');
+    const nonAudioMedia = filtered.filter(m => m.type !== 'audio');
+
+    return { audioMedia, nonAudioMedia, hasMultipleAudio: audioMedia.length > 1 };
   };
 
   return (
     <>
       {/* Top container: transparent spacer for menubar area */}
-      <div style={{ height: '64px' }} />
+      <div className="h-8 sm:h-10 md:h-12 lg:h-16" />
 
       {selectedProject ? (
         /* Project Detail View - Full Page */
         <div
           ref={detailScrollRef}
-          className="fixed"
-          style={{
-            top: '64px',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            overflow: 'auto',
-            zIndex: 6,
-          }}
+          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-auto z-[6]"
           onClick={() => setSelectedProject(null)}
         >
           <div className="relative pointer-events-auto">
@@ -232,18 +233,48 @@ const Audio = () => {
                   >
                     <div className="inline-block max-w-full">
                       <div className="space-y-3">
-                        {getDetailMedia(selectedProject).map((mediaItem, index) => (
-                          <div key={index}>
-                            <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} />
-                          </div>
-                        ))}
+                        {(() => {
+                          const { audioMedia, nonAudioMedia, hasMultipleAudio } = getDetailMedia(selectedProject);
+                          const audioUrls = audioMedia.map(m => m.url);
+                          return (
+                            <>
+                              {/* Non-audio media first */}
+                              {nonAudioMedia.map((mediaItem, index) => (
+                                <div key={index}>
+                                  <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} />
+                                </div>
+                              ))}
 
-                        {/* Title */}
-                        <div className="text-left flex-shrink-0 mt-4">
-                          <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            {selectedProject.title}
-                          </h2>
-                        </div>
+                              {/* Audio playlist with title above */}
+                              {hasMultipleAudio ? (
+                                <>
+                                  {/* Title before playlist */}
+                                  <div className="text-left flex-shrink-0 mt-4">
+                                    <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                      {selectedProject.title}
+                                    </h2>
+                                  </div>
+                                  <AudioPlaylistMinimal urls={audioUrls} />
+                                </>
+                              ) : (
+                                audioMedia.map((mediaItem, index) => (
+                                  <div key={`audio-${index}`}>
+                                    <MediaRenderer media={mediaItem} />
+                                  </div>
+                                ))
+                              )}
+                            </>
+                          );
+                        })()}
+
+                        {/* Title (only shown when not using playlist) */}
+                        {!getDetailMedia(selectedProject).hasMultipleAudio && (
+                          <div className="text-left flex-shrink-0 mt-4">
+                            <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                              {selectedProject.title}
+                            </h2>
+                          </div>
+                        )}
 
                         {selectedProject.description && (
                           <div className="prose prose-sm max-w-none mt-4">
@@ -277,7 +308,7 @@ const Audio = () => {
                   {showScrollIndicator && (
                     <div className="absolute bottom-8 left-0 right-0 flex justify-center pointer-events-none z-[100]">
                       <div className="animate-bounce">
-                        <ChevronDown className="w-6 h-6 text-foreground" />
+                        <ChevronDown className="w-6 h-6 text-foreground" strokeWidth={1.5} />
                       </div>
                     </div>
                   )}
@@ -300,7 +331,7 @@ const Audio = () => {
                 {showScrollIndicator && !selectedProject && (
                   <div className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-[100]">
                     <div className="animate-bounce">
-                      <ChevronDown className="w-6 h-6 text-foreground drop-shadow-lg" />
+                      <ChevronDown className="w-6 h-6 text-foreground drop-shadow-lg" strokeWidth={1.5} />
                     </div>
                   </div>
                 )}
@@ -345,7 +376,7 @@ const Audio = () => {
                           )
                         ) : (
                           <div className="w-full aspect-square bg-background flex items-center justify-center">
-                            <X className="w-16 h-16 text-red-500" />
+                            <X className="w-16 h-16 text-red-500" strokeWidth={1.5} />
                           </div>
                         )}
 
