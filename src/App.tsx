@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
-import { X, Shuffle, Play, Pause, SkipForward } from "lucide-react";
+import { XLg, Shuffle, Play, Pause, SkipEnd } from "react-bootstrap-icons";
 import { useProjectSort } from "@/hooks/use-project-sort";
 import { useThumbnailPreload } from "@/hooks/use-thumbnail-preload";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
@@ -95,7 +95,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               aria-label="Reload background"
               title="Reload background"
             >
-              <Shuffle className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" strokeWidth={3} />
+              <Shuffle className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
             </button>
           </div>
         </div>
@@ -130,7 +130,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 aria-label="Randomize projects"
                 title={isRandomized ? 'Sorted randomly' : 'Sort by date'}
               >
-                <Shuffle className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={3} />
+                <Shuffle className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
               </button>
             )}
             <button
@@ -144,7 +144,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               className="absolute top-1/2 -translate-y-1/2 right-1.5 sm:right-2 md:right-3 lg:right-4 p-1.5 sm:p-2 md:p-2.5 lg:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-colors"
               aria-label={isProjectOpen ? "Close project" : "Close and return home"}
             >
-              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={3} />
+              <XLg className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
             </button>
           </div>
         </nav>
@@ -153,16 +153,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       {children}
 
       {/* Audio player controls - bottom left */}
-      <div className="fixed bottom-1.5 sm:bottom-2 md:bottom-3 lg:bottom-4 left-1.5 sm:left-2 md:left-3 lg:left-4 z-20 flex flex-col-reverse items-start">
+      <div className="fixed bottom-1.5 sm:bottom-2 md:bottom-3 lg:bottom-4 left-1.5 sm:left-2 md:left-3 lg:left-4 z-20 flex flex-col-reverse items-start -space-y-reverse -space-y-1">
         <button
           onClick={togglePlay}
           className="p-1.5 sm:p-2 md:p-2.5 lg:p-3 text-foreground hover:text-foreground/80 pointer-events-auto transition-colors"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
-            <Pause className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={3} />
+            <Pause className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
           ) : (
-            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={3} />
+            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
           )}
         </button>
         <button
@@ -174,7 +174,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           }`}
           aria-label="Next track"
         >
-          <SkipForward className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={3} />
+          <SkipEnd className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
         </button>
       </div>
         </>

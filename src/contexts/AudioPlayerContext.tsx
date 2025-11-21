@@ -36,6 +36,8 @@ interface AudioPlayerContextType {
   currentTrack: string | null;
   play: () => void;
   pause: () => void;
+  pauseForMedia: () => void;
+  resumeAfterMedia: () => void;
   togglePlay: () => void;
   nextTrack: () => void;
 }
@@ -46,6 +48,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const wasPlayingBeforePauseRef = useRef(false);
 
   // Initialize audio element
   useEffect(() => {
@@ -98,6 +101,27 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setIsPlaying(false);
   };
 
+  const pauseForMedia = () => {
+    if (!audioRef.current) return;
+    wasPlayingBeforePauseRef.current = isPlaying;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const resumeAfterMedia = () => {
+    if (!audioRef.current) return;
+    if (wasPlayingBeforePauseRef.current && currentTrack) {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch((error) => {
+        console.error('Error resuming audio:', error);
+      });
+    }
+    wasPlayingBeforePauseRef.current = false;
+  };
+
   const togglePlay = () => {
     if (isPlaying) {
       pause();
@@ -126,6 +150,8 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       currentTrack,
       play,
       pause,
+      pauseForMedia,
+      resumeAfterMedia,
       togglePlay,
       nextTrack,
     }}>

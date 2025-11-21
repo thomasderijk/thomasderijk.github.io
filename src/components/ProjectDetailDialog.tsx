@@ -2,7 +2,7 @@ import { Project } from '@/types/project';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { MediaRenderer } from './MediaRenderer';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'react-bootstrap-icons';
 
 interface ProjectDetailDialogProps {
   project: Project | null;

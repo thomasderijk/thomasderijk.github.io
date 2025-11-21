@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 
 interface AudioPlayerProps {
   url: string;
@@ -7,6 +8,13 @@ interface AudioPlayerProps {
 
 export const AudioPlayer = ({ url, thumbnail }: AudioPlayerProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const { pauseForMedia, resumeAfterMedia } = useAudioPlayer();
+
+  // Use ref to always have access to latest functions
+  const pauseForMediaRef = useRef(pauseForMedia);
+  const resumeAfterMediaRef = useRef(resumeAfterMedia);
+  pauseForMediaRef.current = pauseForMedia;
+  resumeAfterMediaRef.current = resumeAfterMedia;
 
   // Extract filename from URL and remove extension
   const getFileName = (url: string) => {
@@ -23,6 +31,8 @@ export const AudioPlayer = ({ url, thumbnail }: AudioPlayerProps) => {
     if (!audioElement) return;
 
     const handlePlay = () => {
+      // Pause the main audio player (remembers if it was playing)
+      pauseForMediaRef.current();
       // Pause all other audio elements when this one plays
       const allAudioElements = document.querySelectorAll('audio');
       allAudioElements.forEach((audio) => {
@@ -43,6 +53,8 @@ export const AudioPlayer = ({ url, thumbnail }: AudioPlayerProps) => {
 
     return () => {
       audioElement.removeEventListener('play', handlePlay);
+      // Resume main audio when component unmounts (modal closes)
+      resumeAfterMediaRef.current();
     };
   }, []);
 

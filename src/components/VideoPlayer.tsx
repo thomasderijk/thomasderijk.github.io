@@ -1,4 +1,5 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 
 interface VideoPlayerProps {
   url: string;
@@ -11,6 +12,13 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
   const [isPaused, setIsPaused] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<number>(16/9); // Default to 16:9 to prevent layout shift
   const [metadataLoaded, setMetadataLoaded] = useState(false);
+  const { pauseForMedia, resumeAfterMedia } = useAudioPlayer();
+
+  // Use ref to always have access to latest functions
+  const pauseForMediaRef = useRef(pauseForMedia);
+  const resumeAfterMediaRef = useRef(resumeAfterMedia);
+  pauseForMediaRef.current = pauseForMedia;
+  resumeAfterMediaRef.current = resumeAfterMedia;
 
   useEffect(() => {
     const video = videoRef.current;
@@ -18,6 +26,8 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
 
     const handlePlay = () => {
       setIsPaused(false);
+      // Pause the main audio player (remembers if it was playing)
+      pauseForMediaRef.current();
       // Pause all other video elements when this one plays
       const allVideoElements = document.querySelectorAll('video');
       allVideoElements.forEach((otherVideo) => {
@@ -47,6 +57,11 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
       setMetadataLoaded(true);
     }
 
+    // If video is already playing (autoPlay fired before effect), pause main audio
+    if (!video.paused) {
+      pauseForMediaRef.current();
+    }
+
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -55,6 +70,8 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      // Resume main audio when component unmounts (modal closes)
+      resumeAfterMediaRef.current();
     };
   }, []);
 

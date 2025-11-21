@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Github, Instagram, Youtube, Music, Disc } from 'lucide-react';
+import { Github, Instagram, Youtube, MusicNoteBeamed, Disc } from 'react-bootstrap-icons';
 
 interface LetterState {
   char: string;
@@ -19,7 +19,7 @@ const Links = () => {
   const links = [
     { name: 'Instagram', icon: Instagram, url: 'https://instagram.com/thomas_djb' },
     { name: 'YouTube', icon: Youtube, url: 'https://youtube.com/thomasderijk' },
-    { name: 'SoundCloud', icon: Music, url: 'https://soundcloud.com/djbdjbdjb' },
+    { name: 'SoundCloud', icon: MusicNoteBeamed, url: 'https://soundcloud.com/djbdjbdjb' },
     { name: 'Bandcamp', icon: Disc, url: 'https://djbdjbdjb.bandcamp.com/' },
     { name: 'GitHub', icon: Github, url: 'https://github.com/thomasderijk' },
   ];

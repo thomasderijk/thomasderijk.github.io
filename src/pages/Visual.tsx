@@ -8,7 +8,7 @@ import { useProjectSort } from '@/hooks/use-project-sort';
 import { useCommercial } from '@/contexts/CommercialContext';
 import { useProjectDetail } from '@/contexts/ProjectDetailContext';
 import { resetVideoLoadQueue } from '@/hooks/use-video-load-queue';
-import { X, ChevronDown } from 'lucide-react';
+import { X, ChevronDown } from 'react-bootstrap-icons';
 
 // Helper function to get thumbnail media from project
 const getThumbnailMedia = (project: Project): MediaItem | null => {
@@ -345,7 +345,7 @@ const Visual = () => {
                           )
                         ) : (
                           <div className="w-full aspect-square bg-background flex items-center justify-center">
-                            <X className="w-16 h-16 text-red-500" strokeWidth={3} />
+                            <X className="w-16 h-16 text-red-500" />
                           </div>
                         )}
 
