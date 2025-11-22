@@ -34,7 +34,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { isInverted, toggleInvert } = useInvert();
   const showShuffleButton = location.pathname === '/audio' || location.pathname === '/visual';
   const allowScroll = location.pathname === '/audio' || location.pathname === '/visual';
-  const shouldBlurBackground = location.pathname === '/audio' || location.pathname === '/visual';
   const [iframeSrc, setIframeSrc] = useState("/patches/");
   const [iframeLoaded, setIframeLoaded] = useState(false);
 
@@ -48,20 +47,27 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     setIframeLoaded(true);
   };
 
-  // Dispatch grid view events to iframe based on route changes
+  // Trigger Cables functions based on route changes
   useEffect(() => {
-    const iframe = document.querySelector('iframe');
+    const iframe = document.querySelector('iframe') as HTMLIFrameElement | null;
     const isGridView = location.pathname === '/audio' || location.pathname === '/visual';
-    const page = location.pathname.replace('/', '') as 'audio' | 'visual';
 
     if (iframe?.contentWindow && isGridView) {
-      iframe.contentWindow.dispatchEvent(new CustomEvent('gridViewOpen', { detail: { page } }));
+      try {
+        (iframe.contentWindow as any).CABLES?.patch?.config?.gridopen?.();
+      } catch (e) {
+        console.warn('Failed to trigger gridopen:', e);
+      }
     }
 
     return () => {
-      // Fire gridViewClosed when leaving a grid view page
+      // Fire gridclosed when leaving a grid view page
       if (iframe?.contentWindow && isGridView) {
-        iframe.contentWindow.dispatchEvent(new CustomEvent('gridViewClosed', { detail: { page } }));
+        try {
+          (iframe.contentWindow as any).CABLES?.patch?.config?.gridclosed?.();
+        } catch (e) {
+          console.warn('Failed to trigger gridclosed:', e);
+        }
       }
     };
   }, [location.pathname]);
@@ -80,7 +86,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           border: 'none',
           touchAction: 'auto',
           backgroundColor: 'rgb(26, 26, 26)',
-          filter: `${shouldBlurBackground ? 'blur(20px) grayscale(100%)' : ''} ${isInverted ? 'invert(1)' : ''}`.trim() || 'none',
+          filter: `${isInverted ? 'invert(1)' : ''}`.trim() || 'none',
           transition: 'filter 0.3s ease',
           top: '-40px',
           left: '-40px',
@@ -88,21 +94,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           bottom: '-40px',
           width: 'calc(100% + 80px)',
           height: 'calc(100% + 80px)',
-          pointerEvents: shouldBlurBackground ? 'none' : 'auto'
+          pointerEvents: 'auto'
         }}
         title="Background Scene"
         onLoad={handleIframeLoad}
       />
 
-      {/* Dark overlay for blurred background */}
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          opacity: shouldBlurBackground ? 1 : 0,
-          transition: 'opacity 0.3s ease',
-        }}
-      />
 
       {iframeLoaded && (
         <>
