@@ -1,5 +1,0 @@
-title: djb - atlantic
-category: visual, audio
-tags: music video, 2d, animation, 
-description: Abusing After Effects interpolation algo's
-dropbox: https://www.dropbox.com/scl/fi/p5ckkezcd1vyisiqxwey6/dowjonesbrotherhood_-_atlantic_compress1080.mov?rlkey=w5ohm9p6mzm1qans0lnfg5agr&dl=0

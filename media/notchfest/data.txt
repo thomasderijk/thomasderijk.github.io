@@ -1,6 +1,0 @@
-title: Notch.fest LA
-category: visual
-tags: 3d, dome, animation
-description: visuals for Notch.fest (the minecraft guy). The whole venue was a huge 360 dome.
-dropbox: https://www.dropbox.com/scl/fi/afc41l0h9f0ijdtpcojt0/notchfest_sphere_compress.mov?rlkey=t844xm48q1xqs7e0re1psjidb&dl=0
-dropbox: https://www.dropbox.com/scl/fi/w99ej757pfzzf6ql0tn4c/notchfest_unwrap_compress.mov?rlkey=a1pjqtlqod912t6h3i6hpju6c&dl=0

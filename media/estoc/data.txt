@@ -1,6 +1,0 @@
-title: Estoc ep art
-category: visual
-tags: 3d, animation, texturing, rigging
-description: for Valley Recordings
-dropbox: https://www.dropbox.com/scl/fi/wtkaz8bmjoztiu6ki68it/estoc_art_compress.mov?rlkey=qxgquepsiez8ijflib95ge93n&dl=0
-
