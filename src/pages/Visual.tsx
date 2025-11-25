@@ -171,7 +171,7 @@ const Visual = () => {
         /* Project Detail View - Full Page */
         <div
           ref={detailScrollRef}
-          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-auto z-[6]"
+          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-auto z-[6] pointer-events-none"
           onClick={() => setSelectedProject(null)}
         >
           <div className="relative pointer-events-auto">
@@ -339,7 +339,7 @@ const Visual = () => {
         /* Grid content container with fixed viewport clip */
         <div
           ref={scrollContainerRef}
-          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-y-scroll z-[6]"
+          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-y-scroll z-[6] pointer-events-none"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <div
@@ -355,7 +355,7 @@ const Visual = () => {
                     </div>
                   </div>
                 )}
-                <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 rounded-xl">
+                <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 rounded-xl pointer-events-auto">
                   {visualProjects.map((project) => {
                     const key = `${project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${project.date}-${shuffleCount}`;
                     const isHovered = hoveredCard === key;
@@ -366,7 +366,7 @@ const Visual = () => {
                         onClick={() => setSelectedProject(project)}
                         onMouseEnter={() => setHoveredCard(key)}
                         onMouseLeave={() => setHoveredCard(null)}
-                        className="group relative overflow-hidden cursor-pointer mb-4 break-inside-avoid transition-transform duration-200"
+                        className="group relative overflow-hidden cursor-pointer mb-4 break-inside-avoid transition-transform duration-200 pointer-events-auto"
                         style={{
                           transform: isHovered ? 'scale(1.05)' : 'scale(1)',
                           contain: 'layout style paint',
