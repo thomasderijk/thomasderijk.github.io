@@ -4,11 +4,12 @@ import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 
 interface AudioPlaylistMinimalProps {
   urls: string[];
+  allowSimultaneousPlayback?: boolean;
 }
 
 // Minimal player with shared controls
 // Single row of controls with track list below
-export const AudioPlaylistMinimal = ({ urls }: AudioPlaylistMinimalProps) => {
+export const AudioPlaylistMinimal = ({ urls, allowSimultaneousPlayback = false }: AudioPlaylistMinimalProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [currentTrack, setCurrentTrack] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -47,11 +48,20 @@ export const AudioPlaylistMinimal = ({ urls }: AudioPlaylistMinimalProps) => {
     const handlePlay = () => {
       setIsPlaying(true);
       pauseForMediaRef.current();
-      document.querySelectorAll('audio, video').forEach((el) => {
+      // Pause other audio elements
+      document.querySelectorAll('audio').forEach((el) => {
         if (el !== audio && !(el as HTMLMediaElement).paused) {
           (el as HTMLMediaElement).pause();
         }
       });
+      // Only pause video if simultaneous playback is not allowed
+      if (!allowSimultaneousPlayback) {
+        document.querySelectorAll('video').forEach((el) => {
+          if (!(el as HTMLMediaElement).paused) {
+            (el as HTMLMediaElement).pause();
+          }
+        });
+      }
     };
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => {

@@ -4,9 +4,10 @@ import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 interface AudioPlayerProps {
   url: string;
   thumbnail?: string;
+  allowSimultaneousPlayback?: boolean;
 }
 
-export const AudioPlayer = ({ url, thumbnail }: AudioPlayerProps) => {
+export const AudioPlayer = ({ url, thumbnail, allowSimultaneousPlayback = false }: AudioPlayerProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const { pauseForMedia, resumeAfterMedia } = useAudioPlayer();
 
@@ -40,13 +41,15 @@ export const AudioPlayer = ({ url, thumbnail }: AudioPlayerProps) => {
           audio.pause();
         }
       });
-      // Also pause all video elements
-      const allVideoElements = document.querySelectorAll('video');
-      allVideoElements.forEach((video) => {
-        if (!video.paused) {
-          video.pause();
-        }
-      });
+      // Only pause video elements if simultaneous playback is not allowed
+      if (!allowSimultaneousPlayback) {
+        const allVideoElements = document.querySelectorAll('video');
+        allVideoElements.forEach((video) => {
+          if (!video.paused) {
+            video.pause();
+          }
+        });
+      }
     };
 
     audioElement.addEventListener('play', handlePlay);

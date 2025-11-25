@@ -203,51 +203,60 @@ const Audio = () => {
                                 <div className="flex flex-col md:flex-row gap-4">
                                   {/* First visual media */}
                                   <div className="w-full md:w-1/2 flex-shrink-0">
-                                    <MediaRenderer media={nonAudioMedia[0]} isFirstVideo={nonAudioMedia[0].type === 'video'} />
+                                    <MediaRenderer media={nonAudioMedia[0]} isFirstVideo={nonAudioMedia[0].type === 'video'} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
                                   </div>
                                   {/* Rest of content: remaining visuals + audio + metadata */}
-                                  <div className="w-full md:w-1/2 flex flex-col justify-center min-w-0 space-y-3">
-                                    {/* Remaining visual media */}
-                                    {nonAudioMedia.slice(1).map((mediaItem, index) => (
-                                      <div key={`visual-${index}`}>
-                                        <MediaRenderer media={mediaItem} isFirstVideo={false} />
-                                      </div>
-                                    ))}
-                                    {/* Title */}
-                                    <div className="text-left flex-shrink-0">
-                                      <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                        {selectedProject.title}
-                                      </h2>
-                                    </div>
-                                    {/* Audio */}
-                                    {hasMultipleAudio ? (
-                                      <AudioPlaylistMinimal urls={audioUrls} />
-                                    ) : (
-                                      audioMedia.map((mediaItem, index) => (
-                                        <div key={`audio-${index}`}>
-                                          <MediaRenderer media={mediaItem} />
+                                  <div className="w-full md:w-1/2 flex flex-col justify-between min-w-0">
+                                    {/* Top section: remaining visuals and title */}
+                                    <div className="space-y-3">
+                                      {/* Remaining visual media */}
+                                      {nonAudioMedia.slice(1).map((mediaItem, index) => (
+                                        <div key={`visual-${index}`}>
+                                          <MediaRenderer media={mediaItem} isFirstVideo={false} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
                                         </div>
-                                      ))
-                                    )}
-                                    {/* Description */}
-                                    {selectedProject.description && (
-                                      <p className="text-foreground leading-relaxed text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                        {selectedProject.description}
-                                      </p>
-                                    )}
-                                    {/* Tags */}
-                                    <div className="flex flex-wrap gap-1">
-                                      {selectedProject.tags.map((tag, index) => (
-                                        <span key={tag} className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                          {index > 0 && " / "}
-                                          {tag.toLowerCase()}
-                                        </span>
                                       ))}
+                                      {/* Title */}
+                                      <div className="text-left flex-shrink-0">
+                                        <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                          {selectedProject.title}
+                                        </h2>
+                                      </div>
                                     </div>
-                                    {/* Year */}
-                                    <span className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                      {new Date(selectedProject.date).getFullYear()}
-                                    </span>
+                                    {/* Middle section: audio and description */}
+                                    <div className="space-y-3">
+                                      {/* Audio */}
+                                      {hasMultipleAudio ? (
+                                        <AudioPlaylistMinimal urls={audioUrls} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
+                                      ) : (
+                                        audioMedia.map((mediaItem, index) => (
+                                          <div key={`audio-${index}`}>
+                                            <MediaRenderer media={mediaItem} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
+                                          </div>
+                                        ))
+                                      )}
+                                      {/* Description */}
+                                      {selectedProject.description && (
+                                        <p className="text-foreground leading-relaxed text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                          {selectedProject.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                    {/* Bottom section: tags and year - aligned to bottom */}
+                                    <div className="space-y-2 mt-4">
+                                      {/* Tags */}
+                                      <div className="flex flex-wrap gap-1">
+                                        {selectedProject.tags.map((tag, index) => (
+                                          <span key={tag} className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                            {index > 0 && " / "}
+                                            {tag.toLowerCase()}
+                                          </span>
+                                        ))}
+                                      </div>
+                                      {/* Year */}
+                                      <span className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                        {new Date(selectedProject.date).getFullYear()}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               ) : (
@@ -255,7 +264,7 @@ const Audio = () => {
                                   {/* Default layout: Non-audio media first */}
                                   {nonAudioMedia.map((mediaItem, index) => (
                                     <div key={index}>
-                                      <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} />
+                                      <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
                                     </div>
                                   ))}
 
@@ -268,12 +277,12 @@ const Audio = () => {
                                           {selectedProject.title}
                                         </h2>
                                       </div>
-                                      <AudioPlaylistMinimal urls={audioUrls} />
+                                      <AudioPlaylistMinimal urls={audioUrls} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
                                     </>
                                   ) : (
                                     audioMedia.map((mediaItem, index) => (
                                       <div key={`audio-${index}`}>
-                                        <MediaRenderer media={mediaItem} />
+                                        <MediaRenderer media={mediaItem} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
                                       </div>
                                     ))
                                   )}
