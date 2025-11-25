@@ -7,7 +7,12 @@ const preloadedVideos = new Set<string>();
 const preloadedImages = new Set<string>();
 export const thumbnailDimensionsCache = new Map<string, { width: number; height: number }>();
 
-// Helper function to get thumbnail media from project (same logic as in Visual/Audio pages)
+// Cache for selected thumbnails per project (persists during session)
+// Key: project title, Value: selected thumbnail URL
+const selectedThumbnailCache = new Map<string, string>();
+
+// Helper function to get or select thumbnail media from project
+// Uses cache to ensure consistent selection across page loads
 const getThumbnailMedia = (project: Project): MediaItem | null => {
   const thumbnailVideos = project.media.filter(m =>
     m.type === 'video' && m.url.toLowerCase().includes('_thumbnail.')
@@ -19,22 +24,39 @@ const getThumbnailMedia = (project: Project): MediaItem | null => {
   const allImages = project.media.filter(m => m.type === 'image');
   const hasAudio = project.media.some(m => m.type === 'audio');
 
+  // Check if we already have a selected thumbnail for this project
+  const cachedUrl = selectedThumbnailCache.get(project.title);
+
+  // If cached, verify it still exists in the project's media
+  if (cachedUrl) {
+    const cachedMedia = project.media.find(m => m.url === cachedUrl);
+    if (cachedMedia) {
+      return cachedMedia;
+    }
+  }
+
+  // No cache or invalid cache - select a new random thumbnail
+  let selectedMedia: MediaItem | null = null;
+
   if (thumbnailVideos.length > 0) {
-    return thumbnailVideos[0]; // Just preload the first one
+    const randomIndex = Math.floor(Math.random() * thumbnailVideos.length);
+    selectedMedia = thumbnailVideos[randomIndex];
+  } else if (thumbnailImages.length > 0) {
+    const randomIndex = Math.floor(Math.random() * thumbnailImages.length);
+    selectedMedia = thumbnailImages[randomIndex];
+  } else if (allImages.length === 1 && hasAudio) {
+    selectedMedia = allImages[0];
   }
 
-  if (thumbnailImages.length > 0) {
-    return thumbnailImages[0];
+  // Cache the selection
+  if (selectedMedia) {
+    selectedThumbnailCache.set(project.title, selectedMedia.url);
   }
 
-  if (allImages.length === 1 && hasAudio) {
-    return allImages[0];
-  }
-
-  return null;
+  return selectedMedia;
 };
 
-// Preload a single video's metadata and cache dimensions
+// Preload a single video's first frame and cache dimensions
 const preloadVideoMetadata = (url: string): Promise<void> => {
   if (preloadedVideos.has(url)) {
     return Promise.resolve();
@@ -42,7 +64,7 @@ const preloadVideoMetadata = (url: string): Promise<void> => {
 
   return new Promise((resolve) => {
     const video = document.createElement('video');
-    video.preload = 'metadata';
+    video.preload = 'auto'; // Load first frame, not just metadata
     video.muted = true;
     video.playsInline = true;
     video.style.display = 'none';
@@ -62,11 +84,14 @@ const preloadVideoMetadata = (url: string): Promise<void> => {
       resolve();
     };
 
-    video.addEventListener('loadedmetadata', cleanup, { once: true });
+    // Wait for first frame to be loaded (loadeddata), not just metadata
+    video.addEventListener('loadeddata', () => {
+      cleanup();
+    }, { once: true });
     video.addEventListener('error', cleanup, { once: true });
 
     // Timeout fallback
-    setTimeout(cleanup, 5000);
+    setTimeout(cleanup, 10000); // Increased timeout since we're loading more data
 
     video.src = url;
     document.body.appendChild(video);
@@ -154,4 +179,14 @@ export const isPreloaded = (url: string): boolean => {
 // Get cached dimensions for a thumbnail
 export const getCachedThumbnailDimensions = (url: string): { width: number; height: number } | null => {
   return thumbnailDimensionsCache.get(url) || null;
+};
+
+// Clear thumbnail selection cache (called when randomizing grid)
+export const clearThumbnailSelectionCache = () => {
+  selectedThumbnailCache.clear();
+};
+
+// Get the currently selected thumbnail for a project
+export const getSelectedThumbnailForProject = (project: Project): MediaItem | null => {
+  return getThumbnailMedia(project);
 };

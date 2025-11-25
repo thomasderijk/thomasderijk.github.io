@@ -7,41 +7,31 @@ import { Project, MediaItem } from '@/types/project';
 import { useProjectSort } from '@/hooks/use-project-sort';
 import { useCommercial } from '@/contexts/CommercialContext';
 import { useProjectDetail } from '@/contexts/ProjectDetailContext';
-import { resetVideoLoadQueue } from '@/hooks/use-video-load-queue';
 import { X, ChevronDown } from 'lucide-react';
 import { AudioPlaylistMinimal } from '@/components/AudioPlaylistMinimal';
 
-// Helper function to get thumbnail media from project
+// Simple helper to get a random thumbnail from project
 const getThumbnailMedia = (project: Project): MediaItem | null => {
-  // Look for files containing "_thumbnail" before the extension (case insensitive)
-  const thumbnailVideos = project.media.filter(m => 
+  const thumbnailVideos = project.media.filter(m =>
     m.type === 'video' && m.url.toLowerCase().includes('_thumbnail.')
   );
-  const thumbnailImages = project.media.filter(m => 
+  const thumbnailImages = project.media.filter(m =>
     m.type === 'image' && m.url.toLowerCase().includes('_thumbnail.')
   );
-  
-  // Count all images (including thumbnails)
   const allImages = project.media.filter(m => m.type === 'image');
   const hasAudio = project.media.some(m => m.type === 'audio');
-  
-  // Prefer video thumbnails over image thumbnails
+
   if (thumbnailVideos.length > 0) {
     const randomIndex = Math.floor(Math.random() * thumbnailVideos.length);
     return thumbnailVideos[randomIndex];
   }
-  
   if (thumbnailImages.length > 0) {
     const randomIndex = Math.floor(Math.random() * thumbnailImages.length);
     return thumbnailImages[randomIndex];
   }
-  
-  // Special case: if there's only 1 image and audio files, use the single image as thumbnail
   if (allImages.length === 1 && hasAudio) {
     return allImages[0];
   }
-  
-  // No thumbnail found
   return null;
 };
 
@@ -58,7 +48,6 @@ const Visual = () => {
   // Increment shuffle count whenever isRandomized changes
   useEffect(() => {
     setShuffleCount(prev => prev + 1);
-    resetVideoLoadQueue(); // Reset the queue when shuffling
   }, [isRandomized]);
 
   // Ref for the detail view scroll container
@@ -171,7 +160,7 @@ const Visual = () => {
         /* Project Detail View - Full Page */
         <div
           ref={detailScrollRef}
-          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-auto z-[6] pointer-events-none"
+          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-auto z-[6] pointer-events-none-desktop"
           onClick={() => setSelectedProject(null)}
         >
           <div className="relative pointer-events-auto">
@@ -198,15 +187,15 @@ const Visual = () => {
                             <>
                               {useSideBySide ? (
                                 /* Side-by-side layout */
-                                <div className="flex flex-col md:flex-row gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:items-start">
                                   {/* First visual media */}
-                                  <div className="w-full md:w-1/2 flex-shrink-0">
+                                  <div className="w-full">
                                     <MediaRenderer media={nonAudioMedia[0]} isFirstVideo={nonAudioMedia[0].type === 'video'} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
                                   </div>
                                   {/* Rest of content: remaining visuals + audio */}
-                                  <div className="w-full md:w-1/2 flex flex-col justify-between min-w-0">
+                                  <div className="w-full flex flex-col justify-between min-h-full">
                                     {/* Top section: remaining visuals and title */}
-                                    <div className="space-y-3">
+                                    <div className={nonAudioMedia.length > 1 ? 'space-y-3' : ''}>
                                       {/* Remaining visual media */}
                                       {nonAudioMedia.slice(1).map((mediaItem, index) => (
                                         <div key={`visual-${index}`}>
@@ -221,7 +210,7 @@ const Visual = () => {
                                       </div>
                                     </div>
                                     {/* Middle section: audio and description */}
-                                    <div className="space-y-3">
+                                    <div className="space-y-3 mt-3 flex-1">
                                       {/* Audio */}
                                       {hasMultipleAudio ? (
                                         <AudioPlaylistMinimal urls={audioUrls} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
@@ -270,7 +259,7 @@ const Visual = () => {
                                   {hasMultipleAudio ? (
                                     <>
                                       {/* Title before playlist */}
-                                      <div className="text-left flex-shrink-0 mt-4">
+                                      <div className="text-left flex-shrink-0 mt-4 mb-6">
                                         <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                                           {selectedProject.title}
                                         </h2>
@@ -348,7 +337,7 @@ const Visual = () => {
         /* Grid content container with fixed viewport clip */
         <div
           ref={scrollContainerRef}
-          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-y-scroll z-[6] pointer-events-none"
+          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-y-scroll z-[6] pointer-events-none-desktop"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <div
@@ -383,26 +372,12 @@ const Visual = () => {
                         }}
                       >
                         {project.thumbnailMedia ? (
-                          project.thumbnailMedia.type === 'video' ? (
-                            <VideoThumbnail
-                              key={project.thumbnailMedia.url}
-                              src={project.thumbnailMedia.url}
-                              alt={project.title}
-                              className="block w-full h-auto object-cover"
-                              projectVideos={project.media
-                                .filter(m => m.type === 'video' && (m.url.startsWith('http://') || m.url.startsWith('https://')))
-                                .map(m => m.url)
-                              }
-                            />
-                          ) : (
-                            <VideoThumbnail
-                              key={project.thumbnailMedia.url}
-                              src={project.thumbnailMedia.url}
-                              alt={project.title}
-                              className="block w-full h-auto"
-                              projectVideos={[]}
-                            />
-                          )
+                          <VideoThumbnail
+                            key={project.thumbnailMedia.url}
+                            src={project.thumbnailMedia.url}
+                            alt={project.title}
+                            className="block w-full h-auto object-cover"
+                          />
                         ) : (
                           <div className="w-full aspect-square bg-background flex items-center justify-center">
                             <X className="w-16 h-16 text-red-500" strokeWidth={1.5} />

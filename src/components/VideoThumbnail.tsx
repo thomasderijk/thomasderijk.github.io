@@ -1,273 +1,98 @@
 import { useEffect, useRef, useState } from 'react';
-import { useVideoLoadQueue, useAllVideosLoaded } from '@/hooks/use-video-load-queue';
-import { getCachedThumbnailDimensions } from '@/hooks/use-thumbnail-preload';
 
 interface VideoThumbnailProps {
   src: string;
   alt: string;
   className?: string;
-  projectVideos?: string[]; // All video URLs in the project for preloading
 }
 
-export function VideoThumbnail({ src, alt, className = '', projectVideos = [] }: VideoThumbnailProps) {
+export function VideoThumbnail({ src, alt, className = '' }: VideoThumbnailProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const hasPlayedRef = useRef(false);
-  const pauseTimeoutRef = useRef<NodeJS.Timeout>();
-  const [shouldAutoplay, setShouldAutoplay] = useState(false);
-  const [metadataLoaded, setMetadataLoaded] = useState(false);
-  const allVideosLoaded = useAllVideosLoaded();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Determine if this is an image or video based on file extension
   const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(src);
 
-  // Handle hover play/pause
+  // Simple intersection observer - load when in viewport
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Load once and stop observing
+        }
+      },
+      {
+        rootMargin: '50px', // Start loading slightly before entering viewport
+      }
+    );
+
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Handle hover play/pause for videos
   const handleMouseEnter = () => {
     const video = videoRef.current;
-    if (video && metadataLoaded) {
+    if (video && !isImage) {
       video.play().catch(() => {
         // Ignore play errors
-      });
-    }
-
-    // Preload project video metadata on hover (for faster detail page load)
-    if (projectVideos.length > 0) {
-      projectVideos.forEach((videoUrl) => {
-        // Skip if it's the same as thumbnail
-        if (videoUrl === src) return;
-
-        // Check if external video (dropbox, etc)
-        if (videoUrl.startsWith('http://') || videoUrl.startsWith('https://')) {
-          // Create hidden video element to preload metadata
-          const preloadVideo = document.createElement('video');
-          preloadVideo.src = videoUrl;
-          preloadVideo.preload = 'metadata';
-          preloadVideo.style.display = 'none';
-          document.body.appendChild(preloadVideo);
-
-          // Remove after metadata is loaded or on error
-          const cleanup = () => {
-            if (preloadVideo.parentNode) {
-              preloadVideo.parentNode.removeChild(preloadVideo);
-            }
-          };
-
-          preloadVideo.addEventListener('loadedmetadata', cleanup, { once: true });
-          preloadVideo.addEventListener('error', cleanup, { once: true });
-
-          // Fallback cleanup after 10 seconds
-          setTimeout(cleanup, 10000);
-        }
       });
     }
   };
 
   const handleMouseLeave = () => {
     const video = videoRef.current;
-    if (video) {
+    if (video && !isImage) {
       video.pause();
     }
   };
-  
-  // Use queue-based loading
-  const { shouldLoad, notifyLoadComplete } = useVideoLoadQueue(src, () => {
-    // Media is now allowed to start loading
-  });
 
-  // Enable autoplay only on mobile when all videos have loaded
+  // Set random start time for videos
   useEffect(() => {
-    if (allVideosLoaded && metadataLoaded) {
-      // Check if mobile/touch device
-      const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (!isVisible || isImage) return;
 
-      // Only autoplay on mobile
-      if (!isMobile) {
-        setShouldAutoplay(false);
-        return;
-      }
-
-      // Check for Network Information API support
-      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
-
-      if (connection) {
-        const effectiveType = connection.effectiveType;
-        // Disable autoplay on 2G or slow-2g connections
-        if (effectiveType === 'slow-2g' || effectiveType === '2g') {
-          setShouldAutoplay(false);
-          return;
-        }
-      }
-
-      // Enable autoplay for mobile
-      setShouldAutoplay(true);
-    }
-  }, [allVideosLoaded, metadataLoaded]);
-
-  // Listen for network changes
-  useEffect(() => {
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
-
-    if (connection) {
-      const handleConnectionChange = () => {
-        const newType = connection.effectiveType;
-        if (allVideosLoaded && metadataLoaded) {
-          setShouldAutoplay(newType !== 'slow-2g' && newType !== '2g');
-        }
-      };
-
-      connection.addEventListener('change', handleConnectionChange);
-
-      return () => {
-        connection.removeEventListener('change', handleConnectionChange);
-      };
-    }
-  }, [allVideosLoaded, metadataLoaded]);
-
-  // Handle intersection observer with lazy unmount (keep video in memory briefly)
-  useEffect(() => {
-    if (isImage || !shouldLoad) return;
-    
-    const video = videoRef.current;
-    if (!video) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          // Clear any pending pause timeout (lazy unmount)
-          if (pauseTimeoutRef.current) {
-            clearTimeout(pauseTimeoutRef.current);
-            pauseTimeoutRef.current = undefined;
-          }
-
-          // Only autoplay if network conditions allow
-          if (shouldAutoplay && metadataLoaded) {
-            hasPlayedRef.current = true;
-            video.play().catch(() => {
-              // Ignore play errors (e.g., if user hasn't interacted with page)
-            });
-          }
-        } else {
-          // Lazy unmount: delay pausing for 2 seconds to allow smooth scroll-back
-          pauseTimeoutRef.current = setTimeout(() => {
-            video.pause();
-          }, 2000);
-        }
-      },
-      {
-        threshold: 0.25, // Play earlier for smoother UX
-        rootMargin: '100px', // Start loading earlier
-      }
-    );
-
-    observer.observe(video);
-
-    // Check if video is already visible and start playing
-    const rect = video.getBoundingClientRect();
-    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-    if (isVisible && shouldAutoplay && metadataLoaded) {
-      hasPlayedRef.current = true;
-      video.play().catch(() => {
-        // Ignore play errors
-      });
-    }
-
-    return () => {
-      // Clear timeout on unmount
-      if (pauseTimeoutRef.current) {
-        clearTimeout(pauseTimeoutRef.current);
-      }
-      observer.disconnect();
-    };
-  }, [shouldAutoplay, shouldLoad, metadataLoaded, isImage]); // Re-run if network conditions change
-
-  // Handle metadata loading for images
-  useEffect(() => {
-    if (!isImage || !shouldLoad) return;
-    
-    const img = imageRef.current;
-    if (!img) return;
-
-    const handleLoad = () => {
-      setMetadataLoaded(true);
-      notifyLoadComplete();
-    };
-
-    const handleError = () => {
-      // Even on error, notify so the queue continues
-      notifyLoadComplete();
-    };
-
-    img.addEventListener('load', handleLoad);
-    img.addEventListener('error', handleError);
-
-    // Check if image already loaded (cached)
-    if (img.complete) {
-      handleLoad();
-    }
-
-    return () => {
-      img.removeEventListener('load', handleLoad);
-      img.removeEventListener('error', handleError);
-    };
-  }, [isImage, shouldLoad, notifyLoadComplete]);
-
-  // Handle metadata loading for videos (random start time)
-  useEffect(() => {
-    if (isImage || !shouldLoad) return;
-    
     const video = videoRef.current;
     if (!video) return;
 
     const handleLoadedMetadata = () => {
       if (video.duration && isFinite(video.duration)) {
-        // Pick random time between 0 and 80% of duration
         video.currentTime = Math.random() * video.duration * 0.8;
       }
-      setMetadataLoaded(true);
-      // Notify queue that this video has loaded
-      notifyLoadComplete();
-    };
-
-    const handleError = () => {
-      // Even on error, notify so the queue continues
-      notifyLoadComplete();
     };
 
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    video.addEventListener('error', handleError);
 
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      video.removeEventListener('error', handleError);
     };
-  }, [isImage, src, shouldLoad, notifyLoadComplete]);
+  }, [isVisible, isImage]);
 
   return (
     <div
+      ref={containerRef}
       className="relative"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Placeholder while loading */}
-      {!shouldLoad && (() => {
-        const cached = getCachedThumbnailDimensions(src);
-        const aspectRatio = cached ? cached.width / cached.height : 1;
-        return (
-          <div
-            className={className}
-            style={{ aspectRatio, backgroundColor: 'hsl(0, 0%, 10%)' }}
-          />
-        );
-      })()}
-      {shouldLoad && (
+      {!isVisible && (
+        <div className={className} style={{ aspectRatio: 1, backgroundColor: 'hsl(0, 0%, 10%)' }} />
+      )}
+      {isVisible && (
         isImage ? (
           <img
             ref={imageRef}
             src={src}
             alt={alt}
             className={className}
+            loading="lazy"
             decoding="async"
-            style={{ aspectRatio: 'auto' }}
           />
         ) : (
           <video

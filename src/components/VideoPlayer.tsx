@@ -20,7 +20,8 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
 
   const [aspectRatio, setAspectRatio] = useState<number>(initialAspectRatio);
   const [metadataLoaded, setMetadataLoaded] = useState(!!cachedDimensions);
-  const [hasFirstFrame, setHasFirstFrame] = useState(false);
+  // If video was preloaded (has cached dimensions), assume first frame is also loaded
+  const [hasFirstFrame, setHasFirstFrame] = useState(!!cachedDimensions);
   const { pauseForMedia, resumeAfterMedia } = useAudioPlayer();
 
   // Use ref to always have access to latest functions
@@ -58,6 +59,10 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
         setAspectRatio(video.videoWidth / video.videoHeight);
         setMetadataLoaded(true);
       }
+      // Check if first frame is also ready at this point
+      if (video.readyState >= 2) {
+        setHasFirstFrame(true);
+      }
     };
     const handleLoadedData = () => {
       setHasFirstFrame(true);
@@ -73,6 +78,13 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
       setHasFirstFrame(true);
     }
 
+    // Add a small timeout fallback to check readyState again
+    const checkReadyStateTimeout = setTimeout(() => {
+      if (video.readyState >= 2) {
+        setHasFirstFrame(true);
+      }
+    }, 50);
+
     // If video is already playing (autoPlay fired before effect), pause main audio
     if (!video.paused) {
       pauseForMediaRef.current();
@@ -84,6 +96,7 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
     video.addEventListener('loadeddata', handleLoadedData);
 
     return () => {
+      clearTimeout(checkReadyStateTimeout);
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
@@ -108,27 +121,30 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Loading placeholder - shown until first frame is ready */}
-        {!hasFirstFrame && (
-          <div
-            className={`bg-foreground/5 ${isWideLandscape ? 'min-w-[65vw]' : ''}`}
-            style={{ aspectRatio: aspectRatio }}
-          />
-        )}
-        <video
-          ref={videoRef}
-          src={url}
-          controls={showControls}
-          autoPlay={autoPlay}
-          loop
-          controlsList="nodownload noplaybackrate"
-          className={`block w-full h-auto ${isWideLandscape ? 'min-w-[65vw] max-h-[80vh]' : ''} ${is4by3Landscape ? 'max-h-[80vh]' : ''} ${isSquare ? 'max-h-[70vh]' : ''} ${isPortrait ? 'max-h-[75vh]' : ''} ${!hasFirstFrame ? 'absolute inset-0 opacity-0' : ''}`}
-          style={{ display: 'block', maxWidth: '100%' }}
-          preload="auto"
-          playsInline
+        {/* Always reserve space with correct aspect ratio */}
+        <div
+          className={`block w-full h-auto ${isWideLandscape ? 'min-w-[65vw] max-h-[80vh]' : ''} ${is4by3Landscape ? 'max-h-[80vh]' : ''} ${isSquare ? 'max-h-[70vh]' : ''} ${isPortrait ? 'max-h-[75vh]' : ''}`}
+          style={{ aspectRatio: aspectRatio, maxWidth: '100%' }}
         >
-          Your browser does not support the video tag.
-        </video>
+          {/* Black placeholder shown only when video not ready AND not cached */}
+          {!hasFirstFrame && !cachedDimensions && (
+            <div className="absolute inset-0 bg-black" />
+          )}
+          <video
+            ref={videoRef}
+            src={url}
+            controls={showControls}
+            autoPlay={autoPlay}
+            loop
+            controlsList="nodownload noplaybackrate"
+            className="block w-full h-auto"
+            style={{ display: 'block', maxWidth: '100%' }}
+            preload="auto"
+            playsInline
+          >
+            Your browser does not support the video tag.
+          </video>
+        </div>
       </div>
     </div>
   );

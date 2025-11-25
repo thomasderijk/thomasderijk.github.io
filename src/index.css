@@ -186,5 +186,13 @@ All colors MUST be HSL.
     max-width: 100% !important;
     width: 100% !important;
   }
+
+  /* Only apply pointer-events: none on devices with hover capability (desktop) */
+  /* This allows touch devices (iOS, mobile) to scroll normally */
+  @media (hover: hover) and (pointer: fine) {
+    .pointer-events-none-desktop {
+      pointer-events: none;
+    }
+  }
 }
 

@@ -32,19 +32,20 @@ export const YouTubePlayer = ({ url }: YouTubePlayerProps) => {
   const embedUrl = `https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0&controls=1&showinfo=0&fs=1`;
 
   return (
-    <div className="w-full rounded-lg overflow-hidden flex items-center justify-center">
-      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-        <iframe
-          src={embedUrl}
-          className="absolute top-0 left-0 w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          title="YouTube video player"
-          style={{ 
-            border: 'none',
-            maxHeight: 'calc(90vh - 12rem)'
-          }}
-        />
+    <div className="flex justify-center w-full">
+      <div className="inline-block max-w-full rounded-lg overflow-hidden">
+        <div className="relative w-full min-w-[65vw]" style={{ paddingBottom: '56.25%', maxHeight: '80vh' }}>
+          <iframe
+            src={embedUrl}
+            className="absolute top-0 left-0 w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            title="YouTube video player"
+            style={{
+              border: 'none'
+            }}
+          />
+        </div>
       </div>
     </div>
   );

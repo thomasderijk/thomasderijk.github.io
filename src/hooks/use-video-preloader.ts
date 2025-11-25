@@ -37,7 +37,7 @@ export function useVideoPreloader() {
         if (videoMetadataCache.has(url)) return;
 
         const video = document.createElement('video');
-        video.preload = 'metadata';
+        video.preload = 'auto'; // Changed from 'metadata' to 'auto' to load first frame
         video.muted = true;
         video.playsInline = true;
         video.style.display = 'none';
@@ -48,7 +48,8 @@ export function useVideoPreloader() {
           }
         };
 
-        video.addEventListener('loadedmetadata', () => {
+        // Wait for first frame to be loaded (loadeddata), not just metadata
+        video.addEventListener('loadeddata', () => {
           // Cache the dimensions
           if (video.videoWidth && video.videoHeight) {
             videoMetadataCache.set(url, {

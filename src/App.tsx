@@ -6,8 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
 import { X, Shuffle, Play, Pause, SkipForward, Eclipse } from "lucide-react";
 import { useProjectSort } from "@/hooks/use-project-sort";
-import { useThumbnailPreload } from "@/hooks/use-thumbnail-preload";
-import { useVideoPreloader } from "@/hooks/use-video-preloader";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
 import { NavDot } from "@/components/NavDot";
 import { CommercialProvider } from "@/contexts/CommercialContext";
@@ -36,12 +34,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const allowScroll = location.pathname === '/audio' || location.pathname === '/visual';
   const [iframeSrc, setIframeSrc] = useState("/patches/");
   const [iframeLoaded, setIframeLoaded] = useState(false);
-
-  // Preload all thumbnail metadata on app initialization
-  useThumbnailPreload();
-
-  // Preload video metadata for faster detail view loading
-  useVideoPreloader();
 
   const handleIframeLoad = () => {
     setIframeLoaded(true);
