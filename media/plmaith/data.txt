@@ -2,4 +2,5 @@ title: P.L.M.A.I.T.H.
 category: visual, audio
 tags: 2d, animation, audio
 description: pls let me assimilate into the hivemind
+layout: sidebyside
 dropbox: https://www.dropbox.com/scl/fi/kb1zvh23r71inzvh5cbi7/PLMAITH_001_h264_1080x1080.mov?rlkey=bgabhfg9ro9dm4qlqo97c7oni&dl=0
