@@ -12,6 +12,7 @@ import { CommercialProvider } from "@/contexts/CommercialContext";
 import { ProjectDetailProvider, useProjectDetail } from "@/contexts/ProjectDetailContext";
 import { AudioPlayerProvider, useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { InvertProvider, useInvert } from "@/contexts/InvertContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Audio from "./pages/Audio";
 import Visual from "./pages/Visual";
@@ -20,7 +21,14 @@ import About from "./pages/About";
 import Commercial from "./pages/Commercial";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -104,7 +112,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
             <button
               onClick={reloadIframe}
-              className={`absolute top-1/2 -translate-y-1/2 left-2 md:left-4 p-2 md:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
+              className={`absolute top-1/2 -translate-y-1/2 left-2 md:left-4 p-3 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
               aria-label="Reload background"
               title="Reload background"
             >
@@ -139,7 +147,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             {showShuffleButton && (
               <button
                 onClick={toggleRandomize}
-                className={`absolute top-1/2 -translate-y-1/2 left-1.5 sm:left-2 md:left-3 lg:left-4 p-1.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
+                className={`absolute top-1/2 -translate-y-1/2 left-1.5 sm:left-2 md:left-3 lg:left-4 p-2.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
                 aria-label="Randomize projects"
                 title={isRandomized ? 'Sorted randomly' : 'Sort by date'}
               >
@@ -154,7 +162,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   navigate('/');
                 }
               }}
-              className={`absolute top-1/2 -translate-y-1/2 right-1.5 sm:right-2 md:right-3 lg:right-4 p-1.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
+              className={`absolute top-1/2 -translate-y-1/2 right-1.5 sm:right-2 md:right-3 lg:right-4 p-2.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
               aria-label={isProjectOpen ? "Close project" : "Close and return home"}
             >
               <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
@@ -169,7 +177,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <div className="fixed bottom-1.5 sm:bottom-2 md:bottom-3 lg:bottom-4 left-1.5 sm:left-2 md:left-3 lg:left-4 z-20 flex flex-col-reverse items-start -space-y-reverse -space-y-1">
         <button
           onClick={togglePlay}
-          className={`p-1.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
+          className={`p-2.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-colors`}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
@@ -180,7 +188,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </button>
         <button
           onClick={nextTrack}
-          className={`p-1.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-all duration-300 ease-out ${
+          className={`p-2.5 sm:p-2 md:p-2.5 lg:p-3 ${isInverted ? 'text-black hover:text-black/80' : 'text-foreground hover:text-foreground/80'} pointer-events-auto transition-all duration-300 ease-out ${
             isPlaying
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 translate-y-full pointer-events-none'
@@ -207,34 +215,36 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <HashRouter>
-        <InvertProvider>
-          <AudioPlayerProvider>
-            <CommercialProvider>
-              <ProjectDetailProvider>
-                <Layout>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/audio" element={<Audio />} />
-                    <Route path="/visual" element={<Visual />} />
-                    <Route path="/links" element={<Links />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/commercial" element={<Commercial />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Layout>
-              </ProjectDetailProvider>
-            </CommercialProvider>
-          </AudioPlayerProvider>
-        </InvertProvider>
-      </HashRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <HashRouter>
+          <InvertProvider>
+            <AudioPlayerProvider>
+              <CommercialProvider>
+                <ProjectDetailProvider>
+                  <Layout>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/audio" element={<Audio />} />
+                      <Route path="/visual" element={<Visual />} />
+                      <Route path="/links" element={<Links />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/commercial" element={<Commercial />} />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Layout>
+                </ProjectDetailProvider>
+              </CommercialProvider>
+            </AudioPlayerProvider>
+          </InvertProvider>
+        </HashRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

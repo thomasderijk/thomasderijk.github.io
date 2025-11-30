@@ -35,6 +35,12 @@ const Links = () => {
       isItalic: false,
       isCaps: false
     })));
+
+    // Cleanup all timers on unmount to prevent memory leaks
+    return () => {
+      timersRef.current.forEach(timer => clearTimeout(timer));
+      timersRef.current = [];
+    };
   }, []);
 
   const handleClick = () => {
@@ -174,7 +180,7 @@ const Links = () => {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`group inline-flex items-center justify-center gap-3 ${isInverted ? 'hover:text-black/80' : 'hover:text-foreground/80'} transition-colors`}
+                  className={`group inline-flex items-center justify-center gap-3 py-2 ${isInverted ? 'hover:text-black/80' : 'hover:text-foreground/80'} transition-colors`}
                 >
                   <Icon className={`w-4 h-4 ${isInverted ? 'text-black' : 'text-foreground'} flex-shrink-0`} strokeWidth={1.5} />
                   <span className={`${isInverted ? 'text-black' : 'text-foreground'} leading-relaxed`}>

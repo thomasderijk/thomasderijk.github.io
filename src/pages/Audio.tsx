@@ -353,7 +353,7 @@ const Audio = () => {
                     </div>
                   </div>
                 )}
-                <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 rounded-xl pointer-events-auto">
+                <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-3 gap-4 rounded-xl pointer-events-auto">
                   {audioProjects.map((project) => {
                     const key = `${project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${project.date}-${shuffleCount}`;
                     const isHovered = hoveredCard === key;
