@@ -134,7 +134,9 @@ All colors MUST be HSL.
     font-family: 'Inter', sans-serif;
     color: hsl(var(--foreground));
     /* Unified font size for all text */
-    font-size: 12px;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
   }
 
   .font-display {
@@ -145,13 +147,13 @@ All colors MUST be HSL.
 
   /* Unified font size - apply to all text elements except icon buttons */
   h1, h2, h3, h4, h5, h6, p, span, a, div {
-    font-size: 12px !important;
+    font-size: 16px !important;
     line-height: 1.5;
   }
 
-  /* Regular buttons get 12px */
+  /* Regular buttons get 16px */
   button:not(.icon-button) {
-    font-size: 12px !important;
+    font-size: 16px !important;
     line-height: 1.5;
   }
 
@@ -190,6 +192,7 @@ All colors MUST be HSL.
   video::-webkit-media-controls-enclosure {
     background-image: none !important;
     background: transparent !important;
+    box-shadow: none !important;
     max-width: 100% !important;
     width: 100% !important;
   }
@@ -197,6 +200,7 @@ All colors MUST be HSL.
   video::-webkit-media-controls-panel {
     background-image: none !important;
     background: transparent !important;
+    box-shadow: none !important;
     max-width: 100% !important;
     width: 100% !important;
   }
@@ -207,6 +211,17 @@ All colors MUST be HSL.
     .pointer-events-none-desktop {
       pointer-events: none;
     }
+  }
+
+  /* NEVER change opacity on anything - always use color inversion instead */
+  * {
+    transition: opacity 0s !important;
+  }
+
+  button:hover,
+  a:hover,
+  *:hover {
+    opacity: 1 !important;
   }
 }
 

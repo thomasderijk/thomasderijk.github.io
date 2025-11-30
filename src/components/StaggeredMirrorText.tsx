@@ -6,6 +6,8 @@ interface StaggeredMirrorTextProps {
   isActive?: boolean;
   animateOnLoad?: boolean;
   animationSchedule?: number[]; // Array of delays for each letter, provided externally
+  forcedColor?: 'white' | 'black'; // Force a specific color instead of random (legacy)
+  forcedVariant?: 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light'; // Force a specific variant
 }
 
 interface GlitchEffect {
@@ -14,14 +16,27 @@ interface GlitchEffect {
   isItalic: boolean;
 }
 
-export const StaggeredMirrorText = ({ text, className = '', isActive = false, animateOnLoad = false, animationSchedule }: StaggeredMirrorTextProps) => {
+export const StaggeredMirrorText = ({ text, className = '', isActive = false, animateOnLoad = false, animationSchedule, forcedColor, forcedVariant }: StaggeredMirrorTextProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [letterDelays, setLetterDelays] = useState<number[]>([]);
   const [flippedLetters, setFlippedLetters] = useState<boolean[]>([]);
   const [glitchEffects, setGlitchEffects] = useState<(GlitchEffect | null)[]>([]);
   const [loadAnimationEffects, setLoadAnimationEffects] = useState<(GlitchEffect | null)[]>([]);
   const [visibleLetters, setVisibleLetters] = useState<boolean[]>([]);
-  const [textBackground, setTextBackground] = useState<'white-on-black' | 'black-on-white'>(Math.random() < 0.5 ? 'white-on-black' : 'black-on-white');
+  // Use forced variant if provided, or forced color (legacy), otherwise random from 4 options
+  const [textBackground] = useState<'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light'>(() => {
+    if (forcedVariant) {
+      return forcedVariant;
+    }
+    if (forcedColor) {
+      return forcedColor === 'white' ? 'white-on-black' : 'black-on-white';
+    }
+    const random = Math.random();
+    if (random < 0.25) return 'white-on-black';      // 10% bg, 90% text
+    if (random < 0.5) return 'black-on-white';       // 90% bg, 10% text
+    if (random < 0.75) return 'white-on-dark';       // 20% bg, 90% text
+    return 'black-on-light';                          // 80% bg, 10% text
+  });
   const letters = text.split('');
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const residualTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -307,55 +322,62 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
     };
   }, [isHovered, isActive, letters.length]);
 
-  const bgColor = textBackground === 'white-on-black' ? '#000000' : '#ffffff';
-  const textColor = textBackground === 'white-on-black' ? '#ffffff' : '#000000';
+  // Background and text colors based on textBackground variant
+  const bgColor =
+    textBackground === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
+    textBackground === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
+    textBackground === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
+    'hsl(0, 0%, 80%)'; // black-on-light
+  const textColor =
+    textBackground === 'white-on-black' || textBackground === 'white-on-dark'
+      ? 'hsl(0, 0%, 100%)'
+      : 'hsl(0, 0%, 0%)';
 
   return (
     <span
-      className={`inline-block relative ${className}`}
+      className={`inline-block ${className}`}
       onMouseEnter={() => !isActive && setIsHovered(true)}
       onMouseLeave={() => !isActive && setIsHovered(false)}
       style={{
         backgroundColor: bgColor,
         color: textColor,
         padding: '2px 4px',
+        lineHeight: 1,
+        fontSize: '16px',
       }}
     >
-      <span className="invisible">{text.toUpperCase()}</span>
-      <span className="absolute inset-0 flex items-center justify-center">
-        {letters.map((letter, index) => {
-          const glitch = glitchEffects[index];
-          const loadEffect = loadAnimationEffects[index];
-          const isFlipped = flippedLetters[index];
-          const isVisible = visibleLetters[index] ?? true;
+      {letters.map((letter, index) => {
+        const glitch = glitchEffects[index];
+        const loadEffect = loadAnimationEffects[index];
+        const isFlipped = flippedLetters[index];
+        const isVisible = visibleLetters[index] ?? true;
 
-          // Don't render letter if not visible yet
-          if (!isVisible) return null;
+        // Don't render letter if not visible yet
+        if (!isVisible) return null;
 
-          // Determine if letter should be mirrored (from hover/active OR glitch OR load animation)
-          const shouldMirror = (isHovered || isActive) || (glitch?.isMirror ?? false) || (loadEffect?.isMirror ?? false);
+        // Determine if letter should be mirrored (from hover/active OR glitch OR load animation)
+        const shouldMirror = (isHovered || isActive) || (glitch?.isMirror ?? false) || (loadEffect?.isMirror ?? false);
 
-          // Determine if letter should be caps (from flip OR glitch)
-          const shouldBeCaps = isFlipped || (glitch?.isCaps ?? false);
+        // Determine if letter should be caps (from flip OR glitch)
+        const shouldBeCaps = isFlipped || (glitch?.isCaps ?? false);
 
-          // Determine if letter should be italic (from glitch OR load animation)
-          const shouldBeItalic = (glitch?.isItalic ?? false) || (loadEffect?.isItalic ?? false);
+        // Determine if letter should be italic (from glitch OR load animation)
+        const shouldBeItalic = (glitch?.isItalic ?? false) || (loadEffect?.isItalic ?? false);
 
-          return (
-            <span
-              key={index}
-              className="inline-block transition-transform duration-0"
-              style={{
-                transform: shouldMirror ? 'scaleX(-1)' : 'scaleX(1)',
-                transitionDelay: `${letterDelays[index] || 0}ms`,
-                fontStyle: shouldBeItalic ? 'italic' : 'normal',
-              }}
-            >
-              {shouldBeCaps ? letter.toUpperCase() : letter}
-            </span>
-          );
-        })}
-      </span>
+        return (
+          <span
+            key={index}
+            className="inline-block transition-transform duration-0"
+            style={{
+              transform: shouldMirror ? 'scaleX(-1)' : 'scaleX(1)',
+              transitionDelay: `${letterDelays[index] || 0}ms`,
+              fontStyle: shouldBeItalic ? 'italic' : 'normal',
+            }}
+          >
+            {shouldBeCaps ? letter.toUpperCase() : letter}
+          </span>
+        );
+      })}
     </span>
   );
 };

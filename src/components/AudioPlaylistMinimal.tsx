@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from 'react';
-import { Play, Pause } from 'lucide-react';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 
 interface AudioPlaylistMinimalProps {
@@ -258,14 +257,12 @@ export const AudioPlaylistMinimal = ({ urls, allowSimultaneousPlayback = false }
         {/* Play/Pause button */}
         <button
           onClick={togglePlay}
-          className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-foreground hover:bg-foreground/90 transition-colors"
+          className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-foreground hover:bg-foreground/90 transition-colors"
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >
-          {isPlaying ? (
-            <Pause className="w-5 h-5 text-background" fill="currentColor" />
-          ) : (
-            <Play className="w-5 h-5 text-background ml-0.5" fill="currentColor" />
-          )}
+          <span className="text-background" style={{ fontSize: '20px', lineHeight: '1' }}>
+            {isPlaying ? '❚❚' : '▶'}
+          </span>
         </button>
 
         {/* Track info and waveform */}
@@ -311,7 +308,7 @@ export const AudioPlaylistMinimal = ({ urls, allowSimultaneousPlayback = false }
                 setHasUserInteracted(true);
                 setCurrentTrack(index);
               }}
-              className={`w-full flex items-center gap-3 px-2 ${isCompact ? 'py-1.5' : 'py-2'} ${isCompact ? 'text-xs' : 'text-sm'} rounded transition-colors ${
+              className={`w-full flex items-center gap-3 px-2 ${isCompact ? 'py-1.5' : 'py-2'} ${isCompact ? 'text-xs' : 'text-sm'} transition-colors ${
                 index === currentTrack
                   ? 'bg-foreground/10 text-foreground'
                   : 'text-foreground/60 hover:text-foreground hover:bg-foreground/5'

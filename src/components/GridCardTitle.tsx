@@ -115,8 +115,9 @@ export const GridCardTitle = ({ text, className = '', isHovered = false }: GridC
     };
   }, [isHovered, letters.length]);
 
-  const bgColor = textBackground === 'white-on-black' ? '#000000' : '#ffffff';
-  const textColor = textBackground === 'white-on-black' ? '#ffffff' : '#000000';
+  // White text gets 10% lightness black background, black text gets 90% lightness white background
+  const bgColor = textBackground === 'white-on-black' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
+  const textColor = textBackground === 'white-on-black' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
 
   return (
     <h3 className={`${className} break-words`} style={{

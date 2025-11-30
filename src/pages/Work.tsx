@@ -104,7 +104,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
       ...project,
       thumbnailMedia: getThumbnailMedia(project)
     }));
-  }, [isRandomized, showCommercial, categoryFilter]);
+  }, [isRandomized, showCommercial, categoryFilter, shuffleCount]);
 
   useEffect(() => {
     const checkScroll = () => {
@@ -164,14 +164,11 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
 
   return (
     <>
-      {/* Top container: transparent spacer for menubar area */}
-      <div className="h-8 sm:h-10 md:h-12 lg:h-16" />
-
       {selectedProject ? (
         /* Project Detail View - Full Page */
         <div
           ref={detailScrollRef}
-          className="fixed top-8 sm:top-10 md:top-12 lg:top-16 left-0 right-0 bottom-0 overflow-auto z-[6] pointer-events-none-desktop"
+          className="fixed top-0 left-0 right-0 bottom-0 overflow-auto z-[6] pointer-events-none-desktop"
           onClick={() => setSelectedProject(null)}
         >
           <div className="relative pointer-events-auto">
@@ -353,7 +350,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
         >
           <div className="relative">
             <div className="relative">
-              <div className="relative container mx-auto px-2 sm:px-3 md:px-4 pt-2 sm:pt-3 md:pt-4 pb-12">
+              <div className="relative px-4 pb-12">
                 {/* Scroll indicator for grid */}
                 {showScrollIndicator && !selectedProject && (
                   <div className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-[100]">

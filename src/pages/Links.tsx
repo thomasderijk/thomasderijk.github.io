@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useInvert } from '@/contexts/InvertContext';
+import { StaggeredMirrorText } from '@/components/StaggeredMirrorText';
 
 interface LetterState {
   char: string;
@@ -13,10 +14,32 @@ const Links = () => {
   const { isInverted } = useInvert();
   const [letterStates, setLetterStates] = useState<LetterState[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [textBackground] = useState<'white-on-black' | 'black-on-white'>(Math.random() < 0.5 ? 'white-on-black' : 'black-on-white');
-  const [linkBackgrounds] = useState<('white-on-black' | 'black-on-white')[]>(() =>
-    Array(5).fill(null).map(() => Math.random() < 0.5 ? 'white-on-black' : 'black-on-white')
-  );
+  const [textBackground] = useState<'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light'>(() => {
+    const random = Math.random();
+    if (random < 0.25) return 'white-on-black';      // 10% bg, 90% text
+    if (random < 0.5) return 'black-on-white';       // 90% bg, 10% text
+    if (random < 0.75) return 'white-on-dark';       // 20% bg, 90% text
+    return 'black-on-light';                          // 80% bg, 10% text
+  });
+
+  // Random color variant for each link
+  const [linkColors] = useState<('white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light')[]>(() => {
+    const getRandomVariant = () => {
+      const random = Math.random();
+      if (random < 0.25) return 'white-on-black';
+      if (random < 0.5) return 'black-on-white';
+      if (random < 0.75) return 'white-on-dark';
+      return 'black-on-light';
+    };
+    return [
+      getRandomVariant(), // Instagram
+      getRandomVariant(), // YouTube
+      getRandomVariant(), // SoundCloud
+      getRandomVariant(), // Bandcamp
+      getRandomVariant(), // GitHub
+    ];
+  });
+
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const email = 'thomasderijk@me.com';
   const copiedText = 'copied to clipboard';
@@ -176,25 +199,16 @@ const Links = () => {
         <div className="flex flex-col items-center gap-8">
           <div className="flex flex-col items-center">
             {links.map((link, linkIndex) => {
-              const bgStyle = linkBackgrounds[linkIndex];
-              const bgColor = bgStyle === 'white-on-black' ? '#000000' : '#ffffff';
-              const textColor = bgStyle === 'white-on-black' ? '#ffffff' : '#000000';
+              const linkVariant = linkColors[linkIndex];
               return (
                 <a
                   key={link.name}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center justify-center py-2 transition-colors"
-                  style={{
-                    backgroundColor: bgColor,
-                    color: textColor,
-                    padding: '2px 8px',
-                  }}
+                  className="font-display font-normal whitespace-nowrap"
                 >
-                  <span className="leading-relaxed">
-                    {link.name}
-                  </span>
+                  <StaggeredMirrorText text={link.name} forcedVariant={linkVariant} />
                 </a>
               );
             })}
@@ -206,8 +220,15 @@ const Links = () => {
               onClick={handleClick}
               style={{
                 display: 'inline-block',
-                backgroundColor: textBackground === 'white-on-black' ? '#000000' : '#ffffff',
-                color: textBackground === 'white-on-black' ? '#ffffff' : '#000000',
+                backgroundColor:
+                  textBackground === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
+                  textBackground === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
+                  textBackground === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
+                  'hsl(0, 0%, 80%)', // black-on-light
+                color:
+                  textBackground === 'white-on-black' || textBackground === 'white-on-dark'
+                    ? 'hsl(0, 0%, 100%)'
+                    : 'hsl(0, 0%, 0%)',
                 padding: '2px 4px',
                 lineHeight: '1.84em',
               }}
