@@ -9,9 +9,10 @@ interface GridCardTitleProps {
 export const GridCardTitle = ({ text, className = '', isHovered = false }: GridCardTitleProps) => {
   const [visibleLetters, setVisibleLetters] = useState<Set<number>>(new Set());
   const [flippedLetters, setFlippedLetters] = useState<Set<number>>(new Set());
+  const [textBackground] = useState<'white-on-black' | 'black-on-white'>(Math.random() < 0.5 ? 'white-on-black' : 'black-on-white');
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const lingeringTimersRef = useRef<NodeJS.Timeout[]>([]);
-  
+
   const letters = text.split('');
 
   useEffect(() => {
@@ -114,12 +115,20 @@ export const GridCardTitle = ({ text, className = '', isHovered = false }: GridC
     };
   }, [isHovered, letters.length]);
 
+  const bgColor = textBackground === 'white-on-black' ? '#000000' : '#ffffff';
+  const textColor = textBackground === 'white-on-black' ? '#ffffff' : '#000000';
+
   return (
-    <h3 className={`${className} break-words`}>
+    <h3 className={`${className} break-words`} style={{
+      backgroundColor: bgColor,
+      color: textColor,
+      padding: '2px 4px',
+      display: 'inline-block',
+    }}>
       {letters.map((letter, index) => {
         const isVisible = visibleLetters.has(index);
         const isFlipped = flippedLetters.has(index);
-        
+
         return (
           <span
             key={index}

@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { Github, Instagram, Youtube, Music, Disc } from 'lucide-react';
 import { useInvert } from '@/contexts/InvertContext';
 
 interface LetterState {
@@ -14,16 +13,20 @@ const Links = () => {
   const { isInverted } = useInvert();
   const [letterStates, setLetterStates] = useState<LetterState[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [textBackground] = useState<'white-on-black' | 'black-on-white'>(Math.random() < 0.5 ? 'white-on-black' : 'black-on-white');
+  const [linkBackgrounds] = useState<('white-on-black' | 'black-on-white')[]>(() =>
+    Array(5).fill(null).map(() => Math.random() < 0.5 ? 'white-on-black' : 'black-on-white')
+  );
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const email = 'thomasderijk@me.com';
   const copiedText = 'copied to clipboard';
 
   const links = [
-    { name: 'Instagram', icon: Instagram, url: 'https://instagram.com/thomas_djb' },
-    { name: 'YouTube', icon: Youtube, url: 'https://youtube.com/thomasderijk' },
-    { name: 'SoundCloud', icon: Music, url: 'https://soundcloud.com/djbdjbdjb' },
-    { name: 'Bandcamp', icon: Disc, url: 'https://djbdjbdjb.bandcamp.com/' },
-    { name: 'GitHub', icon: Github, url: 'https://github.com/thomasderijk' },
+    { name: 'Instagram', url: 'https://instagram.com/thomas_djb' },
+    { name: 'YouTube', url: 'https://youtube.com/thomasderijk' },
+    { name: 'SoundCloud', url: 'https://soundcloud.com/djbdjbdjb' },
+    { name: 'Bandcamp', url: 'https://djbdjbdjb.bandcamp.com/' },
+    { name: 'GitHub', url: 'https://github.com/thomasderijk' },
   ];
 
   // Initialize with email
@@ -172,18 +175,24 @@ const Links = () => {
       <div className="w-full max-w-md pointer-events-auto">
         <div className="flex flex-col items-center gap-8">
           <div className="flex flex-col items-center">
-            {links.map((link) => {
-              const Icon = link.icon;
+            {links.map((link, linkIndex) => {
+              const bgStyle = linkBackgrounds[linkIndex];
+              const bgColor = bgStyle === 'white-on-black' ? '#000000' : '#ffffff';
+              const textColor = bgStyle === 'white-on-black' ? '#ffffff' : '#000000';
               return (
                 <a
                   key={link.name}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`group inline-flex items-center justify-center gap-3 py-2 ${isInverted ? 'hover:text-black/80' : 'hover:text-foreground/80'} transition-colors`}
+                  className="group inline-flex items-center justify-center py-2 transition-colors"
+                  style={{
+                    backgroundColor: bgColor,
+                    color: textColor,
+                    padding: '2px 8px',
+                  }}
                 >
-                  <Icon className={`w-4 h-4 ${isInverted ? 'text-black' : 'text-foreground'} flex-shrink-0`} strokeWidth={1.5} />
-                  <span className={`${isInverted ? 'text-black' : 'text-foreground'} leading-relaxed`}>
+                  <span className="leading-relaxed">
                     {link.name}
                   </span>
                 </a>
@@ -191,15 +200,15 @@ const Links = () => {
             })}
           </div>
 
-          <div className="w-full max-w-xs">
+          <div className="w-full max-w-xs flex justify-center">
             <p
-              className="cursor-pointer hover:opacity-80 transition-opacity"
+              className="cursor-pointer transition-opacity"
               onClick={handleClick}
               style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                alignContent: 'flex-start',
+                display: 'inline-block',
+                backgroundColor: textBackground === 'white-on-black' ? '#000000' : '#ffffff',
+                color: textBackground === 'white-on-black' ? '#ffffff' : '#000000',
+                padding: '2px 4px',
                 lineHeight: '1.84em',
               }}
             >
@@ -209,15 +218,14 @@ const Links = () => {
                 return (
                   <span
                     key={index}
-                    className={state.isCopiedText ? `font-display ${isInverted ? 'text-black' : 'text-foreground'}` : `${isInverted ? 'text-black' : 'text-foreground'}`}
+                    className={state.isCopiedText ? 'font-display' : ''}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       height: '1.84em',
                       lineHeight: '1.84em',
-                      fontWeight: state.isCopiedText ? 600 : 400,
-                      fontSize: state.isCopiedText ? '1.15em' : '1em',
+                      fontWeight: 400,
                       fontStyle: state.isItalic ? 'italic' : 'normal',
                       transform: state.isMirror ? 'scaleX(-1)' : 'scaleX(1)',
                     }}

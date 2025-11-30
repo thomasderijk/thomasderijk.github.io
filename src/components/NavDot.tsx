@@ -4,17 +4,17 @@ interface NavDotProps {
   className?: string;
 }
 
-// CSS-only dot: relies on vertical-align: middle (x-height) and a tiny nudge using ex units.
+// Unicode middle dot separator
 export function NavDot({ className }: NavDotProps) {
   return (
     <span
       aria-hidden
       className={cn(
-        "inline-block font-display font-bold text-current select-none pointer-events-none align-middle leading-none",
+        "inline-block font-display font-normal text-current select-none pointer-events-none align-middle leading-none",
         className,
       )}
     >
-      -
+      ·
     </span>
   );
 }

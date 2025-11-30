@@ -133,12 +133,26 @@ All colors MUST be HSL.
     background-color: hsl(var(--background));
     font-family: 'Inter', sans-serif;
     color: hsl(var(--foreground));
+    /* Unified font size for all text */
+    font-size: 12px;
   }
 
   .font-display {
     text-shadow: none;
-    /* prefer Tiepolo (self-hosted) then Inter then system sans */
-    font-family: 'Tiepolo', 'Inter', sans-serif;
+    /* Use Inter for all text */
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Unified font size - apply to all text elements except icon buttons */
+  h1, h2, h3, h4, h5, h6, p, span, a, div {
+    font-size: 12px !important;
+    line-height: 1.5;
+  }
+
+  /* Regular buttons get 12px */
+  button:not(.icon-button) {
+    font-size: 12px !important;
+    line-height: 1.5;
   }
 
   /* Custom scrollbar - hidden globally */

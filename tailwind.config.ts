@@ -14,10 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        // Primary font for body text
+        // Use Inter for all text
         sans: ['Inter', 'sans-serif'],
-        // Prefer Tiepolo for display headings when available, fallback to Inter then system sans
-        display: ['Tiepolo', 'Inter', 'sans-serif'],
+        display: ['Inter', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

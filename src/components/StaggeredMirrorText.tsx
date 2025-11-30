@@ -21,6 +21,7 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
   const [glitchEffects, setGlitchEffects] = useState<(GlitchEffect | null)[]>([]);
   const [loadAnimationEffects, setLoadAnimationEffects] = useState<(GlitchEffect | null)[]>([]);
   const [visibleLetters, setVisibleLetters] = useState<boolean[]>([]);
+  const [textBackground, setTextBackground] = useState<'white-on-black' | 'black-on-white'>(Math.random() < 0.5 ? 'white-on-black' : 'black-on-white');
   const letters = text.split('');
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const residualTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -306,11 +307,19 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
     };
   }, [isHovered, isActive, letters.length]);
 
+  const bgColor = textBackground === 'white-on-black' ? '#000000' : '#ffffff';
+  const textColor = textBackground === 'white-on-black' ? '#ffffff' : '#000000';
+
   return (
     <span
       className={`inline-block relative ${className}`}
       onMouseEnter={() => !isActive && setIsHovered(true)}
       onMouseLeave={() => !isActive && setIsHovered(false)}
+      style={{
+        backgroundColor: bgColor,
+        color: textColor,
+        padding: '2px 4px',
+      }}
     >
       <span className="invisible">{text.toUpperCase()}</span>
       <span className="absolute inset-0 flex items-center justify-center">
