@@ -67,7 +67,7 @@ export const AudioPlayer = ({ url, thumbnail, allowSimultaneousPlayback = false 
         <img
           src={thumbnail}
           alt="Audio thumbnail"
-          className="w-full h-auto object-contain rounded-lg mb-4"
+          className="w-full h-auto object-contain mb-4"
           style={{ display: 'block' }}
         />
       )}

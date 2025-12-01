@@ -33,7 +33,7 @@ export const YouTubePlayer = ({ url }: YouTubePlayerProps) => {
 
   return (
     <div className="flex justify-center w-full">
-      <div className="inline-block max-w-full rounded-lg overflow-hidden">
+      <div className="inline-block max-w-full overflow-hidden">
         <div className="relative w-full min-w-[65vw]" style={{ paddingBottom: '56.25%', maxHeight: '80vh' }}>
           <iframe
             src={embedUrl}

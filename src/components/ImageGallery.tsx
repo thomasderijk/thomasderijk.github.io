@@ -6,7 +6,7 @@ interface ImageGalleryProps {
 export const ImageGallery = ({ url, caption }: ImageGalleryProps) => {
   return (
     <div className="flex justify-center w-full">
-      <div className="inline-block max-w-full rounded-lg overflow-hidden">
+      <div className="inline-block max-w-full overflow-hidden">
         <img
           src={url}
           alt={caption || 'Project image'}

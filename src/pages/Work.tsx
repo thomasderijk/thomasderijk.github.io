@@ -13,15 +13,27 @@ import { AudioPlaylistMinimal } from '@/components/AudioPlaylistMinimal';
 type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
 
 const ProjectMetadata = ({ project }: { project: Project }) => {
-  // Generate 4 random colors for: title, description, tags, year
+  // Generate 4 random colors ensuring adjacent colors are different
   const [colors] = useState<ColorOption[]>(() => {
     const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
-    return [
-      options[Math.floor(Math.random() * options.length)],
-      options[Math.floor(Math.random() * options.length)],
-      options[Math.floor(Math.random() * options.length)],
-      options[Math.floor(Math.random() * options.length)],
-    ];
+    const colors: ColorOption[] = [];
+
+    // First color - random choice
+    colors[0] = options[Math.floor(Math.random() * options.length)];
+
+    // Description - must differ from title
+    const availableForDescription = options.filter(opt => opt !== colors[0]);
+    colors[1] = availableForDescription[Math.floor(Math.random() * availableForDescription.length)];
+
+    // Tags - must differ from description
+    const availableForTags = options.filter(opt => opt !== colors[1]);
+    colors[2] = availableForTags[Math.floor(Math.random() * availableForTags.length)];
+
+    // Year - must differ from tags
+    const availableForYear = options.filter(opt => opt !== colors[2]);
+    colors[3] = availableForYear[Math.floor(Math.random() * availableForYear.length)];
+
+    return colors;
   });
 
   const getColors = (variant: ColorOption) => {
@@ -43,64 +55,76 @@ const ProjectMetadata = ({ project }: { project: Project }) => {
   const yearColors = getColors(colors[3]);
 
   return (
-    <div className="space-y-0">
+    <div style={{ fontSize: 0, lineHeight: 0 }}>
       {/* Title */}
-      <div style={{
-        backgroundColor: titleColors.bgColor,
-        color: titleColors.textColor,
-        padding: '2px 4px',
-        display: 'inline-block',
-        fontFamily: "'Inter', sans-serif",
-        fontWeight: 300,
-        fontSize: '16px',
-      }}>
-        {project.title}
-      </div>
-
-      {/* Description */}
-      {project.description && (
-        <div style={{
-          backgroundColor: descriptionColors.bgColor,
-          color: descriptionColors.textColor,
+      <div>
+        <span style={{
+          backgroundColor: titleColors.bgColor,
+          color: titleColors.textColor,
           padding: '2px 4px',
           display: 'inline-block',
           fontFamily: "'Inter', sans-serif",
           fontWeight: 300,
           fontSize: '16px',
+          lineHeight: 1.5,
         }}>
-          {project.description}
+          {project.title}
+        </span>
+      </div>
+
+      {/* Description */}
+      {project.description && (
+        <div>
+          <span style={{
+            backgroundColor: descriptionColors.bgColor,
+            color: descriptionColors.textColor,
+            padding: '2px 4px',
+            display: 'inline-block',
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 300,
+            fontSize: '16px',
+            lineHeight: 1.5,
+          }}>
+            {project.description}
+          </span>
         </div>
       )}
 
       {/* Tags */}
-      <div style={{
-        backgroundColor: tagsColors.bgColor,
-        color: tagsColors.textColor,
-        padding: '2px 4px',
-        display: 'inline-block',
-        fontFamily: "'Inter', sans-serif",
-        fontWeight: 300,
-        fontSize: '16px',
-      }}>
-        {project.tags.map((tag, index) => (
-          <span key={tag}>
-            {index > 0 && " / "}
-            {tag.toLowerCase()}
-          </span>
-        ))}
+      <div>
+        <span style={{
+          backgroundColor: tagsColors.bgColor,
+          color: tagsColors.textColor,
+          padding: '2px 4px',
+          display: 'inline-block',
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 300,
+          fontSize: '16px',
+          lineHeight: 1.5,
+        }}>
+          {project.tags.map((tag, index) => (
+            <span key={tag}>
+              {index > 0 && " / "}
+              {tag.toLowerCase()}
+            </span>
+          ))}
+        </span>
       </div>
 
       {/* Year */}
-      <div style={{
-        backgroundColor: yearColors.bgColor,
-        color: yearColors.textColor,
-        padding: '2px 4px',
-        display: 'inline-block',
-        fontFamily: "'Inter', sans-serif",
-        fontWeight: 300,
-        fontSize: '16px',
-      }}>
-        {new Date(project.date).getFullYear()}
+      <div>
+        <span style={{
+          backgroundColor: yearColors.bgColor,
+          color: yearColors.textColor,
+          padding: '2px 4px',
+          display: 'inline-block',
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 300,
+          fontSize: '16px',
+          lineHeight: 1.5,
+        }}>
+          {new Date(project.date).getFullYear()}
+        </span>
       </div>
     </div>
   );
@@ -282,7 +306,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <div className={`inline-block max-w-full ${selectedProject.layout === 'sidebyside' ? 'md:min-w-[900px] lg:min-w-[1100px] xl:min-w-[1300px]' : ''}`}>
-                      <div className="space-y-3">
+                      <div>
                         {(() => {
                           const { audioMedia, nonAudioMedia, hasMultipleAudio } = getDetailMedia(selectedProject);
                           const audioUrls = audioMedia.map(m => m.url);
@@ -307,14 +331,8 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                                           <MediaRenderer media={mediaItem} isFirstVideo={false} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
                                         </div>
                                       ))}
-                                      {/* Title */}
-                                      <div className="text-left flex-shrink-0">
-                                        <h2 className="text-xl font-light text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                          {selectedProject.title}
-                                        </h2>
-                                      </div>
                                     </div>
-                                    {/* Middle section: audio and description */}
+                                    {/* Middle section: audio */}
                                     <div className="space-y-3 mt-3 flex-1">
                                       {/* Audio */}
                                       {hasMultipleAudio ? (
@@ -326,102 +344,43 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                                           </div>
                                         ))
                                       )}
-                                      {/* Description */}
-                                      {selectedProject.description && (
-                                        <p className="text-foreground leading-relaxed text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                          {selectedProject.description}
-                                        </p>
-                                      )}
                                     </div>
-                                    {/* Bottom section: tags and year - aligned to bottom */}
-                                    <div className="space-y-2 mt-4">
-                                      {/* Tags */}
-                                      <div className="flex flex-wrap gap-1">
-                                        {selectedProject.tags.map((tag, index) => (
-                                          <span key={tag} className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                            {index > 0 && " / "}
-                                            {tag.toLowerCase()}
-                                          </span>
-                                        ))}
-                                      </div>
-                                      {/* Year */}
-                                      <span className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                        {new Date(selectedProject.date).getFullYear()}
-                                      </span>
+                                    {/* Bottom section: metadata */}
+                                    <div>
+                                      <ProjectMetadata project={selectedProject} />
                                     </div>
                                   </div>
                                 </div>
                               ) : (
                                 <>
-                                  {/* Default layout: Non-audio media first */}
-                                  {nonAudioMedia.map((mediaItem, index) => (
-                                    <div key={index}>
-                                      <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
-                                    </div>
-                                  ))}
+                                  {/* Default layout: Media with spacing */}
+                                  <div className="space-y-3">
+                                    {/* Non-audio media */}
+                                    {nonAudioMedia.map((mediaItem, index) => (
+                                      <div key={index}>
+                                        <MediaRenderer media={mediaItem} isFirstVideo={index === 0 && mediaItem.type === 'video'} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
+                                      </div>
+                                    ))}
 
-                                  {/* Audio playlist with title above */}
-                                  {hasMultipleAudio ? (
-                                    <>
-                                      {/* Title before playlist */}
-                                      <div className="text-left flex-shrink-0 mt-4 mb-6">
-                                        <h2 className="text-xl font-light text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                          {selectedProject.title}
-                                        </h2>
-                                      </div>
+                                    {/* Audio */}
+                                    {hasMultipleAudio ? (
                                       <AudioPlaylistMinimal urls={audioUrls} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
-                                    </>
-                                  ) : (
-                                    audioMedia.map((mediaItem, index) => (
-                                      <div key={`audio-${index}`}>
-                                        <MediaRenderer media={mediaItem} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
-                                      </div>
-                                    ))
-                                  )}
+                                    ) : (
+                                      audioMedia.map((mediaItem, index) => (
+                                        <div key={`audio-${index}`}>
+                                          <MediaRenderer media={mediaItem} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
+                                        </div>
+                                      ))
+                                    )}
+                                  </div>
+
+                                  {/* Metadata - directly attached to last media element with no spacing */}
+                                  <ProjectMetadata project={selectedProject} />
                                 </>
                               )}
                             </>
                           );
                         })()}
-
-                        {/* Title (only shown when not using playlist AND not sidebyside) */}
-                        {!getDetailMedia(selectedProject).hasMultipleAudio && selectedProject.layout !== 'sidebyside' && (
-                          <div className="text-left flex-shrink-0 mt-4">
-                            <h2 className="text-xl font-light text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                              {selectedProject.title}
-                            </h2>
-                          </div>
-                        )}
-
-                        {/* Description, Tags, Year - only show here for non-sidebyside layouts */}
-                        {selectedProject.layout !== 'sidebyside' && (
-                          <>
-                            {selectedProject.description && (
-                              <div className="prose prose-sm max-w-none mt-4">
-                                <p className="text-foreground leading-relaxed text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                  {selectedProject.description}
-                                </p>
-                              </div>
-                            )}
-
-                            {/* Tags */}
-                            <div className="flex flex-wrap gap-1 mt-4">
-                              {selectedProject.tags.map((tag, index) => (
-                                <span key={tag} className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                  {index > 0 && " / "}
-                                  {tag.toLowerCase()}
-                                </span>
-                              ))}
-                            </div>
-
-                            {/* Year */}
-                            <div className="flex flex-wrap gap-1 mt-4">
-                              <span className="text-sm font-light text-muted-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                {new Date(selectedProject.date).getFullYear()}
-                              </span>
-                            </div>
-                          </>
-                        )}
                       </div>
                     </div>
                   </div>

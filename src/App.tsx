@@ -287,7 +287,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <div className="relative">
               <Link
                 to="/work"
-                onClick={() => setWorkMenuOpen(!workMenuOpen)}
+                onClick={() => {
+                  setWorkMenuOpen(!workMenuOpen);
+                  if (isProjectOpen && closeHandler) {
+                    closeHandler();
+                  }
+                }}
                 onMouseEnter={() => setWorkMenuOpen(true)}
                 onMouseLeave={() => setWorkMenuOpen(false)}
                 className="font-display font-light whitespace-nowrap pointer-events-auto"

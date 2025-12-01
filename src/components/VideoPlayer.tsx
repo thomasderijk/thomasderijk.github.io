@@ -117,7 +117,7 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
   return (
     <div className="flex justify-center w-full">
       <div
-        className="inline-block max-w-full rounded-lg overflow-hidden relative"
+        className="inline-block max-w-full overflow-hidden relative"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

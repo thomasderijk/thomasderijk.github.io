@@ -205,6 +205,7 @@ All colors MUST be HSL.
     box-shadow: none !important;
     max-width: 100% !important;
     width: 100% !important;
+    border-radius: 0 !important;
   }
 
   video::-webkit-media-controls-panel {
@@ -213,6 +214,21 @@ All colors MUST be HSL.
     box-shadow: none !important;
     max-width: 100% !important;
     width: 100% !important;
+    border-radius: 0 !important;
+  }
+
+  /* Remove timeline container shadows */
+  video::-webkit-media-controls-timeline-container {
+    box-shadow: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+
+  /* Remove timeline (progress bar) shadows */
+  video::-webkit-media-controls-timeline {
+    box-shadow: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
   }
 
   /* Only apply pointer-events: none on devices with hover capability (desktop) */
@@ -232,6 +248,37 @@ All colors MUST be HSL.
   a:hover,
   *:hover {
     opacity: 1 !important;
+  }
+
+  /* Remove all rounded corners from media elements */
+  video,
+  audio,
+  img {
+    border-radius: 0 !important;
+  }
+
+  /* Force square corners on video and all pseudo-elements */
+  video,
+  video *,
+  video::before,
+  video::after {
+    border-radius: 0 !important;
+  }
+
+  /* Audio player and all pseudo-elements */
+  audio,
+  audio *,
+  audio::before,
+  audio::after {
+    border-radius: 0 !important;
+  }
+
+  /* Image elements */
+  img,
+  img *,
+  img::before,
+  img::after {
+    border-radius: 0 !important;
   }
 }
 
