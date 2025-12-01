@@ -11,42 +11,42 @@
 @font-face {
   font-family: 'Tiepolo';
   src: url('/fonts/TiepoloStd-Book.woff2') format('woff2');
-  font-weight: 400;
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Tiepolo';
   src: url('/fonts/TiepoloStd-BookItalic.woff2') format('woff2');
-  font-weight: 400;
+  font-weight: 300;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
   font-family: 'Tiepolo';
   src: url('/fonts/TiepoloStd-Bold.woff2') format('woff2');
-  font-weight: 700;
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Tiepolo';
   src: url('/fonts/TiepoloStd-BoldItalic.woff2') format('woff2');
-  font-weight: 700;
+  font-weight: 300;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
   font-family: 'Tiepolo';
   src: url('/fonts/TiepoloStd-Black.woff2') format('woff2');
-  font-weight: 900;
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Tiepolo';
   src: url('/fonts/TiepoloStd-BlackItalic.woff2') format('woff2');
-  font-weight: 900;
+  font-weight: 300;
   font-style: italic;
   font-display: swap;
 }
@@ -120,10 +120,20 @@ All colors MUST be HSL.
     --border: 0 0% 25%;
     --input: 0 0% 25%;
     --ring: 0 0% 100%;
-    
+
     --audio-player: 0 0% 35%;
 
     --radius: 0.25rem;
+
+    /* Official Inter font setup */
+    font-family: Inter, sans-serif;
+    font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+  }
+
+  @supports (font-variation-settings: normal) {
+    :root {
+      font-family: InterVariable, sans-serif;
+    }
   }
 }
 

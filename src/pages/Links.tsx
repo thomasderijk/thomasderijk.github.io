@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useInvert } from '@/contexts/InvertContext';
+import { useShuffle } from '@/contexts/ShuffleContext';
 import { StaggeredMirrorText } from '@/components/StaggeredMirrorText';
 
 interface LetterState {
@@ -12,33 +13,40 @@ interface LetterState {
 
 const Links = () => {
   const { isInverted } = useInvert();
+  const { shuffleKey } = useShuffle();
   const [letterStates, setLetterStates] = useState<LetterState[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [textBackground] = useState<'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light'>(() => {
-    const random = Math.random();
-    if (random < 0.25) return 'white-on-black';      // 10% bg, 90% text
-    if (random < 0.5) return 'black-on-white';       // 90% bg, 10% text
-    if (random < 0.75) return 'white-on-dark';       // 20% bg, 90% text
-    return 'black-on-light';                          // 80% bg, 10% text
-  });
 
-  // Random color variant for each link
-  const [linkColors] = useState<('white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light')[]>(() => {
-    const getRandomVariant = () => {
-      const random = Math.random();
-      if (random < 0.25) return 'white-on-black';
-      if (random < 0.5) return 'black-on-white';
-      if (random < 0.75) return 'white-on-dark';
-      return 'black-on-light';
-    };
-    return [
-      getRandomVariant(), // Instagram
-      getRandomVariant(), // YouTube
-      getRandomVariant(), // SoundCloud
-      getRandomVariant(), // Bandcamp
-      getRandomVariant(), // GitHub
-    ];
-  });
+  type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
+
+  // Generate colors ensuring each is different from the previous one
+  const generateColors = (count: number): ColorOption[] => {
+    const colors: ColorOption[] = [];
+    const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
+
+    for (let i = 0; i < count; i++) {
+      let availableOptions = options;
+      if (i > 0) {
+        // Filter out the previous color
+        availableOptions = options.filter(opt => opt !== colors[i - 1]);
+      }
+      const randomIndex = Math.floor(Math.random() * availableOptions.length);
+      colors.push(availableOptions[randomIndex]);
+    }
+    return colors;
+  };
+
+  // Generate 6 colors total: 5 for links + 1 for email
+  const [allColors, setAllColors] = useState<ColorOption[]>(() => generateColors(6));
+
+  // Split colors: first 5 for links, last one for email
+  const linkColors = allColors.slice(0, 5);
+  const textBackground = allColors[5];
+
+  // Regenerate colors when shuffle is triggered
+  useEffect(() => {
+    setAllColors(generateColors(6));
+  }, [shuffleKey]);
 
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const email = 'thomasderijk@me.com';
@@ -206,7 +214,7 @@ const Links = () => {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-display font-normal whitespace-nowrap"
+                  className="font-display font-light whitespace-nowrap"
                 >
                   <StaggeredMirrorText text={link.name} forcedVariant={linkVariant} />
                 </a>
@@ -246,7 +254,7 @@ const Links = () => {
                       justifyContent: 'center',
                       height: '1.84em',
                       lineHeight: '1.84em',
-                      fontWeight: 400,
+                      fontWeight: 300,
                       fontStyle: state.isItalic ? 'italic' : 'normal',
                       transform: state.isMirror ? 'scaleX(-1)' : 'scaleX(1)',
                     }}

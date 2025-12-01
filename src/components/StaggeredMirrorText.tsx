@@ -23,20 +23,19 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
   const [glitchEffects, setGlitchEffects] = useState<(GlitchEffect | null)[]>([]);
   const [loadAnimationEffects, setLoadAnimationEffects] = useState<(GlitchEffect | null)[]>([]);
   const [visibleLetters, setVisibleLetters] = useState<boolean[]>([]);
-  // Use forced variant if provided, or forced color (legacy), otherwise random from 4 options
-  const [textBackground] = useState<'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light'>(() => {
-    if (forcedVariant) {
-      return forcedVariant;
-    }
-    if (forcedColor) {
-      return forcedColor === 'white' ? 'white-on-black' : 'black-on-white';
-    }
+
+  // Random variant state - only used when no forced variant/color provided
+  const [randomVariant] = useState<'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light'>(() => {
     const random = Math.random();
-    if (random < 0.25) return 'white-on-black';      // 10% bg, 90% text
-    if (random < 0.5) return 'black-on-white';       // 90% bg, 10% text
-    if (random < 0.75) return 'white-on-dark';       // 20% bg, 90% text
-    return 'black-on-light';                          // 80% bg, 10% text
+    if (random < 0.25) return 'white-on-black';
+    if (random < 0.5) return 'black-on-white';
+    if (random < 0.75) return 'white-on-dark';
+    return 'black-on-light';
   });
+
+  // Determine textBackground - use forced variant if provided, or forced color (legacy), otherwise use random state
+  const textBackground: 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light' =
+    forcedVariant || (forcedColor ? (forcedColor === 'white' ? 'white-on-black' : 'black-on-white') : randomVariant);
   const letters = text.split('');
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const residualTimerRef = useRef<NodeJS.Timeout | null>(null);

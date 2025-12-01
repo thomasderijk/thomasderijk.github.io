@@ -9,7 +9,13 @@ interface GridCardTitleProps {
 export const GridCardTitle = ({ text, className = '', isHovered = false }: GridCardTitleProps) => {
   const [visibleLetters, setVisibleLetters] = useState<Set<number>>(new Set());
   const [flippedLetters, setFlippedLetters] = useState<Set<number>>(new Set());
-  const [textBackground] = useState<'white-on-black' | 'black-on-white'>(Math.random() < 0.5 ? 'white-on-black' : 'black-on-white');
+  const [textBackground] = useState<'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light'>(() => {
+    const random = Math.random();
+    if (random < 0.25) return 'white-on-black';      // 10% bg, 90% text
+    if (random < 0.5) return 'black-on-white';       // 90% bg, 10% text
+    if (random < 0.75) return 'white-on-dark';       // 20% bg, 90% text
+    return 'black-on-light';                          // 80% bg, 10% text
+  });
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const lingeringTimersRef = useRef<NodeJS.Timeout[]>([]);
 
@@ -115,9 +121,16 @@ export const GridCardTitle = ({ text, className = '', isHovered = false }: GridC
     };
   }, [isHovered, letters.length]);
 
-  // White text gets 10% lightness black background, black text gets 90% lightness white background
-  const bgColor = textBackground === 'white-on-black' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
-  const textColor = textBackground === 'white-on-black' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
+  // Background and text colors based on textBackground variant
+  const bgColor =
+    textBackground === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
+    textBackground === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
+    textBackground === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
+    'hsl(0, 0%, 80%)'; // black-on-light
+  const textColor =
+    textBackground === 'white-on-black' || textBackground === 'white-on-dark'
+      ? 'hsl(0, 0%, 100%)'
+      : 'hsl(0, 0%, 0%)';
 
   return (
     <h3 className={`${className} break-words`} style={{

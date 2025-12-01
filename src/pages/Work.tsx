@@ -9,6 +9,103 @@ import { useCommercial } from '@/contexts/CommercialContext';
 import { useProjectDetail } from '@/contexts/ProjectDetailContext';
 import { AudioPlaylistMinimal } from '@/components/AudioPlaylistMinimal';
 
+// Helper component for project metadata with colored backgrounds
+type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
+
+const ProjectMetadata = ({ project }: { project: Project }) => {
+  // Generate 4 random colors for: title, description, tags, year
+  const [colors] = useState<ColorOption[]>(() => {
+    const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
+    return [
+      options[Math.floor(Math.random() * options.length)],
+      options[Math.floor(Math.random() * options.length)],
+      options[Math.floor(Math.random() * options.length)],
+      options[Math.floor(Math.random() * options.length)],
+    ];
+  });
+
+  const getColors = (variant: ColorOption) => {
+    const bgColor =
+      variant === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
+      variant === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
+      variant === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
+      'hsl(0, 0%, 80%)';
+    const textColor =
+      variant === 'white-on-black' || variant === 'white-on-dark'
+        ? 'hsl(0, 0%, 100%)'
+        : 'hsl(0, 0%, 0%)';
+    return { bgColor, textColor };
+  };
+
+  const titleColors = getColors(colors[0]);
+  const descriptionColors = getColors(colors[1]);
+  const tagsColors = getColors(colors[2]);
+  const yearColors = getColors(colors[3]);
+
+  return (
+    <div className="space-y-0">
+      {/* Title */}
+      <div style={{
+        backgroundColor: titleColors.bgColor,
+        color: titleColors.textColor,
+        padding: '2px 4px',
+        display: 'inline-block',
+        fontFamily: "'Inter', sans-serif",
+        fontWeight: 300,
+        fontSize: '16px',
+      }}>
+        {project.title}
+      </div>
+
+      {/* Description */}
+      {project.description && (
+        <div style={{
+          backgroundColor: descriptionColors.bgColor,
+          color: descriptionColors.textColor,
+          padding: '2px 4px',
+          display: 'inline-block',
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 300,
+          fontSize: '16px',
+        }}>
+          {project.description}
+        </div>
+      )}
+
+      {/* Tags */}
+      <div style={{
+        backgroundColor: tagsColors.bgColor,
+        color: tagsColors.textColor,
+        padding: '2px 4px',
+        display: 'inline-block',
+        fontFamily: "'Inter', sans-serif",
+        fontWeight: 300,
+        fontSize: '16px',
+      }}>
+        {project.tags.map((tag, index) => (
+          <span key={tag}>
+            {index > 0 && " / "}
+            {tag.toLowerCase()}
+          </span>
+        ))}
+      </div>
+
+      {/* Year */}
+      <div style={{
+        backgroundColor: yearColors.bgColor,
+        color: yearColors.textColor,
+        padding: '2px 4px',
+        display: 'inline-block',
+        fontFamily: "'Inter', sans-serif",
+        fontWeight: 300,
+        fontSize: '16px',
+      }}>
+        {new Date(project.date).getFullYear()}
+      </div>
+    </div>
+  );
+};
+
 // Simple helper to get a random thumbnail from project
 const getThumbnailMedia = (project: Project): MediaItem | null => {
   const thumbnailVideos = project.media.filter(m =>
@@ -212,7 +309,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                                       ))}
                                       {/* Title */}
                                       <div className="text-left flex-shrink-0">
-                                        <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                        <h2 className="text-xl font-light text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                                           {selectedProject.title}
                                         </h2>
                                       </div>
@@ -268,7 +365,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                                     <>
                                       {/* Title before playlist */}
                                       <div className="text-left flex-shrink-0 mt-4 mb-6">
-                                        <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                        <h2 className="text-xl font-light text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                                           {selectedProject.title}
                                         </h2>
                                       </div>
@@ -290,7 +387,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                         {/* Title (only shown when not using playlist AND not sidebyside) */}
                         {!getDetailMedia(selectedProject).hasMultipleAudio && selectedProject.layout !== 'sidebyside' && (
                           <div className="text-left flex-shrink-0 mt-4">
-                            <h2 className="text-xl font-normal text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            <h2 className="text-xl font-light text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
                               {selectedProject.title}
                             </h2>
                           </div>
@@ -350,7 +447,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
         >
           <div className="relative">
             <div className="relative">
-              <div className="relative px-4 pb-12">
+              <div className="relative px-4 pb-12" style={{ paddingTop: '20px' }}>
                 {/* Scroll indicator for grid */}
                 {showScrollIndicator && !selectedProject && (
                   <div className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-[100]">
@@ -390,12 +487,12 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                           </div>
                         )}
 
-                        <div className="absolute inset-0 flex items-end justify-center pointer-events-none pb-1">
+                        <div className="absolute inset-0 flex items-end justify-start pointer-events-none">
                           {isHovered && (
                             <GridCardTitle
                               text={project.title}
                               isHovered={isHovered}
-                              className="text-sm font-sans font-normal text-foreground text-center leading-tight"
+                              className="text-sm font-sans font-light text-foreground text-left leading-tight"
                             />
                           )}
                         </div>

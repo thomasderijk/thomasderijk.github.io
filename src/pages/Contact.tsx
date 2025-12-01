@@ -188,7 +188,7 @@ const Contact = () => {
                   justifyContent: 'center',
                   height: '1.84em',
                   lineHeight: '1.84em',
-                  fontWeight: state.isCopiedText ? 600 : 400,
+                  fontWeight: 300,
                   fontSize: state.isCopiedText ? '1.15em' : '1em',
                   fontStyle: state.isItalic ? 'italic' : 'normal',
                   transform: state.isMirror ? 'scaleX(-1)' : 'scaleX(1)',
