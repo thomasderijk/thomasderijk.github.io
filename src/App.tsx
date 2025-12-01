@@ -7,6 +7,7 @@ import { HashRouter, Routes, Route, useLocation, Link, useNavigate } from "react
 // Icons replaced with Unicode symbols - no dependencies needed
 import { useProjectSort } from "@/hooks/use-project-sort";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
+import { HoverableTrackTitle } from "@/components/HoverableTrackTitle";
 import { CommercialProvider } from "@/contexts/CommercialContext";
 import { ProjectDetailProvider, useProjectDetail } from "@/contexts/ProjectDetailContext";
 import { AudioPlayerProvider, useAudioPlayer } from "@/contexts/AudioPlayerContext";
@@ -21,6 +22,7 @@ import Links from "./pages/Links";
 import About from "./pages/About";
 import Commercial from "./pages/Commercial";
 import NotFound from "./pages/NotFound";
+import { projects } from "@/data/projects";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,7 +51,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const isHome = location.pathname === '/';
   const { isRandomized, toggleRandomize } = useProjectSort();
-  const { isProjectOpen, closeHandler } = useProjectDetail();
+  const { isProjectOpen, closeHandler, openProjectHandler } = useProjectDetail();
   const { isPlaying, togglePlay, nextTrack, previousTrack, currentTime, duration, seek, currentTrack, getTrackTitle } = useAudioPlayer();
   const [isPlayerHovered, setIsPlayerHovered] = useState(false);
   const { isInverted, toggleInvert } = useInvert();
@@ -196,6 +198,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const shuffleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const shuffleNoiseRef = useRef<number>(Math.random() * 1000); // Random seed for shuffle icon noise
 
+  // Music icon state - ping pong through music notes
+  const musicIcons = ['♪', '♫', '♬'];
+  const [currentMusicIndex, setCurrentMusicIndex] = useState(0);
+  const musicDirectionRef = useRef<1 | -1>(1); // 1 = forward, -1 = backward
+  const musicTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const musicNoiseRef = useRef<number>(Math.random() * 1000); // Random seed for music icon noise
+
   // Simple noise function using sine waves with different frequencies
   const getNoise = (seed: number): number => {
     const time = Date.now() / 1000; // Time in seconds
@@ -261,6 +270,49 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     return () => {
       if (shuffleTimerRef.current) {
         clearTimeout(shuffleTimerRef.current);
+      }
+    };
+  }, []); // No dependencies - runs once on mount
+
+  // Music icon effect - ping pong with variable speed using noise (independent seed)
+  useEffect(() => {
+    const pingPongThroughMusicIcons = () => {
+      setCurrentMusicIndex((prev) => {
+        let nextIndex = prev + musicDirectionRef.current;
+
+        // Check if we need to reverse direction
+        if (nextIndex >= musicIcons.length) {
+          musicDirectionRef.current = -1;
+          return musicIcons.length - 2; // Bounce back
+        } else if (nextIndex < 0) {
+          musicDirectionRef.current = 1;
+          return 1; // Bounce forward
+        }
+
+        return nextIndex;
+      });
+
+      // Base speed: 50ms + 33% = ~67ms, then 33% of that = ~203ms, then 3x slower = ~609ms
+      // Add ±33% variation using noise: 609ms ± 201ms = 408ms to 810ms
+      const baseSpeed = 609;
+      const variation = 201;
+      const noise = getNoise(musicNoiseRef.current);
+      const speed = baseSpeed + (noise - 0.5) * 2 * variation;
+
+      musicTimerRef.current = setTimeout(pingPongThroughMusicIcons, speed);
+    };
+
+    // Start cycling
+    if (musicTimerRef.current) {
+      clearTimeout(musicTimerRef.current);
+    }
+    setCurrentMusicIndex(0);
+    musicDirectionRef.current = 1;
+    pingPongThroughMusicIcons();
+
+    return () => {
+      if (musicTimerRef.current) {
+        clearTimeout(musicTimerRef.current);
       }
     };
   }, []); // No dependencies - runs once on mount
@@ -415,27 +467,44 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <nav className="fixed bottom-0 right-0 z-20 flex items-center justify-end pointer-events-none" style={{ lineHeight: 1 }}>
         {/* Audio player controls */}
         <div className="flex items-center gap-0">
-          {/* Track title - shows when playing */}
-          {isPlaying && currentTrack && (
-            <div
-              className="pointer-events-none"
-              style={{
-                color: getColorFromVariant(audioPlayerColors.title).text,
-                backgroundColor: getColorFromVariant(audioPlayerColors.title).bg,
-                padding: '2px 4px',
-                fontSize: '16px',
-                lineHeight: 1,
-                height: `${ICON_BUTTON_STYLES.size}px`,
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {getTrackTitle(currentTrack)}
-            </div>
-          )}
+          {/* Track title - shows when track is loaded */}
+          {currentTrack && (() => {
+            // Find which project this track belongs to
+            const findProjectForTrack = (trackUrl: string) => {
+              return projects.find(project =>
+                project.media.some(media =>
+                  media.type === 'audio' && media.url === trackUrl
+                )
+              );
+            };
 
-          {/* Progress bar - shows when playing */}
-          {isPlaying && duration > 0 && (
+            const project = findProjectForTrack(currentTrack);
+            const trackTitle = getTrackTitle(currentTrack);
+
+            const handleTrackTitleClick = () => {
+              if (project && openProjectHandler) {
+                // Navigate to work page if not already there
+                if (location.pathname !== '/work' && location.pathname !== '/' && location.pathname !== '/audio') {
+                  navigate('/work');
+                }
+                // Open the project
+                openProjectHandler(project.title);
+              }
+            };
+
+            return (
+              <HoverableTrackTitle
+                title={trackTitle}
+                backgroundColor={getColorFromVariant(audioPlayerColors.title).bg}
+                textColor={getColorFromVariant(audioPlayerColors.title).text}
+                height={ICON_BUTTON_STYLES.size}
+                onClick={handleTrackTitleClick}
+              />
+            );
+          })()}
+
+          {/* Progress bar - shows when track is loaded */}
+          {currentTrack && duration > 0 && (
             <div
               className="pointer-events-auto"
               style={{
@@ -462,8 +531,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
           )}
 
-          {/* Previous button - shows when playing */}
-          {isPlaying && (
+          {/* Previous button - shows when track is loaded */}
+          {currentTrack && (
             <button
               onClick={previousTrack}
               className="icon-button pointer-events-auto group"
@@ -544,12 +613,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               }}
               className="icon-content"
             >
-              {isPlaying ? '❚❚' : (isPlayerHovered ? '▶' : '♫')}
+              {isPlaying ? '❚❚' : (isPlayerHovered ? '▶' : musicIcons[currentMusicIndex])}
             </span>
           </button>
 
-          {/* Next button - shows when playing */}
-          {isPlaying && (
+          {/* Next button - shows when track is loaded */}
+          {currentTrack && (
             <button
               onClick={nextTrack}
               className="icon-button pointer-events-auto group"

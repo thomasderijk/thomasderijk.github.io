@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { projects } from '@/data/projects';
 import { GridCardTitle } from '@/components/GridCardTitle';
+import { SegmentedBorder } from '@/components/SegmentedBorder';
 import { VideoThumbnail } from '@/components/VideoThumbnail';
 import { MediaRenderer } from '@/components/MediaRenderer';
 import { Project, MediaItem } from '@/types/project';
@@ -164,7 +165,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const { isRandomized } = useProjectSort();
   const { showCommercial } = useCommercial();
-  const { setIsProjectOpen, setCloseHandler } = useProjectDetail();
+  const { setIsProjectOpen, setCloseHandler, setOpenProjectHandler } = useProjectDetail();
   const [shuffleCount, setShuffleCount] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
@@ -182,6 +183,18 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
     setIsProjectOpen(selectedProject !== null);
     setCloseHandler(selectedProject !== null ? () => setSelectedProject(null) : null);
   }, [selectedProject, setIsProjectOpen, setCloseHandler]);
+
+  // Register handler to open project by title
+  useEffect(() => {
+    const openByTitle = (projectTitle: string) => {
+      const project = projects.find(p => p.title === projectTitle);
+      if (project) {
+        setSelectedProject(project);
+      }
+    };
+    setOpenProjectHandler(openByTitle);
+    return () => setOpenProjectHandler(null);
+  }, [setOpenProjectHandler]);
 
   // Reset detail view scroll position when opening project
   useEffect(() => {
@@ -426,12 +439,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                         onClick={() => setSelectedProject(project)}
                         onMouseEnter={() => setHoveredCard(key)}
                         onMouseLeave={() => setHoveredCard(null)}
-                        className="group relative overflow-hidden cursor-pointer mb-4 break-inside-avoid transition-transform duration-200 pointer-events-auto"
-                        style={{
-                          transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-                          contain: 'layout style paint',
-                          willChange: isHovered ? 'transform' : 'auto',
-                        }}
+                        className="group relative overflow-visible cursor-pointer mb-4 break-inside-avoid pointer-events-auto"
                       >
                         {project.thumbnailMedia ? (
                           <VideoThumbnail
@@ -445,6 +453,8 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                             <span className="text-6xl text-red-500">✕</span>
                           </div>
                         )}
+
+                        <SegmentedBorder isHovered={isHovered} />
 
                         <div className="absolute inset-0 flex items-end justify-start pointer-events-none">
                           {isHovered && (

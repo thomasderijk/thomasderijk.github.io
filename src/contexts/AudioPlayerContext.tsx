@@ -101,7 +101,8 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      const newTrack = getRandomTrack(currentTrack || undefined);
+      // Exclude both current track and tracks in history
+      const newTrack = getRandomTrack(currentTrack || undefined, true);
       setCurrentTrack(newTrack);
       audioRef.current.src = newTrack;
       setCurrentTime(0);
@@ -121,10 +122,26 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     };
   }, [currentTrack]);
 
-  const getRandomTrack = (excludeCurrent?: string): string => {
-    const availableTracks = excludeCurrent
-      ? AUDIO_FILES.filter(track => track !== excludeCurrent)
-      : AUDIO_FILES;
+  const getRandomTrack = (excludeCurrent?: string, excludeHistory: boolean = false): string => {
+    let availableTracks = AUDIO_FILES;
+
+    // Exclude current track
+    if (excludeCurrent) {
+      availableTracks = availableTracks.filter(track => track !== excludeCurrent);
+    }
+
+    // Exclude tracks in history (tracks that can be skipped back to)
+    if (excludeHistory && trackHistoryRef.current.length > 0) {
+      availableTracks = availableTracks.filter(track => !trackHistoryRef.current.includes(track));
+    }
+
+    // If all tracks have been played, reset and allow any track except current
+    if (availableTracks.length === 0) {
+      availableTracks = excludeCurrent
+        ? AUDIO_FILES.filter(track => track !== excludeCurrent)
+        : AUDIO_FILES;
+    }
+
     return availableTracks[Math.floor(Math.random() * availableTracks.length)];
   };
 
@@ -195,7 +212,8 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const newTrack = getRandomTrack(currentTrack || undefined);
+    // Exclude both current track and tracks in history
+    const newTrack = getRandomTrack(currentTrack || undefined, true);
     setCurrentTrack(newTrack);
     audioRef.current.src = newTrack;
     setCurrentTime(0);
