@@ -1,5 +1,5 @@
 title: djb - ~~~
 category: audio
-tags: audio
+tags: music
 description: All one take op-1 jams
 layout: sidebyside

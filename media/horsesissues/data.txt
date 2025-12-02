@@ -1,4 +1,4 @@
 title: Horses and their many issues
 category: visual
-tags: 3d, animation
+tags: animation
 dropbox: https://www.dropbox.com/scl/fi/zrqet7bil75ekm2321tst/horses_and_their_many_issues_compress.mov?rlkey=lrgdqrft8chg76vybd7oduchz&dl=0

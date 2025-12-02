@@ -1,5 +1,5 @@
 title: djb - Tazed & Confused
 category: audio
-tags: audio, remix
+tags: music
 description: Syphon Filter (1 and 2) OST remixes
 layout: sidebyside

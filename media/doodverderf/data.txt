@@ -1,4 +1,4 @@
 title: djb - dood & verderf
 category: visual, audio
-tags: audio, album
+tags: music, artwork
 layout: sidebyside
