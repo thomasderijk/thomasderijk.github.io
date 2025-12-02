@@ -16,6 +16,7 @@ const Links = () => {
   const { shuffleKey } = useShuffle();
   const [letterStates, setLetterStates] = useState<LetterState[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isEmailHovered, setIsEmailHovered] = useState(false);
 
   type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
 
@@ -226,19 +227,33 @@ const Links = () => {
             <p
               className="cursor-pointer transition-opacity"
               onClick={handleClick}
+              onMouseEnter={() => setIsEmailHovered(true)}
+              onMouseLeave={() => setIsEmailHovered(false)}
               style={{
                 display: 'inline-block',
-                backgroundColor:
+                backgroundColor: isEmailHovered ? (
+                  textBackground === 'white-on-black' || textBackground === 'white-on-dark'
+                    ? 'hsl(0, 0%, 100%)'
+                    : 'hsl(0, 0%, 0%)'
+                ) : (
                   textBackground === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
                   textBackground === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
                   textBackground === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
-                  'hsl(0, 0%, 80%)', // black-on-light
-                color:
+                  'hsl(0, 0%, 80%)' // black-on-light
+                ),
+                color: isEmailHovered ? (
+                  textBackground === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
+                  textBackground === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
+                  textBackground === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
+                  'hsl(0, 0%, 80%)' // black-on-light
+                ) : (
                   textBackground === 'white-on-black' || textBackground === 'white-on-dark'
                     ? 'hsl(0, 0%, 100%)'
-                    : 'hsl(0, 0%, 0%)',
+                    : 'hsl(0, 0%, 0%)'
+                ),
                 padding: '2px 4px',
                 lineHeight: '1.84em',
+                transition: 'background-color 0s, color 0s',
               }}
             >
               {letterStates.map((state, index) => {

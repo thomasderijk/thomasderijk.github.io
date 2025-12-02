@@ -8,6 +8,7 @@ import { HashRouter, Routes, Route, useLocation, Link, useNavigate } from "react
 import { useProjectSort } from "@/hooks/use-project-sort";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
 import { HoverableTrackTitle } from "@/components/HoverableTrackTitle";
+import { NavSpacer } from "@/components/NavSpacer";
 import { CommercialProvider } from "@/contexts/CommercialContext";
 import { ProjectDetailProvider, useProjectDetail } from "@/contexts/ProjectDetailContext";
 import { AudioPlayerProvider, useAudioPlayer } from "@/contexts/AudioPlayerContext";
@@ -130,6 +131,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const [bottomNavColors, setBottomNavColors] = useState<ColorOption[]>(() => [generateAudioPlayerColors().cycleIcon]);
 
+  // Counter for regenerating nav spacers
+  const [navSpacerKey, setNavSpacerKey] = useState(0);
+
   // Regenerate colors when grid is randomized
   useEffect(() => {
     setTopNavColors(generateNavColors());
@@ -137,6 +141,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     setAudioPlayerColors(newAudioColors);
     setBottomNavColors([newAudioColors.cycleIcon]);
     setShuffleIconColor(Math.random() < 0.5 ? 'white' : 'black');
+    setNavSpacerKey(prev => prev + 1);
   }, [isRandomized]);
 
   const [shuffleIconColor, setShuffleIconColor] = useState<'white' | 'black'>(Math.random() < 0.5 ? 'white' : 'black');
@@ -186,6 +191,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [currentIconIndex, setCurrentIconIndex] = useState(0);
   const cycleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const cycleNoiseRef = useRef<number>(Math.random() * 1000); // Random seed for cycle icon noise
+  const [isCycleIconHovered, setIsCycleIconHovered] = useState(false);
 
   // Shuffle icon state - asterisks and stars cycling
   const shuffleIcons = [
@@ -197,6 +203,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [currentShuffleIndex, setCurrentShuffleIndex] = useState(0);
   const shuffleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const shuffleNoiseRef = useRef<number>(Math.random() * 1000); // Random seed for shuffle icon noise
+  const [isShuffleIconHovered, setIsShuffleIconHovered] = useState(false);
 
   // Music icon state - ping pong through music notes
   const musicIcons = ['♪', '♫', '♬'];
@@ -204,6 +211,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const musicDirectionRef = useRef<1 | -1>(1); // 1 = forward, -1 = backward
   const musicTimerRef = useRef<NodeJS.Timeout | null>(null);
   const musicNoiseRef = useRef<number>(Math.random() * 1000); // Random seed for music icon noise
+  const [isMusicIconHovered, setIsMusicIconHovered] = useState(false);
+
+  // Timer refs for mousedown delay
+  const shuffleMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const closeMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const previousMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const playMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const nextMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const cycleMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Simple noise function using sine waves with different frequencies
   const getNoise = (seed: number): number => {
@@ -219,7 +235,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   // Cycling icon effect - variable speed with noise
   useEffect(() => {
     const cycleThroughIcons = () => {
-      setCurrentIconIndex((prev) => (prev + 1) % trigramIcons.length);
+      if (!isCycleIconHovered) {
+        setCurrentIconIndex((prev) => (prev + 1) % trigramIcons.length);
+      }
 
       // Base speed: 50ms + 33% = ~67ms
       // Add ±33% variation using noise: 67ms ± 22ms = 45ms to 89ms
@@ -231,11 +249,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       cycleTimerRef.current = setTimeout(cycleThroughIcons, speed);
     };
 
-    // Start cycling
-    if (cycleTimerRef.current) {
-      clearTimeout(cycleTimerRef.current);
-    }
-    setCurrentIconIndex(0);
+    // Start cycling (don't reset the index)
     cycleThroughIcons();
 
     return () => {
@@ -243,12 +257,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         clearTimeout(cycleTimerRef.current);
       }
     };
-  }, []); // No dependencies - runs once on mount
+  }, [isCycleIconHovered]); // Re-run when hover state changes
 
   // Shuffle icon effect - variable speed with noise (independent from cycle icon)
   useEffect(() => {
     const cycleThroughShuffleIcons = () => {
-      setCurrentShuffleIndex((prev) => (prev + 1) % shuffleIcons.length);
+      if (!isShuffleIconHovered) {
+        setCurrentShuffleIndex((prev) => (prev + 1) % shuffleIcons.length);
+      }
 
       // Base speed: 50ms + 33% = ~67ms
       // Add ±33% variation using noise: 67ms ± 22ms = 45ms to 89ms
@@ -260,11 +276,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       shuffleTimerRef.current = setTimeout(cycleThroughShuffleIcons, speed);
     };
 
-    // Start cycling
-    if (shuffleTimerRef.current) {
-      clearTimeout(shuffleTimerRef.current);
-    }
-    setCurrentShuffleIndex(0);
+    // Start cycling (don't reset the index)
     cycleThroughShuffleIcons();
 
     return () => {
@@ -272,25 +284,27 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         clearTimeout(shuffleTimerRef.current);
       }
     };
-  }, []); // No dependencies - runs once on mount
+  }, [isShuffleIconHovered]); // Re-run when hover state changes
 
   // Music icon effect - ping pong with variable speed using noise (independent seed)
   useEffect(() => {
     const pingPongThroughMusicIcons = () => {
-      setCurrentMusicIndex((prev) => {
-        let nextIndex = prev + musicDirectionRef.current;
+      if (!isMusicIconHovered) {
+        setCurrentMusicIndex((prev) => {
+          let nextIndex = prev + musicDirectionRef.current;
 
-        // Check if we need to reverse direction
-        if (nextIndex >= musicIcons.length) {
-          musicDirectionRef.current = -1;
-          return musicIcons.length - 2; // Bounce back
-        } else if (nextIndex < 0) {
-          musicDirectionRef.current = 1;
-          return 1; // Bounce forward
-        }
+          // Check if we need to reverse direction
+          if (nextIndex >= musicIcons.length) {
+            musicDirectionRef.current = -1;
+            return musicIcons.length - 2; // Bounce back
+          } else if (nextIndex < 0) {
+            musicDirectionRef.current = 1;
+            return 1; // Bounce forward
+          }
 
-        return nextIndex;
-      });
+          return nextIndex;
+        });
+      }
 
       // Base speed: 50ms + 33% = ~67ms, then 33% of that = ~203ms, then 3x slower = ~609ms
       // Add ±33% variation using noise: 609ms ± 201ms = 408ms to 810ms
@@ -302,12 +316,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       musicTimerRef.current = setTimeout(pingPongThroughMusicIcons, speed);
     };
 
-    // Start cycling
-    if (musicTimerRef.current) {
-      clearTimeout(musicTimerRef.current);
-    }
-    setCurrentMusicIndex(0);
-    musicDirectionRef.current = 1;
+    // Start cycling (don't reset the index or direction)
     pingPongThroughMusicIcons();
 
     return () => {
@@ -315,7 +324,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         clearTimeout(musicTimerRef.current);
       }
     };
-  }, []); // No dependencies - runs once on mount
+  }, [isMusicIconHovered]); // Re-run when hover state changes
 
   const handleCycleIconClick = () => {
     const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
@@ -340,7 +349,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <Link
                 to="/work"
                 onClick={() => {
-                  setWorkMenuOpen(!workMenuOpen);
+                  // Keep menu open when clicking (don't toggle it closed)
+                  setWorkMenuOpen(true);
                   if (isProjectOpen && closeHandler) {
                     closeHandler();
                   }
@@ -357,18 +367,34 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   onMouseEnter={() => setWorkMenuOpen(true)}
                   onMouseLeave={() => setWorkMenuOpen(false)}
                 >
-                  <Link to="/audio" className="font-display font-light whitespace-nowrap pointer-events-auto">
+                  <Link
+                    to="/audio"
+                    className="font-display font-light whitespace-nowrap pointer-events-auto"
+                    onClick={(e) => {
+                      // Don't close menu on click, keep it open while still hovering
+                      e.stopPropagation();
+                    }}
+                  >
                     <StaggeredMirrorText text="audio" isActive={location.pathname === '/audio'} forcedVariant={topNavColors[1]} />
                   </Link>
-                  <Link to="/visual" className="font-display font-light whitespace-nowrap pointer-events-auto">
+                  <Link
+                    to="/visual"
+                    className="font-display font-light whitespace-nowrap pointer-events-auto"
+                    onClick={(e) => {
+                      // Don't close menu on click, keep it open while still hovering
+                      e.stopPropagation();
+                    }}
+                  >
                     <StaggeredMirrorText text="visual" isActive={location.pathname === '/visual'} forcedVariant={topNavColors[2]} />
                   </Link>
                 </div>
               )}
             </div>
+            <NavSpacer regenerateKey={navSpacerKey} />
             <Link to="/about" className="font-display font-light pointer-events-auto whitespace-nowrap">
               <StaggeredMirrorText text="about" isActive={location.pathname === '/about'} forcedVariant={topNavColors[3]} />
             </Link>
+            <NavSpacer regenerateKey={navSpacerKey} />
             <Link to="/links" className="font-display font-light pointer-events-auto whitespace-nowrap">
               <StaggeredMirrorText text="links" isActive={location.pathname === '/links'} forcedVariant={topNavColors[4]} />
             </Link>
@@ -376,11 +402,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
           {/* Right: shuffle button and close button */}
           <div className="flex items-center gap-0">
+            <NavSpacer regenerateKey={navSpacerKey} />
             {showShuffleButton && (
               <button
                 onClick={() => {
                   toggleRandomize();
                   triggerShuffle();
+                  // Randomize the shuffle button's own color
+                  setShuffleIconColor(Math.random() < 0.5 ? 'white' : 'black');
                 }}
                 className="icon-button pointer-events-auto group"
                 aria-label="Randomize projects"
@@ -397,14 +426,42 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   justifyContent: 'center',
                 }}
                 onMouseEnter={(e) => {
+                  setIsShuffleIconHovered(true);
                   e.currentTarget.style.backgroundColor = shuffleIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
                   const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
                   if (iconContent) iconContent.style.color = shuffleIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
                 }}
                 onMouseLeave={(e) => {
+                  setIsShuffleIconHovered(false);
                   e.currentTarget.style.backgroundColor = getIconBackground(shuffleIconColor);
                   const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
                   if (iconContent) iconContent.style.color = shuffleIconColor;
+                  // Clear any pending mousedown timer
+                  if (shuffleMouseDownTimerRef.current) {
+                    clearTimeout(shuffleMouseDownTimerRef.current);
+                    shuffleMouseDownTimerRef.current = null;
+                  }
+                }}
+                onMouseDown={(e) => {
+                  // Clear any existing timer
+                  if (shuffleMouseDownTimerRef.current) {
+                    clearTimeout(shuffleMouseDownTimerRef.current);
+                  }
+                  e.currentTarget.style.backgroundColor = getIconBackground(shuffleIconColor);
+                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                  if (iconContent) iconContent.style.color = shuffleIconColor;
+                }}
+                onMouseUp={(e) => {
+                  // Hold the inverted state for 100ms after release
+                  e.currentTarget.style.backgroundColor = shuffleIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
+                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                  if (iconContent) iconContent.style.color = shuffleIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
+
+                  shuffleMouseDownTimerRef.current = setTimeout(() => {
+                    e.currentTarget.style.backgroundColor = getIconBackground(shuffleIconColor);
+                    const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                    if (iconContent) iconContent.style.color = shuffleIconColor;
+                  }, 100);
                 }}
               >
                 <span
@@ -444,6 +501,32 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
                   const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
                   if (iconContent) iconContent.style.color = closeIconColor;
+                  // Clear any pending mousedown timer
+                  if (closeMouseDownTimerRef.current) {
+                    clearTimeout(closeMouseDownTimerRef.current);
+                    closeMouseDownTimerRef.current = null;
+                  }
+                }}
+                onMouseDown={(e) => {
+                  // Clear any existing timer
+                  if (closeMouseDownTimerRef.current) {
+                    clearTimeout(closeMouseDownTimerRef.current);
+                  }
+                  e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
+                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                  if (iconContent) iconContent.style.color = closeIconColor;
+                }}
+                onMouseUp={(e) => {
+                  // Hold the inverted state for 100ms after release
+                  e.currentTarget.style.backgroundColor = closeIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
+                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                  if (iconContent) iconContent.style.color = closeIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
+
+                  closeMouseDownTimerRef.current = setTimeout(() => {
+                    e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
+                    const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                    if (iconContent) iconContent.style.color = closeIconColor;
+                  }, 100);
                 }}
               >
                 <span
@@ -559,6 +642,35 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 e.currentTarget.style.backgroundColor = colors.bg;
                 const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
                 if (iconContent) iconContent.style.color = colors.text;
+                // Clear any pending mousedown timer
+                if (previousMouseDownTimerRef.current) {
+                  clearTimeout(previousMouseDownTimerRef.current);
+                  previousMouseDownTimerRef.current = null;
+                }
+              }}
+              onMouseDown={(e) => {
+                // Clear any existing timer
+                if (previousMouseDownTimerRef.current) {
+                  clearTimeout(previousMouseDownTimerRef.current);
+                }
+                const colors = getColorFromVariant(audioPlayerColors.controls);
+                e.currentTarget.style.backgroundColor = colors.bg;
+                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                if (iconContent) iconContent.style.color = colors.text;
+              }}
+              onMouseUp={(e) => {
+                // Hold the inverted state for 100ms after release
+                const colors = getColorFromVariant(audioPlayerColors.controls);
+                e.currentTarget.style.backgroundColor = colors.text;
+                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                if (iconContent) iconContent.style.color = colors.bg;
+
+                previousMouseDownTimerRef.current = setTimeout(() => {
+                  const colors = getColorFromVariant(audioPlayerColors.controls);
+                  e.currentTarget.style.backgroundColor = colors.bg;
+                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                  if (iconContent) iconContent.style.color = colors.text;
+                }, 100);
               }}
             >
               <span
@@ -592,6 +704,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             }}
             onMouseEnter={(e) => {
               setIsPlayerHovered(true);
+              setIsMusicIconHovered(true);
               const colors = getColorFromVariant(audioPlayerColors.controls);
               e.currentTarget.style.backgroundColor = colors.text;
               const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
@@ -599,10 +712,40 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             }}
             onMouseLeave={(e) => {
               setIsPlayerHovered(false);
+              setIsMusicIconHovered(false);
               const colors = getColorFromVariant(audioPlayerColors.controls);
               e.currentTarget.style.backgroundColor = colors.bg;
               const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
               if (iconContent) iconContent.style.color = colors.text;
+              // Clear any pending mousedown timer
+              if (playMouseDownTimerRef.current) {
+                clearTimeout(playMouseDownTimerRef.current);
+                playMouseDownTimerRef.current = null;
+              }
+            }}
+            onMouseDown={(e) => {
+              // Clear any existing timer
+              if (playMouseDownTimerRef.current) {
+                clearTimeout(playMouseDownTimerRef.current);
+              }
+              const colors = getColorFromVariant(audioPlayerColors.controls);
+              e.currentTarget.style.backgroundColor = colors.bg;
+              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+              if (iconContent) iconContent.style.color = colors.text;
+            }}
+            onMouseUp={(e) => {
+              // Hold the inverted state for 100ms after release
+              const colors = getColorFromVariant(audioPlayerColors.controls);
+              e.currentTarget.style.backgroundColor = colors.text;
+              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+              if (iconContent) iconContent.style.color = colors.bg;
+
+              playMouseDownTimerRef.current = setTimeout(() => {
+                const colors = getColorFromVariant(audioPlayerColors.controls);
+                e.currentTarget.style.backgroundColor = colors.bg;
+                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                if (iconContent) iconContent.style.color = colors.text;
+              }, 100);
             }}
           >
             <span
@@ -645,6 +788,35 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 e.currentTarget.style.backgroundColor = colors.bg;
                 const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
                 if (iconContent) iconContent.style.color = colors.text;
+                // Clear any pending mousedown timer
+                if (nextMouseDownTimerRef.current) {
+                  clearTimeout(nextMouseDownTimerRef.current);
+                  nextMouseDownTimerRef.current = null;
+                }
+              }}
+              onMouseDown={(e) => {
+                // Clear any existing timer
+                if (nextMouseDownTimerRef.current) {
+                  clearTimeout(nextMouseDownTimerRef.current);
+                }
+                const colors = getColorFromVariant(audioPlayerColors.controls);
+                e.currentTarget.style.backgroundColor = colors.bg;
+                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                if (iconContent) iconContent.style.color = colors.text;
+              }}
+              onMouseUp={(e) => {
+                // Hold the inverted state for 100ms after release
+                const colors = getColorFromVariant(audioPlayerColors.controls);
+                e.currentTarget.style.backgroundColor = colors.text;
+                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                if (iconContent) iconContent.style.color = colors.bg;
+
+                nextMouseDownTimerRef.current = setTimeout(() => {
+                  const colors = getColorFromVariant(audioPlayerColors.controls);
+                  e.currentTarget.style.backgroundColor = colors.bg;
+                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                  if (iconContent) iconContent.style.color = colors.text;
+                }, 100);
               }}
             >
               <span
@@ -677,16 +849,47 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               justifyContent: 'center',
             }}
             onMouseEnter={(e) => {
+              setIsCycleIconHovered(true);
               const colors = getColorFromVariant(cycleIconColor);
               e.currentTarget.style.backgroundColor = colors.text;
               const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
               if (iconContent) iconContent.style.color = colors.bg;
             }}
             onMouseLeave={(e) => {
+              setIsCycleIconHovered(false);
               const colors = getColorFromVariant(cycleIconColor);
               e.currentTarget.style.backgroundColor = colors.bg;
               const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
               if (iconContent) iconContent.style.color = colors.text;
+              // Clear any pending mousedown timer
+              if (cycleMouseDownTimerRef.current) {
+                clearTimeout(cycleMouseDownTimerRef.current);
+                cycleMouseDownTimerRef.current = null;
+              }
+            }}
+            onMouseDown={(e) => {
+              // Clear any existing timer
+              if (cycleMouseDownTimerRef.current) {
+                clearTimeout(cycleMouseDownTimerRef.current);
+              }
+              const colors = getColorFromVariant(cycleIconColor);
+              e.currentTarget.style.backgroundColor = colors.bg;
+              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+              if (iconContent) iconContent.style.color = colors.text;
+            }}
+            onMouseUp={(e) => {
+              // Hold the inverted state for 100ms after release
+              const colors = getColorFromVariant(cycleIconColor);
+              e.currentTarget.style.backgroundColor = colors.text;
+              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+              if (iconContent) iconContent.style.color = colors.bg;
+
+              cycleMouseDownTimerRef.current = setTimeout(() => {
+                const colors = getColorFromVariant(cycleIconColor);
+                e.currentTarget.style.backgroundColor = colors.bg;
+                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                if (iconContent) iconContent.style.color = colors.text;
+              }, 100);
             }}
           >
             <span

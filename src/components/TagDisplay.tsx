@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { tagIcons } from '@/config/tagIcons';
 
 interface TagDisplayProps {
@@ -9,11 +9,32 @@ interface TagDisplayProps {
 type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
 
 export const TagDisplay = ({ tags, isHovered }: TagDisplayProps) => {
-  // Generate random color for each tag (cached per component instance)
-  const [tagColors] = useState<ColorOption[]>(() => {
+  // Generate random colors ensuring adjacent tags have different colors
+  const generateColors = (): ColorOption[] => {
     const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
-    return tags.map(() => options[Math.floor(Math.random() * options.length)]);
-  });
+    const colors: ColorOption[] = [];
+
+    for (let i = 0; i < tags.length; i++) {
+      let availableOptions = options;
+      if (i > 0) {
+        // Filter out the previous color
+        availableOptions = options.filter(opt => opt !== colors[i - 1]);
+      }
+      const randomIndex = Math.floor(Math.random() * availableOptions.length);
+      colors.push(availableOptions[randomIndex]);
+    }
+
+    return colors;
+  };
+
+  const [tagColors, setTagColors] = useState<ColorOption[]>(() => generateColors());
+
+  // Regenerate colors when hover state changes to true
+  useEffect(() => {
+    if (isHovered) {
+      setTagColors(generateColors());
+    }
+  }, [isHovered]);
 
   const getColors = (variant: ColorOption) => {
     const bgColor =

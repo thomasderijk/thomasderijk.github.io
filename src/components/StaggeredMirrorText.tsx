@@ -18,11 +18,14 @@ interface GlitchEffect {
 
 export const StaggeredMirrorText = ({ text, className = '', isActive = false, animateOnLoad = false, animationSchedule, forcedColor, forcedVariant }: StaggeredMirrorTextProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isColorInverted, setIsColorInverted] = useState(false);
+  const [isMouseDown, setIsMouseDown] = useState(false);
   const [letterDelays, setLetterDelays] = useState<number[]>([]);
   const [flippedLetters, setFlippedLetters] = useState<boolean[]>([]);
   const [glitchEffects, setGlitchEffects] = useState<(GlitchEffect | null)[]>([]);
   const [loadAnimationEffects, setLoadAnimationEffects] = useState<(GlitchEffect | null)[]>([]);
   const [visibleLetters, setVisibleLetters] = useState<boolean[]>([]);
+  const [transformationEffects, setTransformationEffects] = useState<(GlitchEffect | null)[]>([]);
 
   // Random variant state - only used when no forced variant/color provided
   const [randomVariant] = useState<'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light'>(() => {
@@ -43,6 +46,9 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
   const prevActiveRef = useRef(isActive);
   const loadAnimationTimersRef = useRef<NodeJS.Timeout[]>([]);
   const visibilityTimersRef = useRef<NodeJS.Timeout[]>([]);
+  const transformationTimersRef = useRef<NodeJS.Timeout[]>([]);
+  const mouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isTransformedRef = useRef(false); // Track if already transformed
 
   // Initialize glitch effects array
   useEffect(() => {
@@ -114,7 +120,7 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
     const triggerRandomGlitch = () => {
       // Pick only ONE random letter
       const randomIndex = Math.floor(Math.random() * letters.length);
-      
+
       // Apply random effect to this letter
       // Each effect (caps, mirror, italic) has independent 50% chance
       const isCaps = Math.random() < 0.5;
@@ -127,9 +133,9 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
 
       const newGlitchEffects = [...glitchEffects];
       newGlitchEffects[randomIndex] = { isCaps: finalCaps, isMirror, isItalic };
-      
+
       setGlitchEffects(newGlitchEffects);
-      
+
       // Duration: 3-20 frames (48-320ms)
       const frames = Math.floor(Math.random() * 18) + 3; // 3-20 frames
       const baseDuration = frames * 16;
@@ -192,32 +198,37 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
           });
         }, baseDuration);
       }
-      
+
       // Schedule next glitch with weighted randomness
       // Using exponential distribution to weight towards longer intervals
       // Most glitches will be far apart, but occasionally they can be close together
+      // Much higher frequency when active, normal frequency otherwise
       const randomValue = Math.random();
       // Power of 3 heavily weights towards 1 (longer delays)
       const weightedRandom = Math.pow(randomValue, 3);
-      // Map to range: 200ms to 13000ms (0.2s to 13s)
-      // Weighted towards the longer end
-      const nextGlitchDelay = 200 + (1 - weightedRandom) * 12800;
-      
+
+      // If active, use much faster timing (10x faster), otherwise use normal timing
+      const nextGlitchDelay = isActive
+        ? 50 + (1 - weightedRandom) * 1300  // 50ms to 1350ms (very frequent)
+        : 200 + (1 - weightedRandom) * 12800; // 200ms to 13000ms (normal)
+
       glitchTimerRef.current = setTimeout(triggerRandomGlitch, nextGlitchDelay);
     };
-    
+
     // Start the glitch loop with initial random delay
     const randomValue = Math.random();
     const weightedRandom = Math.pow(randomValue, 3);
-    const initialDelay = 200 + (1 - weightedRandom) * 12800;
+    const initialDelay = isActive
+      ? 50 + (1 - weightedRandom) * 1300  // Very fast when active
+      : 200 + (1 - weightedRandom) * 12800; // Normal when not active
     glitchTimerRef.current = setTimeout(triggerRandomGlitch, initialDelay);
-    
+
     return () => {
       if (glitchTimerRef.current) {
         clearTimeout(glitchTimerRef.current);
       }
     };
-  }, [letters.length]);
+  }, [letters.length, isActive]);
 
   // When isActive changes from true to false, immediately clear everything
   useEffect(() => {
@@ -235,70 +246,164 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
     prevActiveRef.current = isActive;
   }, [isActive, letters.length]);
 
-  // Generate random delays when hover/active state changes
+  // Generate random delays when hover/active state changes - with transformation animation
   useEffect(() => {
     if (isHovered || isActive) {
-      // Create array of indices and shuffle them
-      const indices = letters.map((_, i) => i);
-      const shuffled = indices.sort(() => Math.random() - 0.5);
-      
-      // Assign staggered delays (total 80ms / 5 frames)
-      const totalDuration = 80; // 5 frames at ~16ms per frame
-      const delays = letters.map((_, i) => {
-        const order = shuffled.indexOf(i);
-        const increment = letters.length > 1 ? totalDuration / (letters.length - 1) : 0;
-        return order * increment;
-      });
-      
-      setLetterDelays(delays);
-      
+      // If already transformed, don't restart the transformation
+      // This prevents restarting when transitioning from hovered to active (clicking)
+      if (isTransformedRef.current) {
+        return;
+      }
+
+      // Mark as transformed
+      isTransformedRef.current = true;
+
       // Clear existing timers
       timersRef.current.forEach(timer => clearTimeout(timer));
+      transformationTimersRef.current.forEach(timer => clearTimeout(timer));
       timersRef.current = [];
-      
-      // Set up timers to flip each letter after its delay
+      transformationTimersRef.current = [];
+
+      // Create array of indices and shuffle them for random order
+      const transformOrder = [...Array(letters.length).keys()].sort(() => Math.random() - 0.5);
+
+      // Phase 1: Transform letters with random effects, gradually moving to final state
       const newFlipped = new Array(letters.length).fill(false);
       setFlippedLetters(newFlipped);
-      
-      delays.forEach((delay, index) => {
-        const timer = setTimeout(() => {
-          setFlippedLetters(prev => {
+      setTransformationEffects(new Array(letters.length).fill(null));
+
+      // Select 1-5 random letters to linger in intermediate states
+      const numLingeringLetters = Math.floor(Math.random() * 5) + 1; // 1 to 5
+      const lingeringIndices = new Set<number>();
+      while (lingeringIndices.size < Math.min(numLingeringLetters, letters.length)) {
+        lingeringIndices.add(Math.floor(Math.random() * letters.length));
+      }
+
+      transformOrder.forEach((charIndex, orderIndex) => {
+        const progress = orderIndex / (transformOrder.length - 1);
+        const easedProgress = progress * progress;
+        const startDelay = 33 + easedProgress * 47; // 33ms to 80ms (total 80ms / 5 frames)
+
+        // Check if this letter should linger
+        const shouldLinger = lingeringIndices.has(charIndex);
+        const lingerDuration = shouldLinger ? 10 + Math.random() * 290 : 0; // 10-300ms extra
+
+        // Show initial random transformation
+        const timer1 = setTimeout(() => {
+          setTransformationEffects(prev => {
             const updated = [...prev];
-            updated[index] = true;
+            updated[charIndex] = {
+              isCaps: Math.random() < 0.5,
+              isMirror: Math.random() < 0.5,
+              isItalic: Math.random() < 0.5
+            };
             return updated;
           });
-        }, delay);
-        timersRef.current.push(timer);
+        }, startDelay);
+        transformationTimersRef.current.push(timer1);
+
+        // After 50ms, transition to mostly final state but keep some randomness
+        const timer2 = setTimeout(() => {
+          setTransformationEffects(prev => {
+            const updated = [...prev];
+            updated[charIndex] = {
+              isCaps: Math.random() < 0.8, // 80% chance of caps
+              isMirror: Math.random() < 0.8, // 80% chance of mirror
+              isItalic: Math.random() < 0.3  // 30% chance of italic
+            };
+            return updated;
+          });
+        }, startDelay + 50);
+        transformationTimersRef.current.push(timer2);
+
+        // After another 50ms, move even closer to final state
+        // If lingering, stay in an intermediate state with at least one non-final attribute
+        const timer3 = setTimeout(() => {
+          setTransformationEffects(prev => {
+            const updated = [...prev];
+            if (shouldLinger) {
+              // Lingering letters keep at least one non-final attribute
+              const effects = [];
+              if (Math.random() < 0.5) effects.push('caps'); // 50% chance to be lowercase
+              if (Math.random() < 0.5) effects.push('mirror'); // 50% chance to be non-mirrored
+              if (Math.random() < 0.5) effects.push('italic'); // 50% chance to be italic
+
+              // Ensure at least one effect is different from final state
+              if (effects.length === 0) {
+                const randomEffect = ['caps', 'mirror', 'italic'][Math.floor(Math.random() * 3)];
+                effects.push(randomEffect);
+              }
+
+              updated[charIndex] = {
+                isCaps: !effects.includes('caps'),
+                isMirror: !effects.includes('mirror'),
+                isItalic: effects.includes('italic')
+              };
+            } else {
+              updated[charIndex] = {
+                isCaps: true,
+                isMirror: true,
+                isItalic: Math.random() < 0.2  // 20% chance of italic
+              };
+            }
+            return updated;
+          });
+
+          // Also flip to final state
+          setFlippedLetters(prev => {
+            const updated = [...prev];
+            updated[charIndex] = true;
+            return updated;
+          });
+        }, startDelay + 100);
+        transformationTimersRef.current.push(timer3);
+
+        // Clear transformation effect to show pure final state
+        // Lingering letters clear after additional delay
+        const clearTimer = setTimeout(() => {
+          setTransformationEffects(prev => {
+            const updated = [...prev];
+            updated[charIndex] = null;
+            return updated;
+          });
+        }, startDelay + 150 + lingerDuration);
+        transformationTimersRef.current.push(clearTimer);
       });
     } else {
+      // Reset the transformed flag when hover/active ends
+      isTransformedRef.current = false;
+
       // When hover ends, randomly keep 0-all letters in caps for 3-15 frames each
       const numLettersToKeep = Math.floor(Math.random() * (letters.length + 1)); // 0 to all letters
       const indicesToKeep = new Set<number>();
-      
+
       // Pick random letters to keep capitalized
       while (indicesToKeep.size < numLettersToKeep) {
         indicesToKeep.add(Math.floor(Math.random() * letters.length));
       }
-      
+
       // Set the flipped state
       const residualFlipped = letters.map((_, i) => indicesToKeep.has(i));
       setFlippedLetters(residualFlipped);
-      
+
       // Clear animation timers
       timersRef.current.forEach(timer => clearTimeout(timer));
+      transformationTimersRef.current.forEach(timer => clearTimeout(timer));
       timersRef.current = [];
-      
+      transformationTimersRef.current = [];
+      setTransformationEffects(new Array(letters.length).fill(null));
+
       // Clear any existing residual timers
       if (residualTimerRef.current) {
         clearTimeout(residualTimerRef.current);
       }
-      
+
       // Set random duration for each letter (3-15 frames = 48-240ms)
       const newTimers: NodeJS.Timeout[] = [];
       indicesToKeep.forEach((index) => {
         const randomFrames = Math.floor(Math.random() * 13) + 3; // 3-15 frames
         const residualDuration = randomFrames * 16;
-        
+
         const timer = setTimeout(() => {
           setFlippedLetters(prev => {
             const updated = [...prev];
@@ -306,15 +411,16 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
             return updated;
           });
         }, residualDuration);
-        
+
         newTimers.push(timer);
       });
-      
+
       timersRef.current = newTimers;
     }
-    
+
     return () => {
       timersRef.current.forEach(timer => clearTimeout(timer));
+      transformationTimersRef.current.forEach(timer => clearTimeout(timer));
       if (residualTimerRef.current) {
         clearTimeout(residualTimerRef.current);
       }
@@ -322,46 +428,97 @@ export const StaggeredMirrorText = ({ text, className = '', isActive = false, an
   }, [isHovered, isActive, letters.length]);
 
   // Background and text colors based on textBackground variant
-  const bgColor =
+  const baseBgColor =
     textBackground === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
     textBackground === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
     textBackground === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
     'hsl(0, 0%, 80%)'; // black-on-light
-  const textColor =
+  const baseTextColor =
     textBackground === 'white-on-black' || textBackground === 'white-on-dark'
       ? 'hsl(0, 0%, 100%)'
       : 'hsl(0, 0%, 0%)';
 
+  // Swap colors when inverted (hover inverts, but mousedown inverts it back)
+  const shouldInvertColors = isColorInverted && !isMouseDown;
+  const bgColor = shouldInvertColors ? baseTextColor : baseBgColor;
+  const textColor = shouldInvertColors ? baseBgColor : baseTextColor;
+
   return (
     <span
       className={`inline-block ${className}`}
-      onMouseEnter={() => !isActive && setIsHovered(true)}
-      onMouseLeave={() => !isActive && setIsHovered(false)}
+      onMouseEnter={() => {
+        if (!isActive) {
+          setIsHovered(true);
+        }
+        setIsColorInverted(true);
+      }}
+      onMouseLeave={() => {
+        if (!isActive) {
+          setIsHovered(false);
+        }
+        setIsColorInverted(false);
+        setIsMouseDown(false);
+        // Clear any pending mousedown timer
+        if (mouseDownTimerRef.current) {
+          clearTimeout(mouseDownTimerRef.current);
+          mouseDownTimerRef.current = null;
+        }
+      }}
+      onMouseDown={() => {
+        // Clear any existing timer
+        if (mouseDownTimerRef.current) {
+          clearTimeout(mouseDownTimerRef.current);
+        }
+        setIsMouseDown(true);
+      }}
+      onMouseUp={() => {
+        // Hold the mousedown state for 100ms after release
+        mouseDownTimerRef.current = setTimeout(() => {
+          setIsMouseDown(false);
+        }, 100);
+      }}
       style={{
         backgroundColor: bgColor,
         color: textColor,
         padding: '2px 4px',
         lineHeight: 1,
         fontSize: '16px',
+        transition: 'background-color 0s, color 0s',
+        cursor: 'pointer',
       }}
     >
       {letters.map((letter, index) => {
         const glitch = glitchEffects[index];
         const loadEffect = loadAnimationEffects[index];
+        const transformEffect = transformationEffects[index];
         const isFlipped = flippedLetters[index];
         const isVisible = visibleLetters[index] ?? true;
 
         // Don't render letter if not visible yet
         if (!isVisible) return null;
 
-        // Determine if letter should be mirrored (from hover/active OR glitch OR load animation)
-        const shouldMirror = (isHovered || isActive) || (glitch?.isMirror ?? false) || (loadEffect?.isMirror ?? false);
+        // Priority: transformation effect > glitch > hover/active > load animation
+        // When a glitch is active, it overrides the hover/active state
+        // Determine if letter should be mirrored
+        const shouldMirror = transformEffect
+          ? transformEffect.isMirror
+          : glitch
+          ? glitch.isMirror
+          : ((isHovered || isActive) || (loadEffect?.isMirror ?? false));
 
-        // Determine if letter should be caps (from flip OR glitch)
-        const shouldBeCaps = isFlipped || (glitch?.isCaps ?? false);
+        // Determine if letter should be caps
+        const shouldBeCaps = transformEffect
+          ? transformEffect.isCaps
+          : glitch
+          ? glitch.isCaps
+          : isFlipped;
 
-        // Determine if letter should be italic (from glitch OR load animation)
-        const shouldBeItalic = (glitch?.isItalic ?? false) || (loadEffect?.isItalic ?? false);
+        // Determine if letter should be italic
+        const shouldBeItalic = transformEffect
+          ? transformEffect.isItalic
+          : glitch
+          ? glitch.isItalic
+          : (loadEffect?.isItalic ?? false);
 
         return (
           <span
