@@ -4,37 +4,43 @@ import { GridCardTitle } from '@/components/GridCardTitle';
 import { SegmentedBorder } from '@/components/SegmentedBorder';
 import { VideoThumbnail } from '@/components/VideoThumbnail';
 import { MediaRenderer } from '@/components/MediaRenderer';
+import { TagDisplay } from '@/components/TagDisplay';
 import { Project, MediaItem } from '@/types/project';
 import { useProjectSort } from '@/hooks/use-project-sort';
 import { useCommercial } from '@/contexts/CommercialContext';
 import { useProjectDetail } from '@/contexts/ProjectDetailContext';
 import { AudioPlaylistMinimal } from '@/components/AudioPlaylistMinimal';
 
+// Unified padding for both grid and project detail views
+const TOP_PADDING = 56;
+const SIDE_PADDING = 28;
+const GRID_GAP = 28;
+
 // Helper component for project metadata with colored backgrounds
 type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
 
 const ProjectMetadata = ({ project }: { project: Project }) => {
-  // Generate 4 random colors ensuring adjacent colors are different
+  // Generate 4 random colors ensuring adjacent colors are different (same logic as nav bar)
   const [colors] = useState<ColorOption[]>(() => {
     const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
-    const colors: ColorOption[] = [];
+    const selectedColors: ColorOption[] = [];
 
-    // First color - random choice
-    colors[0] = options[Math.floor(Math.random() * options.length)];
+    // Title (index 0) - random choice
+    selectedColors[0] = options[Math.floor(Math.random() * options.length)];
 
-    // Description - must differ from title
-    const availableForDescription = options.filter(opt => opt !== colors[0]);
-    colors[1] = availableForDescription[Math.floor(Math.random() * availableForDescription.length)];
+    // Description (index 1) - must differ from title (index 0)
+    let availableForDescription = options.filter(opt => opt !== selectedColors[0]);
+    selectedColors[1] = availableForDescription[Math.floor(Math.random() * availableForDescription.length)];
 
-    // Tags - must differ from description
-    const availableForTags = options.filter(opt => opt !== colors[1]);
-    colors[2] = availableForTags[Math.floor(Math.random() * availableForTags.length)];
+    // Tags (index 2) - must differ from description (index 1)
+    let availableForTags = options.filter(opt => opt !== selectedColors[1]);
+    selectedColors[2] = availableForTags[Math.floor(Math.random() * availableForTags.length)];
 
-    // Year - must differ from tags
-    const availableForYear = options.filter(opt => opt !== colors[2]);
-    colors[3] = availableForYear[Math.floor(Math.random() * availableForYear.length)];
+    // Year (index 3) - must differ from tags (index 2)
+    let availableForYear = options.filter(opt => opt !== selectedColors[2]);
+    selectedColors[3] = availableForYear[Math.floor(Math.random() * availableForYear.length)];
 
-    return colors;
+    return selectedColors;
   });
 
   const getColors = (variant: ColorOption) => {
@@ -306,8 +312,8 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
           onClick={() => setSelectedProject(null)}
         >
           <div className="relative pointer-events-auto">
-              <div className="container mx-auto px-4 py-4">
-                <div className="flex flex-col max-w-[95vw] mx-auto relative px-6">
+              <div className="container mx-auto" style={{ paddingTop: `${TOP_PADDING}px`, paddingLeft: `${SIDE_PADDING}px`, paddingRight: `${SIDE_PADDING}px`, paddingBottom: `${SIDE_PADDING}px` }}>
+                <div className="flex flex-col max-w-[95vw] mx-auto relative">
                   {/* Content */}
                   <div
                     className="overflow-y-auto flex-1 min-h-0 relative scrollbar-hide flex justify-center"
@@ -329,7 +335,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                             <>
                               {useSideBySide ? (
                                 /* Side-by-side layout */
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:items-start">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-[28px] md:gap-[28px] md:items-start">
                                   {/* First visual media */}
                                   <div className="w-full">
                                     <MediaRenderer media={nonAudioMedia[0]} isFirstVideo={nonAudioMedia[0].type === 'video'} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
@@ -419,7 +425,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
         >
           <div className="relative">
             <div className="relative">
-              <div className="relative px-4 pb-12" style={{ paddingTop: '20px' }}>
+              <div className="relative" style={{ paddingTop: `${TOP_PADDING}px`, paddingLeft: `${SIDE_PADDING}px`, paddingRight: `${SIDE_PADDING}px`, paddingBottom: `${SIDE_PADDING}px` }}>
                 {/* Scroll indicator for grid */}
                 {showScrollIndicator && !selectedProject && (
                   <div className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-[100]">
@@ -428,7 +434,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                     </div>
                   </div>
                 )}
-                <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-3 gap-4 rounded-xl pointer-events-auto">
+                <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-3 rounded-xl pointer-events-auto" style={{ gap: `${GRID_GAP}px` }}>
                   {audioProjects.map((project) => {
                     const key = `${project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${project.date}-${shuffleCount}`;
                     const isHovered = hoveredCard === key;
@@ -439,7 +445,8 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                         onClick={() => setSelectedProject(project)}
                         onMouseEnter={() => setHoveredCard(key)}
                         onMouseLeave={() => setHoveredCard(null)}
-                        className="group relative overflow-visible cursor-pointer mb-4 break-inside-avoid pointer-events-auto"
+                        className="group relative overflow-visible cursor-pointer break-inside-avoid pointer-events-auto"
+                        style={{ marginBottom: `${GRID_GAP}px` }}
                       >
                         {project.thumbnailMedia ? (
                           <VideoThumbnail
@@ -455,6 +462,9 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                         )}
 
                         <SegmentedBorder isHovered={isHovered} />
+
+                        {/* Tags in top-right corner */}
+                        <TagDisplay tags={project.tags} isHovered={isHovered} />
 
                         <div className="absolute inset-0 flex items-end justify-start pointer-events-none">
                           {isHovered && (

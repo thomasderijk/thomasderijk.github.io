@@ -6,13 +6,11 @@ import { Project } from '@/types/project';
 export const projects: Project[] = [
   {
     "title": "KFC",
-    "tags": [
-      "KFC"
-    ],
+    "tags": [],
     "categories": [
       "commercial"
     ],
-    "date": "2025-11-06",
+    "date": "2025",
     "media": [
       {
         "type": "image",
@@ -40,9 +38,7 @@ export const projects: Project[] = [
     "title": "de Jeugd - een Barkie",
     "tags": [
       "music video",
-      "3d",
-      "animation",
-      "photoscan"
+      "animation"
     ],
     "categories": [
       "visual"
@@ -75,12 +71,12 @@ export const projects: Project[] = [
   {
     "title": "Bleedingheart",
     "tags": [
-      "bleedingheart"
+      "artwork"
     ],
     "categories": [
       "visual"
     ],
-    "date": "2025-11-06",
+    "date": "2025",
     "media": [
       {
         "type": "image",
@@ -95,7 +91,6 @@ export const projects: Project[] = [
   {
     "title": "Cara <3 Karl",
     "tags": [
-      "3d",
       "animation"
     ],
     "categories": [
@@ -139,9 +134,7 @@ export const projects: Project[] = [
     "title": "Coco Bryce - Club Tropicana",
     "tags": [
       "music video",
-      "3d",
-      "animation",
-      "vhs"
+      "animation"
     ],
     "categories": [
       "visual"
@@ -168,13 +161,11 @@ export const projects: Project[] = [
   },
   {
     "title": "Danio",
-    "tags": [
-      "danio"
-    ],
+    "tags": [],
     "categories": [
       "commercial"
     ],
-    "date": "2025-11-06",
+    "date": "2025",
     "media": [
       {
         "type": "image",
@@ -214,7 +205,6 @@ export const projects: Project[] = [
     "title": "djb - atlantic",
     "tags": [
       "music video",
-      "2d",
       "animation"
     ],
     "categories": [
@@ -245,8 +235,7 @@ export const projects: Project[] = [
   {
     "title": "djb - Tazed & Confused",
     "tags": [
-      "audio",
-      "remix"
+      "music"
     ],
     "categories": [
       "audio"
@@ -272,7 +261,7 @@ export const projects: Project[] = [
   {
     "title": "djb - ~~~",
     "tags": [
-      "audio"
+      "music"
     ],
     "categories": [
       "audio"
@@ -334,8 +323,8 @@ export const projects: Project[] = [
   {
     "title": "djb - dood & verderf",
     "tags": [
-      "audio",
-      "album"
+      "music",
+      "artwork"
     ],
     "categories": [
       "visual",
@@ -393,9 +382,7 @@ export const projects: Project[] = [
   {
     "title": "Duran Lantink - LFW digi show",
     "tags": [
-      "2d",
-      "animation",
-      "compositing"
+      "animation"
     ],
     "categories": [
       "visual"
@@ -424,17 +411,14 @@ export const projects: Project[] = [
   {
     "title": "Eel",
     "tags": [
-      "3d",
       "animation",
-      "modeling",
-      "texturing",
-      "unreal"
+      "sound design"
     ],
     "categories": [
       "visual",
       "audio"
     ],
-    "date": "2025-11-06",
+    "date": "2025",
     "media": [
       {
         "type": "video",
@@ -457,10 +441,8 @@ export const projects: Project[] = [
   {
     "title": "Estoc ep art",
     "tags": [
-      "3d",
       "animation",
-      "texturing",
-      "rigging"
+      "artwork"
     ],
     "categories": [
       "visual"
@@ -485,8 +467,8 @@ export const projects: Project[] = [
   {
     "title": "Fly like a bird",
     "tags": [
-      "3d",
-      "animation"
+      "animation",
+      "sound design"
     ],
     "categories": [
       "visual"
@@ -511,7 +493,8 @@ export const projects: Project[] = [
     "title": "Halp - Polar",
     "tags": [
       "music video",
-      "audio"
+      "animation",
+      "music"
     ],
     "categories": [
       "visual"
@@ -544,7 +527,6 @@ export const projects: Project[] = [
   {
     "title": "Horses and their many issues",
     "tags": [
-      "3d",
       "animation"
     ],
     "categories": [
@@ -574,10 +556,7 @@ export const projects: Project[] = [
     "title": "Hang Youth - Steek de Mona Lisa in de fik",
     "tags": [
       "music video",
-      "2d",
-      "3d",
-      "animation",
-      "editing"
+      "animation"
     ],
     "categories": [
       "visual"
@@ -606,7 +585,6 @@ export const projects: Project[] = [
     "title": "Hang Youth - dat wordt nog wat met Sinterklaas dit jaar",
     "tags": [
       "music video",
-      "3d",
       "animation"
     ],
     "categories": [
@@ -639,8 +617,7 @@ export const projects: Project[] = [
   {
     "title": "IJSLAND - IJSLAND",
     "tags": [
-      "artwork",
-      "3d"
+      "artwork"
     ],
     "categories": [
       "visual"
@@ -660,8 +637,8 @@ export const projects: Project[] = [
   {
     "title": "Lit woke angel",
     "tags": [
-      "3d",
-      "animation"
+      "animation",
+      "sound design"
     ],
     "categories": [
       "visual",
@@ -690,7 +667,6 @@ export const projects: Project[] = [
   {
     "title": "Monsbot festival",
     "tags": [
-      "3d",
       "animation"
     ],
     "categories": [
@@ -711,7 +687,6 @@ export const projects: Project[] = [
   {
     "title": "Mtv international ident",
     "tags": [
-      "3d",
       "animation",
       "sound design"
     ],
@@ -742,9 +717,8 @@ export const projects: Project[] = [
   {
     "title": "Notch.fest LA",
     "tags": [
-      "3d",
-      "dome",
-      "animation"
+      "animation",
+      "interactive"
     ],
     "categories": [
       "visual"
@@ -778,7 +752,6 @@ export const projects: Project[] = [
     "title": "Jonkoklapper - Offer",
     "tags": [
       "music video",
-      "3d",
       "animation"
     ],
     "categories": [
@@ -812,9 +785,8 @@ export const projects: Project[] = [
     "title": "djb - ondersteboven",
     "tags": [
       "music video",
-      "audio",
-      "3d",
-      "animation"
+      "animation",
+      "music"
     ],
     "categories": [
       "visual",
@@ -843,7 +815,6 @@ export const projects: Project[] = [
   {
     "title": "Pornhub awards",
     "tags": [
-      "3d",
       "animation"
     ],
     "categories": [
@@ -917,9 +888,8 @@ export const projects: Project[] = [
   {
     "title": "P.L.M.A.I.T.H.",
     "tags": [
-      "2d",
       "animation",
-      "audio"
+      "music"
     ],
     "categories": [
       "visual",
@@ -971,8 +941,7 @@ export const projects: Project[] = [
     "title": "P.L.M.A.I.T.H. vids",
     "tags": [
       "video",
-      "ai",
-      "audio"
+      "music"
     ],
     "categories": [
       "visual",
@@ -1026,16 +995,14 @@ export const projects: Project[] = [
   {
     "title": "Poly",
     "tags": [
-      "old",
-      "2d",
       "animation",
-      "film"
+      "sound design"
     ],
     "categories": [
       "visual",
       "audio"
     ],
-    "date": "2025-11-06",
+    "date": "2025",
     "media": [
       {
         "type": "video",
@@ -1058,7 +1025,6 @@ export const projects: Project[] = [
   {
     "title": "Praise be",
     "tags": [
-      "3d",
       "animation",
       "sound design"
     ],
@@ -1085,7 +1051,6 @@ export const projects: Project[] = [
   {
     "title": "Slavic Phantasmagoria",
     "tags": [
-      "audio",
       "sound design",
       "installation"
     ],
@@ -1121,8 +1086,7 @@ export const projects: Project[] = [
     "title": "Slugabed waterfalls",
     "tags": [
       "music video",
-      "film",
-      "editing"
+      "animation"
     ],
     "categories": [
       "visual"
@@ -1150,13 +1114,12 @@ export const projects: Project[] = [
   {
     "title": "Smite",
     "tags": [
-      "3d",
       "animation"
     ],
     "categories": [
       "visual"
     ],
-    "date": "2025-11-06",
+    "date": "2025",
     "media": [
       {
         "type": "video",
@@ -1179,16 +1142,14 @@ export const projects: Project[] = [
   {
     "title": "Superduper",
     "tags": [
-      "3d",
       "animation",
-      "vhs",
       "sound design"
     ],
     "categories": [
       "visual",
       "audio"
     ],
-    "date": "2025-11-06",
+    "date": "2025",
     "media": [
       {
         "type": "video",
@@ -1214,14 +1175,12 @@ export const projects: Project[] = [
   },
   {
     "title": "Telegotu",
-    "tags": [
-      "telegotu"
-    ],
+    "tags": [],
     "categories": [
       "commercial",
       "visual"
     ],
-    "date": "2025-11-06",
+    "date": "2025",
     "media": [
       {
         "type": "image",
@@ -1233,7 +1192,6 @@ export const projects: Project[] = [
     "title": "Titts Woef",
     "tags": [
       "music video",
-      "3d",
       "animation"
     ],
     "categories": [
@@ -1262,7 +1220,6 @@ export const projects: Project[] = [
   {
     "title": "Travis Scott viz",
     "tags": [
-      "3d",
       "animation",
       "visuals"
     ],
@@ -1301,8 +1258,8 @@ export const projects: Project[] = [
   {
     "title": "Yellow Claw mixtape trailer",
     "tags": [
-      "3d",
-      "animation"
+      "animation",
+      "music video"
     ],
     "categories": [
       "visual"
