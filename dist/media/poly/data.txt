@@ -1,4 +1,4 @@
 title: Poly
 category: visual, audio
-tags: old, 2d, animation, film
+tags: animation, sound design
 dropbox: https://www.dropbox.com/scl/fi/i00ko4tqewl7h14a7r2pc/poly-1080p.mp4?rlkey=g33wl5r0iz93e58zu96amlofd&dl=0

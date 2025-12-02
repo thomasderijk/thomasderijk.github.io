@@ -20,7 +20,7 @@ interface Block {
 export const NavSpacer = ({
   enabled = true,
   minBlocks = 1,
-  maxBlocks = 20,
+  maxBlocks = 15,
   minWidth = 1,
   maxWidth = 9,
   height = 28,

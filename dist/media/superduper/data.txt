@@ -1,4 +1,4 @@
 title: Superduper
 category: visual, audio
-tags: 3d, animation, vhs, sound design
+tags: animation, sound design
 dropbox: https://www.dropbox.com/scl/fi/wulw666msdvninz69qx25/superduper-1080p.mp4?rlkey=uuwhd6kyzwisf272ow4jp9lgx&dl=0
