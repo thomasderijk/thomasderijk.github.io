@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-interface NavSpacerProps {
+interface BottomNavSpacerProps {
   enabled?: boolean;
   minBlocks?: number;
   maxBlocks?: number;
@@ -17,7 +17,7 @@ interface Block {
   color: ColorOption;
 }
 
-export const NavSpacer = ({
+export const BottomNavSpacer = ({
   enabled = true,
   minBlocks = 1,
   maxBlocks = 15,
@@ -25,7 +25,7 @@ export const NavSpacer = ({
   maxWidth = 9,
   height = 28,
   regenerateKey = 0,
-}: NavSpacerProps) => {
+}: BottomNavSpacerProps) => {
   const [blocks, setBlocks] = useState<Block[]>([]);
 
   // Simple noise function for weighted placement

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-interface NavSpacerProps {
+interface PlaylistNavSpacerProps {
   enabled?: boolean;
   minBlocks?: number;
   maxBlocks?: number;
@@ -17,15 +17,15 @@ interface Block {
   color: ColorOption;
 }
 
-export const NavSpacer = ({
+export const PlaylistNavSpacer = ({
   enabled = true,
   minBlocks = 1,
-  maxBlocks = 15,
+  maxBlocks = 14, // Double the original 7 blocks
   minWidth = 1,
   maxWidth = 9,
   height = 28,
   regenerateKey = 0,
-}: NavSpacerProps) => {
+}: PlaylistNavSpacerProps) => {
   const [blocks, setBlocks] = useState<Block[]>([]);
 
   // Simple noise function for weighted placement

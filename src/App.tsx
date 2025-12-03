@@ -9,6 +9,7 @@ import { useProjectSort } from "@/hooks/use-project-sort";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
 import { HoverableTrackTitle } from "@/components/HoverableTrackTitle";
 import { NavSpacer } from "@/components/NavSpacer";
+import { BottomNavSpacer } from "@/components/BottomNavSpacer";
 import { CommercialProvider } from "@/contexts/CommercialContext";
 import { ProjectDetailProvider, useProjectDetail } from "@/contexts/ProjectDetailContext";
 import { AudioPlayerProvider, useAudioPlayer } from "@/contexts/AudioPlayerContext";
@@ -19,6 +20,7 @@ import Index from "./pages/Index";
 import Work from "./pages/Work";
 import Audio from "./pages/Audio";
 import Visual from "./pages/Visual";
+import List from "./pages/List";
 import Links from "./pages/Links";
 import About from "./pages/About";
 import Commercial from "./pages/Commercial";
@@ -53,7 +55,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const isHome = location.pathname === '/';
   const { isRandomized, toggleRandomize } = useProjectSort();
   const { isProjectOpen, closeHandler, openProjectHandler } = useProjectDetail();
-  const { isPlaying, togglePlay, nextTrack, previousTrack, currentTime, duration, seek, currentTrack, getTrackTitle } = useAudioPlayer();
+  const { isPlaying, togglePlay, nextTrack, previousTrack, currentTime, duration, seek, currentTrack, getTrackTitle, closePlayer } = useAudioPlayer();
   const [isPlayerHovered, setIsPlayerHovered] = useState(false);
   const { isInverted, toggleInvert } = useInvert();
   const { triggerShuffle } = useShuffle();
@@ -68,8 +70,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
 
   // Generate nav colors with proper adjacency rules
-  // Index mapping: 0=work, 1=audio, 2=visual, 3=about, 4=links
-  // Adjacency rules: work≠audio, audio≠visual, work≠about, about≠links
+  // Index mapping: 0=work, 1=audio, 2=visual, 3=list, 4=about, 5=links
+  // Adjacency rules: work≠audio, audio≠visual, visual≠list, work≠about, about≠links
   const generateNavColors = (): ColorOption[] => {
     const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
     const colors: ColorOption[] = [];
@@ -85,13 +87,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     let availableForVisual = options.filter(opt => opt !== colors[1]);
     colors[2] = availableForVisual[Math.floor(Math.random() * availableForVisual.length)];
 
-    // 3: about - must differ from work (index 0), since it's horizontally adjacent
-    let availableForAbout = options.filter(opt => opt !== colors[0]);
-    colors[3] = availableForAbout[Math.floor(Math.random() * availableForAbout.length)];
+    // 3: list - must differ from visual (index 2)
+    let availableForList = options.filter(opt => opt !== colors[2]);
+    colors[3] = availableForList[Math.floor(Math.random() * availableForList.length)];
 
-    // 4: links - must differ from about (index 3)
-    let availableForLinks = options.filter(opt => opt !== colors[3]);
-    colors[4] = availableForLinks[Math.floor(Math.random() * availableForLinks.length)];
+    // 4: about - must differ from work (index 0), since it's horizontally adjacent
+    let availableForAbout = options.filter(opt => opt !== colors[0]);
+    colors[4] = availableForAbout[Math.floor(Math.random() * availableForAbout.length)];
+
+    // 5: links - must differ from about (index 4)
+    let availableForLinks = options.filter(opt => opt !== colors[4]);
+    colors[5] = availableForLinks[Math.floor(Math.random() * availableForLinks.length)];
 
     return colors;
   };
@@ -131,8 +137,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const [bottomNavColors, setBottomNavColors] = useState<ColorOption[]>(() => [generateAudioPlayerColors().cycleIcon]);
 
-  // Counter for regenerating nav spacers
-  const [navSpacerKey, setNavSpacerKey] = useState(0);
+  // Counter for regenerating nav spacers - separate keys for each spacer
+  const [navSpacerKey1, setNavSpacerKey1] = useState(0); // Between work and about
+  const [navSpacerKey2, setNavSpacerKey2] = useState(0); // Between about and links
+  const [navSpacerKey3, setNavSpacerKey3] = useState(0); // Between links and icon
+
+  // Bottom nav spacers
+  const [bottomNavSpacerKey1, setBottomNavSpacerKey1] = useState(0); // Between title and progress bar
+  const [bottomNavSpacerKey2, setBottomNavSpacerKey2] = useState(0); // Between progress bar and controls
+  const [bottomNavSpacerKey3, setBottomNavSpacerKey3] = useState(0); // Between controls and cycle icon
 
   // Regenerate colors when grid is randomized
   useEffect(() => {
@@ -141,7 +154,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     setAudioPlayerColors(newAudioColors);
     setBottomNavColors([newAudioColors.cycleIcon]);
     setShuffleIconColor(Math.random() < 0.5 ? 'white' : 'black');
-    setNavSpacerKey(prev => prev + 1);
+    setNavSpacerKey1(prev => prev + 1);
+    setNavSpacerKey2(prev => prev + 1);
+    setNavSpacerKey3(prev => prev + 1);
+    setBottomNavSpacerKey1(prev => prev + 1);
+    setBottomNavSpacerKey2(prev => prev + 1);
+    setBottomNavSpacerKey3(prev => prev + 1);
   }, [isRandomized]);
 
   const [shuffleIconColor, setShuffleIconColor] = useState<'white' | 'black'>(Math.random() < 0.5 ? 'white' : 'black');
@@ -155,6 +173,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setCycleIconColor(bottomNavColors[0]);
   }, [bottomNavColors]);
+
+  // Close player when navigating to a new page while paused
+  useEffect(() => {
+    if (!isPlaying && currentTrack) {
+      closePlayer();
+    }
+  }, [location.pathname]);
 
   // Helper to get background color from ColorOption
   const getColorFromVariant = (variant: ColorOption): { bg: string; text: string } => {
@@ -387,22 +412,32 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   >
                     <StaggeredMirrorText text="visual" isActive={location.pathname === '/visual'} forcedVariant={topNavColors[2]} />
                   </Link>
+                  <Link
+                    to="/list"
+                    className="font-display font-light whitespace-nowrap pointer-events-auto"
+                    onClick={(e) => {
+                      // Don't close menu on click, keep it open while still hovering
+                      e.stopPropagation();
+                    }}
+                  >
+                    <StaggeredMirrorText text="list" isActive={location.pathname === '/list'} forcedVariant={topNavColors[3]} />
+                  </Link>
                 </div>
               )}
             </div>
-            <NavSpacer regenerateKey={navSpacerKey} />
+            <NavSpacer regenerateKey={navSpacerKey1} />
             <Link to="/about" className="font-display font-light pointer-events-auto whitespace-nowrap">
-              <StaggeredMirrorText text="about" isActive={location.pathname === '/about'} forcedVariant={topNavColors[3]} />
+              <StaggeredMirrorText text="about" isActive={location.pathname === '/about'} forcedVariant={topNavColors[4]} />
             </Link>
-            <NavSpacer regenerateKey={navSpacerKey} />
+            <NavSpacer regenerateKey={navSpacerKey2} />
             <Link to="/links" className="font-display font-light pointer-events-auto whitespace-nowrap">
-              <StaggeredMirrorText text="links" isActive={location.pathname === '/links'} forcedVariant={topNavColors[4]} />
+              <StaggeredMirrorText text="links" isActive={location.pathname === '/links'} forcedVariant={topNavColors[5]} />
             </Link>
           </div>
 
           {/* Right: shuffle button and close button */}
           <div className="flex items-center gap-0">
-            <NavSpacer regenerateKey={navSpacerKey} />
+            <NavSpacer regenerateKey={navSpacerKey3} />
             {showShuffleButton && (
               <button
                 onClick={() => {
@@ -565,13 +600,22 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             const trackTitle = getTrackTitle(currentTrack);
 
             const handleTrackTitleClick = () => {
-              if (project && openProjectHandler) {
+              if (project) {
                 // Navigate to work page if not already there
-                if (location.pathname !== '/work' && location.pathname !== '/' && location.pathname !== '/audio') {
+                const needsNavigation = location.pathname !== '/work' && location.pathname !== '/' && location.pathname !== '/audio';
+
+                if (needsNavigation) {
                   navigate('/work');
+                  // Wait for Work component to mount and register the handler
+                  setTimeout(() => {
+                    if (openProjectHandler) {
+                      openProjectHandler(project.title);
+                    }
+                  }, 100);
+                } else if (openProjectHandler) {
+                  // Already on work page, open immediately
+                  openProjectHandler(project.title);
                 }
-                // Open the project
-                openProjectHandler(project.title);
               }
             };
 
@@ -585,6 +629,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               />
             );
           })()}
+
+          {/* Spacer between title and progress bar */}
+          {currentTrack && <BottomNavSpacer regenerateKey={bottomNavSpacerKey1} />}
 
           {/* Progress bar - shows when track is loaded */}
           {currentTrack && duration > 0 && (
@@ -613,6 +660,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               />
             </div>
           )}
+
+          {/* Spacer between progress bar and controls */}
+          {currentTrack && <BottomNavSpacer regenerateKey={bottomNavSpacerKey2} />}
 
           {/* Previous button - shows when track is loaded */}
           {currentTrack && (
@@ -832,6 +882,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </button>
           )}
 
+          {/* Spacer between controls and cycle icon */}
+          <BottomNavSpacer regenerateKey={bottomNavSpacerKey3} />
+
           {/* Cycle icon */}
           <button
             onClick={handleCycleIconClick}
@@ -939,6 +992,7 @@ const App = () => (
                       <Route path="/work" element={<Work />} />
                       <Route path="/audio" element={<Audio />} />
                       <Route path="/visual" element={<Visual />} />
+                      <Route path="/list" element={<List />} />
                       <Route path="/links" element={<Links />} />
                       <Route path="/about" element={<About />} />
                       <Route path="/commercial" element={<Commercial />} />

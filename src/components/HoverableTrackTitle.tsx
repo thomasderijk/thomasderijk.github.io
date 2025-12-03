@@ -47,15 +47,15 @@ export const HoverableTrackTitle = ({
     timersRef.current = [];
 
     if (isHovered) {
-      // Transform to "go to project" - 50% faster (267ms instead of 533ms)
+      // Transform to "go to project" - 50% faster with linear timing
       const targetChars = hoverText.split('');
       const numChars = Math.max(originalText.length, targetChars.length);
       const transformOrder = [...Array(numChars).keys()].sort(() => Math.random() - 0.5);
 
       transformOrder.forEach((charIndex, orderIndex) => {
         const progress = orderIndex / (transformOrder.length - 1);
-        const easedProgress = progress * progress;
-        const delay = 33 + easedProgress * 267; // 50% faster
+        // Linear progression for even transition speed
+        const delay = 17 + progress * 117; // 50% faster, linear timing
 
         const timer = setTimeout(() => {
           setLetterStates(prev => {
@@ -84,7 +84,8 @@ export const HoverableTrackTitle = ({
 
         timersRef.current.push(timer);
 
-        // Clear effects 0.5s after this letter appears
+        // Clear effects with random duration for each letter (100-400ms)
+        const randomClearDelay = Math.random() * 300 + 100;
         const clearTimer = setTimeout(() => {
           setLetterStates(prev => {
             const updated = [...prev];
@@ -98,20 +99,20 @@ export const HoverableTrackTitle = ({
             }
             return updated;
           });
-        }, delay + 500);
+        }, delay + randomClearDelay);
 
         timersRef.current.push(clearTimer);
       });
     } else {
-      // Transform back to original text - 50% faster
+      // Transform back to original text - 50% faster with linear timing
       const targetChars = originalText.split('');
       const numChars = Math.max(hoverText.length, targetChars.length);
       const transformOrder = [...Array(numChars).keys()].sort(() => Math.random() - 0.5);
 
       transformOrder.forEach((charIndex, orderIndex) => {
         const progress = orderIndex / (transformOrder.length - 1);
-        const easedProgress = progress * progress;
-        const delay = 33 + easedProgress * 267; // 50% faster
+        // Linear progression for even transition speed
+        const delay = 17 + progress * 117; // 50% faster, linear timing
 
         const timer = setTimeout(() => {
           setLetterStates(prev => {

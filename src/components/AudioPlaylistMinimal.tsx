@@ -1,24 +1,77 @@
 import { useRef, useState, useEffect } from 'react';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
+import { PlaylistNavSpacer } from './PlaylistNavSpacer';
 
 interface AudioPlaylistMinimalProps {
   urls: string[];
   allowSimultaneousPlayback?: boolean;
 }
 
-// SoundCloud-inspired minimal player with waveform visualization
+// Audio playlist matching the main audio player layout
 export const AudioPlaylistMinimal = ({ urls, allowSimultaneousPlayback = false }: AudioPlaylistMinimalProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const waveformContainerRef = useRef<HTMLDivElement>(null);
   const [currentTrack, setCurrentTrack] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [waveformData, setWaveformData] = useState<number[]>([]);
-  const { pauseForMedia, resumeAfterMedia } = useAudioPlayer();
+  const { pauseForMedia, resumeAfterMedia, isPlaying: globalIsPlaying } = useAudioPlayer();
+
+  // Spacer keys for each track
+  const [spacerKeys, setSpacerKeys] = useState<number[]>(() => urls.map(() => 0));
+
+  // Color system
+  type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
+
+  // Generate random colors for each track ensuring adjacent elements have different colors
+  // and vertical coordination (title colors differ from track above)
+  const generateTrackColors = () => {
+    const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
+    const allColors: ColorOption[][] = [];
+
+    urls.forEach((_, index) => {
+      // For each track: [title, progressBar, controls]
+      const colors: ColorOption[] = [];
+
+      // Title color (different from track above)
+      let titleOptions = options;
+      if (index > 0 && allColors[index - 1]) {
+        // Filter out the previous track's title color
+        const prevTitleColor = allColors[index - 1][0];
+        titleOptions = options.filter(opt => opt !== prevTitleColor);
+      }
+      colors.push(titleOptions[Math.floor(Math.random() * titleOptions.length)]);
+
+      // Progress bar color (different from title)
+      const progressOptions = options.filter(opt => opt !== colors[0]);
+      colors.push(progressOptions[Math.floor(Math.random() * progressOptions.length)]);
+
+      // Controls color (different from progress bar)
+      const controlsOptions = options.filter(opt => opt !== colors[1]);
+      colors.push(controlsOptions[Math.floor(Math.random() * controlsOptions.length)]);
+
+      allColors.push(colors);
+    });
+
+    return allColors;
+  };
+
+  const [trackColors, setTrackColors] = useState<ColorOption[][]>(() => generateTrackColors());
+
+  // Helper to get colors from ColorOption
+  const getColors = (variant: ColorOption): { bg: string; text: string } => {
+    const bgColor =
+      variant === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
+      variant === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
+      variant === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
+      'hsl(0, 0%, 80%)'; // black-on-light
+    const textColor =
+      variant === 'white-on-black' || variant === 'white-on-dark'
+        ? 'hsl(0, 0%, 90%)'
+        : 'hsl(0, 0%, 10%)';
+    return { bg: bgColor, text: textColor };
+  };
 
   const pauseForMediaRef = useRef(pauseForMedia);
   const resumeAfterMediaRef = useRef(resumeAfterMedia);
@@ -32,124 +85,12 @@ export const AudioPlaylistMinimal = ({ urls, allowSimultaneousPlayback = false }
     return name.replace(/^\d+[-_]\s*/, '');
   };
 
-  const isSingleTrack = urls.length === 1;
-
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
-  // Generate waveform data from audio
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const generateWaveform = async () => {
-      try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const response = await fetch(urls[currentTrack]);
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-        const rawData = audioBuffer.getChannelData(0);
-        const samples = 100; // Number of bars in waveform
-        const blockSize = Math.floor(rawData.length / samples);
-        const filteredData = [];
-
-        for (let i = 0; i < samples; i++) {
-          let blockStart = blockSize * i;
-          let sum = 0;
-          for (let j = 0; j < blockSize; j++) {
-            sum += Math.abs(rawData[blockStart + j]);
-          }
-          filteredData.push(sum / blockSize);
-        }
-
-        // Normalize the data
-        const max = Math.max(...filteredData);
-        const normalizedData = filteredData.map(n => n / max);
-        setWaveformData(normalizedData);
-      } catch (error) {
-        console.error('Error generating waveform:', error);
-        // Generate a simple placeholder waveform
-        const placeholderData = Array.from({ length: 100 }, () => Math.random() * 0.8 + 0.2);
-        setWaveformData(placeholderData);
-      }
-    };
-
-    generateWaveform();
-  }, [currentTrack, urls]);
-
-  // Draw waveform on canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const container = waveformContainerRef.current;
-    if (!canvas || !container || waveformData.length === 0) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size to match container
-    const dpr = window.devicePixelRatio || 1;
-    const rect = container.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-    ctx.scale(dpr, dpr);
-
-    // Clear canvas
-    ctx.clearRect(0, 0, rect.width, rect.height);
-
-    // Draw waveform
-    const barWidth = rect.width / waveformData.length;
-    const barGap = barWidth * 0.3;
-    const actualBarWidth = barWidth - barGap;
-    const centerY = rect.height / 2;
-    const maxBarHeight = rect.height * 0.9;
-
-    waveformData.forEach((value, index) => {
-      const barHeight = value * maxBarHeight / 2;
-      const x = index * barWidth;
-
-      // Determine if this bar is in the played portion
-      const barProgress = (index / waveformData.length) * 100;
-      const isPlayed = barProgress <= progress;
-
-      // Draw bar (centered vertically, extending up and down)
-      // Use actual RGB white color instead of HSL variable
-      ctx.fillStyle = isPlayed
-        ? 'rgba(255, 255, 255, 1)'
-        : 'rgba(255, 255, 255, 0.3)';
-      ctx.fillRect(x, centerY - barHeight, actualBarWidth, barHeight * 2);
-    });
-
-    // Draw progress cursor line
-    const cursorX = (progress / 100) * rect.width;
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(cursorX, 0);
-    ctx.lineTo(cursorX, rect.height);
-    ctx.stroke();
-  }, [waveformData, progress]);
-
-  // Resize canvas on window resize
-  useEffect(() => {
-    const handleResize = () => {
-      const canvas = canvasRef.current;
-      const container = waveformContainerRef.current;
-      if (!canvas || !container) return;
-
-      // Trigger redraw
-      setProgress(prev => prev);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -215,6 +156,16 @@ export const AudioPlaylistMinimal = ({ urls, allowSimultaneousPlayback = false }
     }
   }, [currentTrack, urls, hasUserInteracted]);
 
+  // Auto-play first track on mount if global player is not playing
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || hasUserInteracted || globalIsPlaying) return;
+
+    // Start playing the first track automatically
+    setHasUserInteracted(true);
+    audio.play().catch(() => {});
+  }, [globalIsPlaying, hasUserInteracted]);
+
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -226,7 +177,21 @@ export const AudioPlaylistMinimal = ({ urls, allowSimultaneousPlayback = false }
     }
   };
 
-  const handleWaveformClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePrevious = () => {
+    if (currentTrack > 0) {
+      setCurrentTrack(prev => prev - 1);
+      setHasUserInteracted(true);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentTrack < urls.length - 1) {
+      setCurrentTrack(prev => prev + 1);
+      setHasUserInteracted(true);
+    }
+  };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const audio = audioRef.current;
     if (!audio) return;
     setHasUserInteracted(true);
@@ -235,100 +200,276 @@ export const AudioPlaylistMinimal = ({ urls, allowSimultaneousPlayback = false }
     audio.currentTime = percent * audio.duration;
   };
 
-  const handleWaveformTouch = (e: React.TouchEvent<HTMLDivElement>) => {
-    const audio = audioRef.current;
-    if (!audio) return;
+  const handleTrackClick = (index: number) => {
     setHasUserInteracted(true);
-    const rect = e.currentTarget.getBoundingClientRect();
-    const touch = e.touches[0];
-    const percent = (touch.clientX - rect.left) / rect.width;
-    audio.currentTime = Math.max(0, Math.min(1, percent)) * audio.duration;
+    setCurrentTrack(index);
+
+    // Regenerate spacers for this track
+    setSpacerKeys(prev => {
+      const newKeys = [...prev];
+      newKeys[index] = (newKeys[index] || 0) + 1;
+      return newKeys;
+    });
+
+    // Regenerate progress bar and controls colors based on current title color
+    setTrackColors(prev => {
+      const newColors = [...prev];
+      const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
+      const titleColor = newColors[index][0];
+
+      // Progress bar color (different from title)
+      const progressOptions = options.filter(opt => opt !== titleColor);
+      newColors[index][1] = progressOptions[Math.floor(Math.random() * progressOptions.length)];
+
+      // Controls color (different from progress bar)
+      const controlsOptions = options.filter(opt => opt !== newColors[index][1]);
+      newColors[index][2] = controlsOptions[Math.floor(Math.random() * controlsOptions.length)];
+
+      return newColors;
+    });
   };
 
-  // Determine if we should use compact spacing (for many tracks)
-  const isCompact = urls.length > 7;
-
   return (
-    <div className="w-full min-w-0">
+    <div className="w-full min-w-0" style={{ fontSize: 0, lineHeight: 0 }}>
       <audio ref={audioRef} playsInline preload="metadata" />
 
-      {/* Main player controls */}
-      <div className={`flex items-center gap-4 ${isCompact ? 'mb-3' : 'mb-4'}`}>
-        {/* Play/Pause button */}
-        <button
-          onClick={togglePlay}
-          className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-foreground hover:bg-foreground/90 transition-colors"
-          aria-label={isPlaying ? 'Pause' : 'Play'}
-        >
-          <span className="text-background" style={{ fontSize: '20px', lineHeight: '1' }}>
-            {isPlaying ? '❚❚' : '▶'}
-          </span>
-        </button>
+      {/* Track list */}
+      <div style={{ fontSize: 0, lineHeight: 0 }}>
+        {urls.map((url, index) => (
+          <div key={url}>
+            {/* Track row with controls when playing */}
+            {index === currentTrack && hasUserInteracted ? (
+              <div
+                className="flex items-center gap-0"
+                style={{
+                  height: '28px',
+                  fontSize: 0,
+                  lineHeight: 0,
+                }}
+              >
+                {/* Track title (clickable) */}
+                <button
+                  onClick={togglePlay}
+                  onMouseEnter={(e) => {
+                    const colors = getColors(trackColors[index][0]);
+                    e.currentTarget.style.backgroundColor = colors.text;
+                    e.currentTarget.style.color = colors.bg;
+                  }}
+                  onMouseLeave={(e) => {
+                    const colors = getColors(trackColors[index][0]);
+                    e.currentTarget.style.backgroundColor = colors.bg;
+                    e.currentTarget.style.color = colors.text;
+                  }}
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 300,
+                    fontSize: '16px',
+                    lineHeight: 1.5,
+                    padding: '2px 4px',
+                    backgroundColor: getColors(trackColors[index][0]).bg,
+                    color: getColors(trackColors[index][0]).text,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    textAlign: 'left',
+                    border: 'none',
+                    cursor: 'pointer',
+                    flexShrink: 1,
+                    minWidth: 0,
+                    transition: 'background-color 0s, color 0s',
+                  }}
+                >
+                  {getFileName(url)}
+                </button>
 
-        {/* Track info and waveform */}
-        <div className="flex-1 min-w-0">
-          {/* Current track title */}
-          <p className="text-foreground text-sm font-medium mb-4 truncate">
-            {getFileName(urls[currentTrack])}
-          </p>
+                {/* Spacer between title and progress bar */}
+                <PlaylistNavSpacer regenerateKey={spacerKeys[index] || 0} />
 
-          {/* Waveform visualization */}
-          <div
-            ref={waveformContainerRef}
-            className="relative h-12 cursor-pointer touch-none"
-            onClick={handleWaveformClick}
-            onTouchStart={handleWaveformTouch}
-            onTouchMove={handleWaveformTouch}
-          >
-            <canvas
-              ref={canvasRef}
-              className="absolute inset-0 w-full h-full"
-            />
+                {/* Progress bar (flexible) */}
+                <div
+                  onClick={handleProgressClick}
+                  style={{
+                    flexGrow: 1,
+                    height: '28px',
+                    backgroundColor: getColors(trackColors[index][1]).bg,
+                    position: 'relative',
+                    cursor: 'pointer',
+                    minWidth: '100px',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      width: `${progress}%`,
+                      height: '100%',
+                      backgroundColor: getColors(trackColors[index][1]).text,
+                    }}
+                  />
+                </div>
+
+                {/* Spacer between progress bar and controls */}
+                <PlaylistNavSpacer regenerateKey={spacerKeys[index] || 0} />
+
+                {/* Controls block - treated as one unit */}
+                <div
+                  style={{
+                    display: 'flex',
+                    height: '28px',
+                    backgroundColor: getColors(trackColors[index][2]).bg,
+                    flexShrink: 0,
+                  }}
+                >
+                  {/* Previous button */}
+                  <button
+                    onClick={handlePrevious}
+                    disabled={currentTrack === 0}
+                    onMouseEnter={(e) => {
+                      if (currentTrack !== 0) {
+                        const colors = getColors(trackColors[index][2]);
+                        e.currentTarget.style.backgroundColor = colors.text;
+                        e.currentTarget.style.color = colors.bg;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      const colors = getColors(trackColors[index][2]);
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = colors.text;
+                    }}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      backgroundColor: 'transparent',
+                      color: getColors(trackColors[index][2]).text,
+                      border: 'none',
+                      cursor: currentTrack === 0 ? 'default' : 'pointer',
+                      opacity: currentTrack === 0 ? 0.3 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      flexShrink: 0,
+                      transition: 'background-color 0s, color 0s',
+                    }}
+                  >
+                    ⏮
+                  </button>
+
+                  {/* Play/Pause button */}
+                  <button
+                    onClick={togglePlay}
+                    onMouseEnter={(e) => {
+                      const colors = getColors(trackColors[index][2]);
+                      e.currentTarget.style.backgroundColor = colors.text;
+                      e.currentTarget.style.color = colors.bg;
+                    }}
+                    onMouseLeave={(e) => {
+                      const colors = getColors(trackColors[index][2]);
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = colors.text;
+                    }}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      backgroundColor: 'transparent',
+                      color: getColors(trackColors[index][2]).text,
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      flexShrink: 0,
+                      transition: 'background-color 0s, color 0s',
+                    }}
+                  >
+                    {isPlaying ? '❚❚' : '▶'}
+                  </button>
+
+                  {/* Next button */}
+                  <button
+                    onClick={handleNext}
+                    disabled={currentTrack === urls.length - 1}
+                    onMouseEnter={(e) => {
+                      if (currentTrack !== urls.length - 1) {
+                        const colors = getColors(trackColors[index][2]);
+                        e.currentTarget.style.backgroundColor = colors.text;
+                        e.currentTarget.style.color = colors.bg;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      const colors = getColors(trackColors[index][2]);
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = colors.text;
+                    }}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      backgroundColor: 'transparent',
+                      color: getColors(trackColors[index][2]).text,
+                      border: 'none',
+                      cursor: currentTrack === urls.length - 1 ? 'default' : 'pointer',
+                      opacity: currentTrack === urls.length - 1 ? 0.3 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      flexShrink: 0,
+                      transition: 'background-color 0s, color 0s',
+                    }}
+                  >
+                    ⏭
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Non-playing track - just the title */
+              <div
+                className="flex items-center gap-0"
+                style={{
+                  height: '28px',
+                  fontSize: 0,
+                  lineHeight: 0,
+                }}
+              >
+                {/* Track title (clickable to play) */}
+                <button
+                  onClick={() => handleTrackClick(index)}
+                  onMouseEnter={(e) => {
+                    const colors = getColors(trackColors[index][0]);
+                    e.currentTarget.style.backgroundColor = colors.text;
+                    e.currentTarget.style.color = colors.bg;
+                  }}
+                  onMouseLeave={(e) => {
+                    const colors = getColors(trackColors[index][0]);
+                    e.currentTarget.style.backgroundColor = colors.bg;
+                    e.currentTarget.style.color = colors.text;
+                  }}
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 300,
+                    fontSize: '16px',
+                    lineHeight: 1.5,
+                    padding: '2px 4px',
+                    backgroundColor: getColors(trackColors[index][0]).bg,
+                    color: getColors(trackColors[index][0]).text,
+                    whiteSpace: 'nowrap',
+                    textAlign: 'left',
+                    border: 'none',
+                    cursor: 'pointer',
+                    width: 'auto',
+                    display: 'inline-block',
+                    transition: 'background-color 0s, color 0s',
+                  }}
+                >
+                  {getFileName(url)}
+                </button>
+              </div>
+            )}
           </div>
-
-          {/* Time display */}
-          <div className="flex items-center justify-between mt-1">
-            <span className="text-foreground/50 text-xs">
-              {formatTime(currentTime)}
-            </span>
-            <span className="text-foreground/50 text-xs">
-              {formatTime(duration)}
-            </span>
-          </div>
-        </div>
+        ))}
       </div>
-
-      {/* Track list - only show for multiple tracks */}
-      {!isSingleTrack && (
-        <div className={`space-y-0 border-t border-foreground/10 ${isCompact ? 'pt-2' : 'pt-3'}`}>
-          {urls.map((url, index) => (
-            <button
-              key={url}
-              onClick={() => {
-                setHasUserInteracted(true);
-                setCurrentTrack(index);
-              }}
-              className={`w-full flex items-center gap-3 px-2 ${isCompact ? 'py-1.5' : 'py-2'} ${isCompact ? 'text-xs' : 'text-sm'} transition-colors ${
-                index === currentTrack
-                  ? 'bg-foreground/10 text-foreground'
-                  : 'text-foreground/60 hover:text-foreground hover:bg-foreground/5'
-              }`}
-            >
-              <span className={`text-foreground/40 w-6 text-left flex-shrink-0 ${isCompact ? 'text-[10px]' : 'text-xs'}`}>
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <span className="truncate text-left flex-1">
-                {getFileName(url)}
-              </span>
-              {index === currentTrack && isPlaying && (
-                <span className={`text-foreground/40 flex-shrink-0 ${isCompact ? 'text-[10px]' : 'text-xs'}`}>
-                  Playing
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

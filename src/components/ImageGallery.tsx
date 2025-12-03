@@ -5,15 +5,14 @@ interface ImageGalleryProps {
 
 export const ImageGallery = ({ url, caption }: ImageGalleryProps) => {
   return (
-    <div className="flex justify-center w-full">
-      <div className="inline-block max-w-full overflow-hidden">
-        <img
-          src={url}
-          alt={caption || 'Project image'}
-          className="block w-full h-auto max-h-[70vh]"
-          style={{ display: 'block', maxWidth: '100%' }}
-        />
-      </div>
-    </div>
+    <img
+      src={url}
+      alt={caption || 'Project image'}
+      className="w-full h-auto"
+      style={{
+        maxHeight: '70vh',
+        objectFit: 'contain'
+      }}
+    />
   );
 };

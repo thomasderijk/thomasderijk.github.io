@@ -45,6 +45,7 @@ interface AudioPlayerContextType {
   previousTrack: () => void;
   seek: (time: number) => void;
   getTrackTitle: (track: string | null) => string;
+  closePlayer: () => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | null>(null);
@@ -57,6 +58,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const wasPlayingBeforePauseRef = useRef(false);
   const trackHistoryRef = useRef<string[]>([]);
+  const pauseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize audio element
   useEffect(() => {
@@ -148,6 +150,12 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const play = () => {
     if (!audioRef.current) return;
 
+    // Clear any pending pause timer
+    if (pauseTimerRef.current) {
+      clearTimeout(pauseTimerRef.current);
+      pauseTimerRef.current = null;
+    }
+
     if (!currentTrack) {
       // First time playing - pick a random track
       const track = getRandomTrack();
@@ -169,6 +177,32 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     if (!audioRef.current) return;
     audioRef.current.pause();
     setIsPlaying(false);
+
+    // Start 15-second timer to close player
+    if (pauseTimerRef.current) {
+      clearTimeout(pauseTimerRef.current);
+    }
+    pauseTimerRef.current = setTimeout(() => {
+      closePlayer();
+    }, 15000); // 15 seconds
+  };
+
+  const closePlayer = () => {
+    if (!audioRef.current) return;
+
+    // Clear any pending pause timer
+    if (pauseTimerRef.current) {
+      clearTimeout(pauseTimerRef.current);
+      pauseTimerRef.current = null;
+    }
+
+    // Stop and reset the player
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    setIsPlaying(false);
+    setCurrentTrack(null);
+    setCurrentTime(0);
+    setDuration(0);
   };
 
   const pauseForMedia = () => {
@@ -296,6 +330,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       previousTrack,
       seek,
       getTrackTitle,
+      closePlayer,
     }}>
       {children}
     </AudioPlayerContext.Provider>

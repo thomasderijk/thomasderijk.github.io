@@ -19,47 +19,51 @@ const GRID_GAP = 28;
 // Helper component for project metadata with colored backgrounds
 type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
 
+// Helper to generate random colors for metadata
+const generateMetadataColors = () => {
+  const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
+  const selectedColors: ColorOption[] = [];
+
+  // Title (index 0) - random choice
+  selectedColors[0] = options[Math.floor(Math.random() * options.length)];
+
+  // Description (index 1) - must differ from title (index 0)
+  let availableForDescription = options.filter(opt => opt !== selectedColors[0]);
+  selectedColors[1] = availableForDescription[Math.floor(Math.random() * availableForDescription.length)];
+
+  // Tags (index 2) - must differ from description (index 1)
+  let availableForTags = options.filter(opt => opt !== selectedColors[1]);
+  selectedColors[2] = availableForTags[Math.floor(Math.random() * availableForTags.length)];
+
+  // Year (index 3) - must differ from tags (index 2)
+  let availableForYear = options.filter(opt => opt !== selectedColors[2]);
+  selectedColors[3] = availableForYear[Math.floor(Math.random() * availableForYear.length)];
+
+  return selectedColors;
+};
+
+// Helper to get colors from variant
+const getColorsFromVariant = (variant: ColorOption) => {
+  const bgColor =
+    variant === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
+    variant === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
+    variant === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
+    'hsl(0, 0%, 80%)';
+  const textColor =
+    variant === 'white-on-black' || variant === 'white-on-dark'
+      ? 'hsl(0, 0%, 100%)'
+      : 'hsl(0, 0%, 0%)';
+  return { bgColor, textColor };
+};
+
 const ProjectMetadata = ({ project }: { project: Project }) => {
   // Generate 4 random colors ensuring adjacent colors are different (same logic as nav bar)
-  const [colors] = useState<ColorOption[]>(() => {
-    const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
-    const selectedColors: ColorOption[] = [];
+  const [colors] = useState<ColorOption[]>(() => generateMetadataColors());
 
-    // Title (index 0) - random choice
-    selectedColors[0] = options[Math.floor(Math.random() * options.length)];
-
-    // Description (index 1) - must differ from title (index 0)
-    let availableForDescription = options.filter(opt => opt !== selectedColors[0]);
-    selectedColors[1] = availableForDescription[Math.floor(Math.random() * availableForDescription.length)];
-
-    // Tags (index 2) - must differ from description (index 1)
-    let availableForTags = options.filter(opt => opt !== selectedColors[1]);
-    selectedColors[2] = availableForTags[Math.floor(Math.random() * availableForTags.length)];
-
-    // Year (index 3) - must differ from tags (index 2)
-    let availableForYear = options.filter(opt => opt !== selectedColors[2]);
-    selectedColors[3] = availableForYear[Math.floor(Math.random() * availableForYear.length)];
-
-    return selectedColors;
-  });
-
-  const getColors = (variant: ColorOption) => {
-    const bgColor =
-      variant === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
-      variant === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
-      variant === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
-      'hsl(0, 0%, 80%)';
-    const textColor =
-      variant === 'white-on-black' || variant === 'white-on-dark'
-        ? 'hsl(0, 0%, 100%)'
-        : 'hsl(0, 0%, 0%)';
-    return { bgColor, textColor };
-  };
-
-  const titleColors = getColors(colors[0]);
-  const descriptionColors = getColors(colors[1]);
-  const tagsColors = getColors(colors[2]);
-  const yearColors = getColors(colors[3]);
+  const titleColors = getColorsFromVariant(colors[0]);
+  const descriptionColors = getColorsFromVariant(colors[1]);
+  const tagsColors = getColorsFromVariant(colors[2]);
+  const yearColors = getColorsFromVariant(colors[3]);
 
   return (
     <div style={{ fontSize: 0, lineHeight: 0 }}>
@@ -129,6 +133,81 @@ const ProjectMetadata = ({ project }: { project: Project }) => {
           fontWeight: 300,
           fontSize: '16px',
           lineHeight: 1.5,
+        }}>
+          {new Date(project.date).getFullYear()}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// Component for split metadata (title separate, rest together) - used in side-by-side audio layout
+const ProjectMetadataSplit = ({ project, showTitle }: { project: Project; showTitle: boolean }) => {
+  // Generate colors once and store them
+  const [colors] = useState<ColorOption[]>(() => generateMetadataColors());
+
+  const titleColors = getColorsFromVariant(colors[0]);
+  const descriptionColors = getColorsFromVariant(colors[1]);
+  const tagsColors = getColorsFromVariant(colors[2]);
+  const yearColors = getColorsFromVariant(colors[3]);
+
+  const spanStyle = {
+    padding: '2px 4px',
+    display: 'inline-block' as const,
+    fontFamily: "'Inter', sans-serif",
+    fontWeight: 300,
+    fontSize: '16px',
+    lineHeight: 1.5,
+  };
+
+  if (showTitle) {
+    // Just the title
+    return (
+      <div style={{ fontSize: 0, lineHeight: 0 }}>
+        <span style={{
+          ...spanStyle,
+          backgroundColor: titleColors.bgColor,
+          color: titleColors.textColor,
+        }}>
+          {project.title}
+        </span>
+      </div>
+    );
+  }
+
+  // Description, tags, and year
+  return (
+    <div style={{ fontSize: 0, lineHeight: 0 }}>
+      {project.description && (
+        <div>
+          <span style={{
+            ...spanStyle,
+            backgroundColor: descriptionColors.bgColor,
+            color: descriptionColors.textColor,
+          }}>
+            {project.description}
+          </span>
+        </div>
+      )}
+      <div>
+        <span style={{
+          ...spanStyle,
+          backgroundColor: tagsColors.bgColor,
+          color: tagsColors.textColor,
+        }}>
+          {project.tags.map((tag, index) => (
+            <span key={tag}>
+              {index > 0 && " / "}
+              {tag.toLowerCase()}
+            </span>
+          ))}
+        </span>
+      </div>
+      <div>
+        <span style={{
+          ...spanStyle,
+          backgroundColor: yearColors.bgColor,
+          color: yearColors.textColor,
         }}>
           {new Date(project.date).getFullYear()}
         </span>
@@ -324,7 +403,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className={`inline-block max-w-full ${selectedProject.layout === 'sidebyside' ? 'md:min-w-[900px] lg:min-w-[1100px] xl:min-w-[1300px]' : ''}`}>
+                    <div className="inline-block w-full">
                       <div>
                         {(() => {
                           const { audioMedia, nonAudioMedia, hasMultipleAudio } = getDetailMedia(selectedProject);
@@ -335,38 +414,52 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                             <>
                               {useSideBySide ? (
                                 /* Side-by-side layout */
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-[28px] md:gap-[28px] md:items-start">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-[28px] md:gap-x-[28px] md:gap-y-0 md:items-start">
                                   {/* First visual media */}
-                                  <div className="w-full">
+                                  <div className="min-w-0">
                                     <MediaRenderer media={nonAudioMedia[0]} isFirstVideo={nonAudioMedia[0].type === 'video'} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
                                   </div>
-                                  {/* Rest of content: remaining visuals + audio + metadata */}
-                                  <div className="w-full flex flex-col justify-between min-h-full">
-                                    {/* Top section: remaining visuals and title */}
-                                    <div className={nonAudioMedia.length > 1 ? 'space-y-3' : ''}>
-                                      {/* Remaining visual media */}
-                                      {nonAudioMedia.slice(1).map((mediaItem, index) => (
-                                        <div key={`visual-${index}`}>
-                                          <MediaRenderer media={mediaItem} isFirstVideo={false} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
-                                        </div>
-                                      ))}
-                                    </div>
-                                    {/* Middle section: audio */}
-                                    <div className="space-y-3 mt-3 flex-1">
-                                      {/* Audio */}
-                                      {hasMultipleAudio ? (
-                                        <AudioPlaylistMinimal urls={audioUrls} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
-                                      ) : (
-                                        audioMedia.map((mediaItem, index) => (
-                                          <div key={`audio-${index}`}>
-                                            <MediaRenderer media={mediaItem} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
+                                  {/* Rest of content: title + audio + remaining metadata */}
+                                  <div className="min-w-0 flex flex-col">
+                                    {/* Remaining visual media */}
+                                    {nonAudioMedia.slice(1).length > 0 && (
+                                      <div className="space-y-[28px] mb-[28px]">
+                                        {nonAudioMedia.slice(1).map((mediaItem, index) => (
+                                          <div key={`visual-${index}`}>
+                                            <MediaRenderer media={mediaItem} isFirstVideo={false} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
                                           </div>
-                                        ))
-                                      )}
-                                    </div>
-                                    {/* Bottom section: metadata */}
+                                        ))}
+                                      </div>
+                                    )}
+                                    {/* Title (only when audio is present) */}
+                                    {audioMedia.length > 0 && (
+                                      <div className="mb-[28px]">
+                                        <ProjectMetadataSplit project={selectedProject} showTitle={true} />
+                                      </div>
+                                    )}
+                                    {/* Audio */}
+                                    {audioMedia.length > 0 && (
+                                      <div className="mb-[28px]">
+                                        {hasMultipleAudio ? (
+                                          <AudioPlaylistMinimal urls={audioUrls} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
+                                        ) : (
+                                          audioMedia.map((mediaItem, index) => (
+                                            <div key={`audio-${index}`}>
+                                              <MediaRenderer media={mediaItem} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
+                                            </div>
+                                          ))
+                                        )}
+                                      </div>
+                                    )}
+                                    {/* Metadata (full when no audio, description/tags/year when audio) */}
                                     <div>
-                                      <ProjectMetadata project={selectedProject} />
+                                      {audioMedia.length > 0 ? (
+                                        /* Only description, tags, year - title already shown above audio */
+                                        <ProjectMetadataSplit project={selectedProject} showTitle={false} />
+                                      ) : (
+                                        /* No audio - show full metadata including title */
+                                        <ProjectMetadata project={selectedProject} />
+                                      )}
                                     </div>
                                   </div>
                                 </div>
