@@ -20,8 +20,10 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
 
   const [aspectRatio, setAspectRatio] = useState<number>(initialAspectRatio);
   const [metadataLoaded, setMetadataLoaded] = useState(!!cachedDimensions);
-  // If video was preloaded (has cached dimensions), assume first frame is also loaded
+  // If video was preloaded (has cached dimensions), the first frame is guaranteed to be loaded
+  // because the preloader waits for 'loadeddata' event before caching
   const [hasFirstFrame, setHasFirstFrame] = useState(!!cachedDimensions);
+  const [shouldAutoPlay, setShouldAutoPlay] = useState(autoPlay);
   const { pauseForMedia, resumeAfterMedia } = useAudioPlayer();
 
   // Use ref to always have access to latest functions
@@ -56,7 +58,8 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
     const handlePause = () => setIsPaused(true);
     const handleLoadedMetadata = () => {
       if (video.videoWidth && video.videoHeight) {
-        setAspectRatio(video.videoWidth / video.videoHeight);
+        const newAspectRatio = video.videoWidth / video.videoHeight;
+        setAspectRatio(newAspectRatio);
         setMetadataLoaded(true);
       }
       // Check if first frame is also ready at this point
@@ -66,22 +69,55 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
     };
     const handleLoadedData = () => {
       setHasFirstFrame(true);
+      // Auto-play once first frame is ready
+      if (shouldAutoPlay && video.paused) {
+        video.play().catch(() => {
+          // Ignore autoplay errors (e.g., user interaction required)
+        });
+      }
     };
+
+    // Force load the video by setting currentTime
+    // This triggers the browser to decode and display the first frame
+    if (cachedDimensions && video.readyState === 0) {
+      video.load();
+      // Try to seek to start to force first frame decode
+      video.currentTime = 0.001;
+    }
 
     // Check if metadata is already loaded (from browser cache)
     if (video.readyState >= 1 && video.videoWidth && video.videoHeight) {
-      setAspectRatio(video.videoWidth / video.videoHeight);
+      const newAspectRatio = video.videoWidth / video.videoHeight;
+      setAspectRatio(newAspectRatio);
       setMetadataLoaded(true);
     }
-    // Check if first frame is already available (from browser cache)
+    // Check if first frame is already available (from browser cache or preloader)
     if (video.readyState >= 2) {
       setHasFirstFrame(true);
+      // Auto-play if ready immediately
+      if (shouldAutoPlay && video.paused) {
+        video.play().catch(() => {
+          // Ignore autoplay errors
+        });
+      }
+    } else if (cachedDimensions && shouldAutoPlay) {
+      // Video was preloaded, so first frame should be in browser cache
+      // Try to play immediately, the browser will handle it
+      video.play().catch(() => {
+        // Ignore autoplay errors
+      });
     }
 
     // Add a small timeout fallback to check readyState again
     const checkReadyStateTimeout = setTimeout(() => {
       if (video.readyState >= 2) {
         setHasFirstFrame(true);
+        // Auto-play if ready after timeout
+        if (shouldAutoPlay && video.paused) {
+          video.play().catch(() => {
+            // Ignore autoplay errors
+          });
+        }
       }
     }, 50);
 
@@ -126,21 +162,20 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
           className={`block w-full h-auto ${isWideLandscape ? 'min-w-[65vw] max-h-[80vh]' : ''} ${is4by3Landscape ? 'max-h-[80vh]' : ''} ${isSquare ? 'max-h-[70vh]' : ''} ${isPortrait ? 'max-h-[75vh]' : ''}`}
           style={{ aspectRatio: aspectRatio, maxWidth: '100%' }}
         >
-          {/* Black placeholder shown only when video not ready AND not cached */}
-          {!hasFirstFrame && !cachedDimensions && (
-            <div className="absolute inset-0 bg-black" />
-          )}
           <video
             ref={videoRef}
             src={url}
             controls={showControls}
-            autoPlay={autoPlay}
             loop
             controlsList="nodownload noplaybackrate"
             className="block w-full h-auto"
-            style={{ display: 'block', maxWidth: '100%' }}
-            preload="auto"
+            style={{
+              display: 'block',
+              maxWidth: '100%'
+            }}
+            preload="metadata"
             playsInline
+            muted={false}
           >
             Your browser does not support the video tag.
           </video>

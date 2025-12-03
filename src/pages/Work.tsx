@@ -281,6 +281,19 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
     return () => setOpenProjectHandler(null);
   }, [setOpenProjectHandler]);
 
+  // Listen for custom event to open project (from List page)
+  useEffect(() => {
+    const handleOpenProject = (event: CustomEvent<string>) => {
+      const projectTitle = event.detail;
+      const project = projects.find(p => p.title === projectTitle);
+      if (project) {
+        setSelectedProject(project);
+      }
+    };
+    window.addEventListener('openProject', handleOpenProject as EventListener);
+    return () => window.removeEventListener('openProject', handleOpenProject as EventListener);
+  }, []);
+
   // Reset detail view scroll position when opening project
   useEffect(() => {
     if (selectedProject !== null && detailScrollRef.current) {
@@ -403,7 +416,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="inline-block w-full">
+                    <div className="inline-block">
                       <div>
                         {(() => {
                           const { audioMedia, nonAudioMedia, hasMultipleAudio } = getDetailMedia(selectedProject);

@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { projects } from '@/data/projects';
 
-// Global cache to store video dimensions after preloading
+// Global cache to store video dimensions and preloaded video elements
 export const videoMetadataCache = new Map<string, { width: number; height: number }>();
+export const preloadedVideoElements = new Map<string, HTMLVideoElement>();
 
-// Preload video metadata for faster detail view loading
-// Metadata is very light (~5-20KB per video) and gives us dimensions for proper sizing
+// Preload all videos - load first frame and keep elements in DOM
 export function useVideoPreloader() {
   const hasStarted = useRef(false);
 
@@ -13,20 +13,28 @@ export function useVideoPreloader() {
     if (hasStarted.current) return;
     hasStarted.current = true;
 
-    // Collect all video URLs from projects (excluding thumbnails which are already loaded)
+    // Collect all video URLs from projects
     const videoUrls: string[] = [];
     projects.forEach(project => {
       project.media.forEach(media => {
-        if (media.type === 'video' &&
-            !videoMetadataCache.has(media.url) &&
-            !media.url.toLowerCase().includes('_thumbnail.')) {
+        if (media.type === 'video' && !media.url.toLowerCase().includes('_thumbnail.')) {
           videoUrls.push(media.url);
         }
       });
     });
 
-    // Preload videos in batches to avoid overwhelming the browser
-    const BATCH_SIZE = 4;
+    // Create hidden container for preloaded videos
+    const container = document.createElement('div');
+    container.id = 'video-preload-container';
+    container.style.position = 'fixed';
+    container.style.top = '-9999px';
+    container.style.left = '-9999px';
+    container.style.visibility = 'hidden';
+    container.style.pointerEvents = 'none';
+    document.body.appendChild(container);
+
+    // Preload videos in batches
+    const BATCH_SIZE = 3;
     let currentIndex = 0;
 
     const preloadBatch = () => {
@@ -34,54 +42,53 @@ export function useVideoPreloader() {
       if (batch.length === 0) return;
 
       batch.forEach(url => {
-        if (videoMetadataCache.has(url)) return;
+        if (preloadedVideoElements.has(url)) return;
 
         const video = document.createElement('video');
-        video.preload = 'auto'; // Changed from 'metadata' to 'auto' to load first frame
+        video.preload = 'auto'; // Changed to 'auto' for faster/more aggressive preloading
         video.muted = true;
         video.playsInline = true;
-        video.style.display = 'none';
+        video.crossOrigin = 'anonymous';
 
-        const cleanup = () => {
-          if (video.parentNode) {
-            video.parentNode.removeChild(video);
-          }
-        };
-
-        // Wait for first frame to be loaded (loadeddata), not just metadata
-        video.addEventListener('loadeddata', () => {
-          // Cache the dimensions
+        // When metadata loads, cache dimensions
+        video.addEventListener('loadedmetadata', () => {
           if (video.videoWidth && video.videoHeight) {
             videoMetadataCache.set(url, {
               width: video.videoWidth,
               height: video.videoHeight
             });
           }
-          cleanup();
-        }, { once: true });
+        });
 
-        video.addEventListener('error', cleanup, { once: true });
+        // When first frame loads, keep the element
+        video.addEventListener('loadeddata', () => {
+          preloadedVideoElements.set(url, video);
+        });
 
-        // Fallback cleanup after 20 seconds
-        setTimeout(cleanup, 20000);
+        video.addEventListener('error', (e) => {
+          console.error(`[Preloader] Error loading ${url.substring(url.lastIndexOf('/') + 1)}:`, e);
+        });
 
         video.src = url;
-        document.body.appendChild(video);
+        container.appendChild(video);
       });
 
       currentIndex += BATCH_SIZE;
 
-      // Schedule next batch with delay to not block main thread
       if (currentIndex < videoUrls.length) {
-        setTimeout(preloadBatch, 300);
+        setTimeout(preloadBatch, 200); // Reduced from 500ms to 200ms for faster loading
       }
     };
 
-    // Start preloading after a short delay to not block initial render
-    const timeoutId = setTimeout(preloadBatch, 500);
+    // Start preloading immediately (reduced from 1000ms)
+    setTimeout(preloadBatch, 100);
 
     return () => {
-      clearTimeout(timeoutId);
+      // Cleanup on unmount
+      const cont = document.getElementById('video-preload-container');
+      if (cont) {
+        document.body.removeChild(cont);
+      }
     };
   }, []);
 }
@@ -89,4 +96,9 @@ export function useVideoPreloader() {
 // Helper to get cached dimensions
 export function getCachedVideoDimensions(url: string): { width: number; height: number } | null {
   return videoMetadataCache.get(url) || null;
+}
+
+// Helper to get preloaded video element
+export function getPreloadedVideo(url: string): HTMLVideoElement | null {
+  return preloadedVideoElements.get(url) || null;
 }

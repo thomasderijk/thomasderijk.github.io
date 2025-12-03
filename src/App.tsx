@@ -3,13 +3,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
+import { HashRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 // Icons replaced with Unicode symbols - no dependencies needed
 import { useProjectSort } from "@/hooks/use-project-sort";
+import { useVideoPreloader } from "@/hooks/use-video-preloader";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
 import { HoverableTrackTitle } from "@/components/HoverableTrackTitle";
 import { NavSpacer } from "@/components/NavSpacer";
 import { BottomNavSpacer } from "@/components/BottomNavSpacer";
+import { NavLink } from "@/components/NavLink";
 import { CommercialProvider } from "@/contexts/CommercialContext";
 import { ProjectDetailProvider, useProjectDetail } from "@/contexts/ProjectDetailContext";
 import { AudioPlayerProvider, useAudioPlayer } from "@/contexts/AudioPlayerContext";
@@ -55,13 +57,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const isHome = location.pathname === '/';
   const { isRandomized, toggleRandomize } = useProjectSort();
   const { isProjectOpen, closeHandler, openProjectHandler } = useProjectDetail();
+
+  // Preload all videos on app load
+  useVideoPreloader();
   const { isPlaying, togglePlay, nextTrack, previousTrack, currentTime, duration, seek, currentTrack, getTrackTitle, closePlayer } = useAudioPlayer();
   const [isPlayerHovered, setIsPlayerHovered] = useState(false);
   const { isInverted, toggleInvert } = useInvert();
   const { triggerShuffle } = useShuffle();
   // Show shuffle button on all pages when project is not open
   const showShuffleButton = !isProjectOpen;
-  const allowScroll = location.pathname === '/work' || location.pathname === '/audio' || location.pathname === '/visual' || location.pathname === '/';
+  const allowScroll = location.pathname === '/work' || location.pathname === '/audio' || location.pathname === '/visual' || location.pathname === '/' || location.pathname === '/links' || location.pathname === '/list';
   const iframeLoaded = true; // No iframe anymore, always show content
   const [workMenuOpen, setWorkMenuOpen] = useState(false);
   const isWorkPage = location.pathname === '/work' || location.pathname === '/audio' || location.pathname === '/visual' || location.pathname === '/';
@@ -371,28 +376,25 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           {/* Left: menu items */}
           <div className="flex items-center gap-0">
             <div className="relative">
-              <Link
+              <NavLink
                 to="/work"
                 onClick={() => {
                   // Keep menu open when clicking (don't toggle it closed)
                   setWorkMenuOpen(true);
-                  if (isProjectOpen && closeHandler) {
-                    closeHandler();
-                  }
                 }}
                 onMouseEnter={() => setWorkMenuOpen(true)}
                 onMouseLeave={() => setWorkMenuOpen(false)}
                 className="font-display font-light whitespace-nowrap pointer-events-auto"
               >
                 <StaggeredMirrorText text="work" isActive={isWorkPage} forcedVariant={topNavColors[0]} />
-              </Link>
+              </NavLink>
               {workMenuOpen && (
                 <div
                   className="absolute top-full left-0 flex flex-col gap-0 mt-0"
                   onMouseEnter={() => setWorkMenuOpen(true)}
                   onMouseLeave={() => setWorkMenuOpen(false)}
                 >
-                  <Link
+                  <NavLink
                     to="/audio"
                     className="font-display font-light whitespace-nowrap pointer-events-auto"
                     onClick={(e) => {
@@ -401,8 +403,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     }}
                   >
                     <StaggeredMirrorText text="audio" isActive={location.pathname === '/audio'} forcedVariant={topNavColors[1]} />
-                  </Link>
-                  <Link
+                  </NavLink>
+                  <NavLink
                     to="/visual"
                     className="font-display font-light whitespace-nowrap pointer-events-auto"
                     onClick={(e) => {
@@ -411,8 +413,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     }}
                   >
                     <StaggeredMirrorText text="visual" isActive={location.pathname === '/visual'} forcedVariant={topNavColors[2]} />
-                  </Link>
-                  <Link
+                  </NavLink>
+                  <NavLink
                     to="/list"
                     className="font-display font-light whitespace-nowrap pointer-events-auto"
                     onClick={(e) => {
@@ -421,18 +423,24 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     }}
                   >
                     <StaggeredMirrorText text="list" isActive={location.pathname === '/list'} forcedVariant={topNavColors[3]} />
-                  </Link>
+                  </NavLink>
                 </div>
               )}
             </div>
             <NavSpacer regenerateKey={navSpacerKey1} />
-            <Link to="/about" className="font-display font-light pointer-events-auto whitespace-nowrap">
+            <NavLink
+              to="/about"
+              className="font-display font-light pointer-events-auto whitespace-nowrap"
+            >
               <StaggeredMirrorText text="about" isActive={location.pathname === '/about'} forcedVariant={topNavColors[4]} />
-            </Link>
+            </NavLink>
             <NavSpacer regenerateKey={navSpacerKey2} />
-            <Link to="/links" className="font-display font-light pointer-events-auto whitespace-nowrap">
+            <NavLink
+              to="/links"
+              className="font-display font-light pointer-events-auto whitespace-nowrap"
+            >
               <StaggeredMirrorText text="links" isActive={location.pathname === '/links'} forcedVariant={topNavColors[5]} />
-            </Link>
+            </NavLink>
           </div>
 
           {/* Right: shuffle button and close button */}
