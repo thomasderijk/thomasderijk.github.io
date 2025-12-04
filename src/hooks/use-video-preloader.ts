@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { projects } from '@/data/projects';
 
-// Global cache to store video dimensions and preloaded video elements
+// Global cache to store video dimensions, preloaded video elements, and poster images
 export const videoMetadataCache = new Map<string, { width: number; height: number }>();
 export const preloadedVideoElements = new Map<string, HTMLVideoElement>();
+export const videoPosterCache = new Map<string, string>(); // stores data URLs of first frames
 
 // Preload all videos - load first frame and keep elements in DOM
 export function useVideoPreloader() {
@@ -60,9 +61,24 @@ export function useVideoPreloader() {
           }
         });
 
-        // When first frame loads, keep the element
+        // When first frame loads, capture it as poster and keep the element
         video.addEventListener('loadeddata', () => {
           preloadedVideoElements.set(url, video);
+
+          // Capture first frame as poster image
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const posterDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+              videoPosterCache.set(url, posterDataUrl);
+            }
+          } catch (e) {
+            // Ignore canvas errors (CORS issues, etc.)
+          }
         });
 
         video.addEventListener('error', (e) => {
@@ -101,4 +117,9 @@ export function getCachedVideoDimensions(url: string): { width: number; height: 
 // Helper to get preloaded video element
 export function getPreloadedVideo(url: string): HTMLVideoElement | null {
   return preloadedVideoElements.get(url) || null;
+}
+
+// Helper to get poster image
+export function getVideoPoster(url: string): string | null {
+  return videoPosterCache.get(url) || null;
 }

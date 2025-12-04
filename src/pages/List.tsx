@@ -4,6 +4,7 @@ import { projects } from '@/data/projects';
 import { Project, MediaItem } from '@/types/project';
 import { HoverableTrackTitle } from '@/components/HoverableTrackTitle';
 import { useProjectDetail } from '@/contexts/ProjectDetailContext';
+import { ProjectMetadata, ProjectMetadataSplit } from '@/components/ProjectMetadata';
 import { tagIcons } from '@/config/tagIcons';
 import { MediaRenderer } from '@/components/MediaRenderer';
 import { AudioPlaylistMinimal } from '@/components/AudioPlaylistMinimal';
@@ -13,172 +14,26 @@ type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'blac
 const TOP_PADDING = 56;
 const SIDE_PADDING = 28;
 
-// Helper to generate random colors for metadata
-const generateMetadataColors = () => {
-  const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
-  const selectedColors: ColorOption[] = [];
-
-  // Title (index 0) - random choice
-  selectedColors[0] = options[Math.floor(Math.random() * options.length)];
-
-  // Description (index 1) - must differ from title (index 0)
-  let availableForDescription = options.filter(opt => opt !== selectedColors[0]);
-  selectedColors[1] = availableForDescription[Math.floor(Math.random() * availableForDescription.length)];
-
-  // Tags (index 2) - must differ from description (index 1)
-  let availableForTags = options.filter(opt => opt !== selectedColors[1]);
-  selectedColors[2] = availableForTags[Math.floor(Math.random() * availableForTags.length)];
-
-  // Year (index 3) - must differ from tags (index 2)
-  let availableForYear = options.filter(opt => opt !== selectedColors[2]);
-  selectedColors[3] = availableForYear[Math.floor(Math.random() * availableForYear.length)];
-
-  return selectedColors;
-};
-
-// Helper to get colors from variant
-const getColorsFromVariant = (variant: ColorOption) => {
-  const bgColor =
-    variant === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
-    variant === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
-    variant === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
-    'hsl(0, 0%, 80%)';
-  const textColor =
-    variant === 'white-on-black' || variant === 'white-on-dark'
-      ? 'hsl(0, 0%, 100%)'
-      : 'hsl(0, 0%, 0%)';
-  return { bgColor, textColor };
-};
-
-const ProjectMetadata = ({ project }: { project: Project }) => {
-  const [colors] = useState<ColorOption[]>(() => generateMetadataColors());
-
-  const titleColors = getColorsFromVariant(colors[0]);
-  const descriptionColors = getColorsFromVariant(colors[1]);
-  const tagsColors = getColorsFromVariant(colors[2]);
-  const yearColors = getColorsFromVariant(colors[3]);
-
-  return (
-    <div style={{ fontSize: 0, lineHeight: 0 }}>
-      {/* Title */}
-      <div>
-        <span style={{
-          backgroundColor: titleColors.bgColor,
-          color: titleColors.textColor,
-          padding: '2px 4px',
-          display: 'inline-block',
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 300,
-          fontSize: '16px',
-          lineHeight: 1.5,
-        }}>
-          {project.title}
-        </span>
-      </div>
-
-      {/* Description */}
-      {project.description && (
-        <div>
-          <span style={{
-            backgroundColor: descriptionColors.bgColor,
-            color: descriptionColors.textColor,
-            padding: '2px 4px',
-            display: 'inline-block',
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 300,
-            fontSize: '16px',
-            lineHeight: 1.5,
-          }}>
-            {project.description}
-          </span>
-        </div>
-      )}
-
-      {/* Tags and Year */}
-      <div style={{ display: 'flex', gap: 0 }}>
-        <span style={{
-          backgroundColor: tagsColors.bgColor,
-          color: tagsColors.textColor,
-          padding: '2px 4px',
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 300,
-          fontSize: '16px',
-          lineHeight: 1.5,
-        }}>
-          {project.tags.join(', ')}
-        </span>
-        <span style={{
-          backgroundColor: yearColors.bgColor,
-          color: yearColors.textColor,
-          padding: '2px 4px',
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 300,
-          fontSize: '16px',
-          lineHeight: 1.5,
-        }}>
-          {project.date}
-        </span>
-      </div>
-    </div>
-  );
-};
-
-const ProjectMetadataSplit = ({ project, showTitle }: { project: Project; showTitle: boolean }) => {
-  const [colors] = useState<ColorOption[]>(() => generateMetadataColors());
-
-  const titleColors = getColorsFromVariant(colors[0]);
-  const descriptionColors = getColorsFromVariant(colors[1]);
-  const tagsColors = getColorsFromVariant(colors[2]);
-  const yearColors = getColorsFromVariant(colors[3]);
-
-  const spanStyle = {
-    padding: '2px 4px',
-    display: 'inline-block' as const,
-    fontFamily: "'Inter', sans-serif",
-    fontWeight: 300,
-    fontSize: '16px',
-    lineHeight: 1.5,
-  };
-
-  if (showTitle) {
-    return (
-      <div style={{ fontSize: 0, lineHeight: 0 }}>
-        <div>
-          <span style={{ ...spanStyle, backgroundColor: titleColors.bgColor, color: titleColors.textColor }}>
-            {project.title}
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ fontSize: 0, lineHeight: 0 }}>
-      {project.description && (
-        <div>
-          <span style={{ ...spanStyle, backgroundColor: descriptionColors.bgColor, color: descriptionColors.textColor }}>
-            {project.description}
-          </span>
-        </div>
-      )}
-      <div style={{ display: 'flex', gap: 0 }}>
-        <span style={{ ...spanStyle, backgroundColor: tagsColors.bgColor, color: tagsColors.textColor }}>
-          {project.tags.join(', ')}
-        </span>
-        <span style={{ ...spanStyle, backgroundColor: yearColors.bgColor, color: yearColors.textColor }}>
-          {project.date}
-        </span>
-      </div>
-    </div>
-  );
-};
-
 const List = () => {
   const navigate = useNavigate();
   const { setIsProjectOpen, setCloseHandler, setOpenProjectHandler } = useProjectDetail();
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Detect mobile for icon-only tag display
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && (window.innerWidth < 768)
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const getColors = (variant: ColorOption): { bg: string; text: string } => {
     const bgColor =
@@ -429,19 +284,26 @@ const List = () => {
                 onMouseEnter={() => setHoveredProject(project.title)}
                 onMouseLeave={() => setHoveredProject(null)}
               >
-              {/* Project Title with Hoverable Effect */}
-              <HoverableTrackTitle
-                title={project.title}
-                backgroundColor={titleColors.bg}
-                textColor={titleColors.text}
-                height={28}
-                onClick={() => handleProjectClick(project.title)}
-              />
+              {/* Project Title with Hoverable Effect - allows shrinking at intersection point */}
+              <div style={{
+                minWidth: 0,
+                flex: '0 1 auto',
+                overflow: 'hidden',
+                display: 'flex'
+              }}>
+                <HoverableTrackTitle
+                  title={project.title}
+                  backgroundColor={titleColors.bg}
+                  textColor={titleColors.text}
+                  height={28}
+                  onClick={() => handleProjectClick(project.title)}
+                />
+              </div>
 
-              {/* Spacer to push tags and year to the right */}
-              <div style={{ flex: 1 }} />
+              {/* Spacer to push tags and year to the right - collapses when needed */}
+              <div style={{ flex: '1 1 auto', minWidth: 0 }} />
 
-              {/* Tags */}
+              {/* Tags - icon only on mobile, full text on desktop */}
               {project.tags.length > 0 && projectColors && (
                 <>
                   {project.tags.map((tag, index) => {
@@ -463,9 +325,11 @@ const List = () => {
                           gap: '4px',
                           fontFamily: "'Inter', sans-serif",
                           fontWeight: 300,
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap',
                         }}
                       >
-                        {tag}
+                        {!isMobile && tag}
                         <span>{icon}</span>
                       </div>
                     );
@@ -486,6 +350,8 @@ const List = () => {
                   alignItems: 'center',
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 300,
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {project.date}

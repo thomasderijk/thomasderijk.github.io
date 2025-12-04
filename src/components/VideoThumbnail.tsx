@@ -4,43 +4,49 @@ interface VideoThumbnailProps {
   src: string;
   alt: string;
   className?: string;
+  loadDelay?: number; // Optional stagger delay
 }
 
-export function VideoThumbnail({ src, alt, className = '' }: VideoThumbnailProps) {
+// Simple aspect ratio detection from common thumbnail sizes
+const estimateAspectRatio = (src: string): number => {
+  // Most thumbnails are square or close to square for grid display
+  // Default to 1:1 (square) which is common for grid thumbnails
+  return 1;
+};
+
+export function VideoThumbnail({ src, alt, className = '', loadDelay = 0 }: VideoThumbnailProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const loadingBatchRef = useRef<NodeJS.Timeout | null>(null);
 
   // Determine if this is an image or video based on file extension
   const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(src);
 
-  // Simple intersection observer - load when in viewport
+  // Estimate aspect ratio for placeholder
+  const aspectRatio = estimateAspectRatio(src);
+
+  // Load all thumbnails immediately with stagger delay
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    loadingBatchRef.current = setTimeout(() => {
+      setIsLoaded(true);
+    }, loadDelay);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect(); // Load once and stop observing
-        }
-      },
-      {
-        rootMargin: '50px', // Start loading slightly before entering viewport
+    return () => {
+      if (loadingBatchRef.current) {
+        clearTimeout(loadingBatchRef.current);
       }
-    );
+    };
+  }, [loadDelay]);
 
-    observer.observe(container);
+  // Detect if device is mobile (user agent only, not window width)
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    return () => observer.disconnect();
-  }, []);
-
-  // Handle hover play/pause for videos
+  // Handle hover play/pause for videos (desktop only)
   const handleMouseEnter = () => {
     const video = videoRef.current;
-    if (video && !isImage) {
+    if (video && !isImage && !isMobile) {
       video.play().catch(() => {
         // Ignore play errors
       });
@@ -49,14 +55,41 @@ export function VideoThumbnail({ src, alt, className = '' }: VideoThumbnailProps
 
   const handleMouseLeave = () => {
     const video = videoRef.current;
-    if (video && !isImage) {
+    if (video && !isImage && !isMobile) {
       video.pause();
     }
   };
 
+  // Autoplay on mobile when video is visible
+  useEffect(() => {
+    if (!isMobile || isImage) return;
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleCanPlay = () => {
+      video.play().catch(() => {
+        // Ignore autoplay errors
+      });
+    };
+
+    video.addEventListener('canplay', handleCanPlay);
+
+    // Try to play immediately if already can play
+    if (video.readyState >= 3) {
+      video.play().catch(() => {
+        // Ignore autoplay errors
+      });
+    }
+
+    return () => {
+      video.removeEventListener('canplay', handleCanPlay);
+    };
+  }, [isMobile, isImage]);
+
   // Set random start time for videos
   useEffect(() => {
-    if (!isVisible || isImage) return;
+    if (isImage) return;
 
     const video = videoRef.current;
     if (!video) return;
@@ -72,7 +105,7 @@ export function VideoThumbnail({ src, alt, className = '' }: VideoThumbnailProps
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
-  }, [isVisible, isImage]);
+  }, [isImage]);
 
   return (
     <div
@@ -81,37 +114,38 @@ export function VideoThumbnail({ src, alt, className = '' }: VideoThumbnailProps
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {!isVisible && (
-        <div className={className} style={{ aspectRatio: 1, backgroundColor: 'hsl(0, 0%, 10%)' }} />
-      )}
-      {isVisible && (
-        isImage ? (
-          <img
-            ref={imageRef}
-            src={src}
-            alt={alt}
-            className={className}
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <video
-            ref={videoRef}
-            src={src}
-            className={className}
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            disablePictureInPicture
-            disableRemotePlayback
-            aria-label={alt}
-            style={{
-              objectFit: 'cover',
-              backgroundColor: 'transparent'
-            }}
-          />
-        )
+      {isImage ? (
+        <img
+          ref={imageRef}
+          src={src}
+          alt={alt}
+          className={className}
+          loading="eager"
+          decoding="async"
+          style={{
+            opacity: 1,
+            transition: 'opacity 0.3s ease-in-out'
+          }}
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          src={src}
+          className={className}
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          disablePictureInPicture
+          disableRemotePlayback
+          aria-label={alt}
+          style={{
+            objectFit: 'cover',
+            backgroundColor: 'transparent',
+            opacity: 1,
+            transition: 'opacity 0.3s ease-in-out'
+          }}
+        />
       )}
     </div>
   );

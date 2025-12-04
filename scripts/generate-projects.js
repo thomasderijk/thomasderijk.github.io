@@ -156,18 +156,19 @@ function inferMediaType(filename) {
       let youtubeUrl = null;
       let yearFromFile = null;
       let layoutFromFile = null;
-      
+      let allowSimultaneousPlaybackFromFile = null;
+
       try {
         const dataPath = path.join(folderPath, 'data.txt');
         const stat = await fs.stat(dataPath).catch(() => null);
         if (stat && stat.isFile()) {
           const raw = await fs.readFile(dataPath, 'utf8');
           const lines = raw.split('\n');
-          
+
           for (const line of lines) {
             const trimmed = line.trim();
             if (!trimmed) continue;
-            
+
             if (trimmed.startsWith('title:')) {
               titleFromFile = trimmed.substring(6).trim();
             } else if (trimmed.startsWith('description:')) {
@@ -189,20 +190,23 @@ function inferMediaType(filename) {
                   .replace(/[?&]dl=[01]/, '')
                   .replace(/\?/, '?raw=1&')
                   .replace(/&raw=1&/, '?raw=1&');
-                
+
                 let finalUrl = convertedUrl;
                 if (!finalUrl.includes('?')) {
                   finalUrl += '?raw=1';
                 } else if (!finalUrl.includes('raw=1')) {
                   finalUrl += '&raw=1';
                 }
-                
+
                 dropboxUrls.push(finalUrl);
               }
             } else if (trimmed.startsWith('youtube:')) {
               youtubeUrl = trimmed.substring(8).trim();
             } else if (trimmed.startsWith('layout:')) {
               layoutFromFile = trimmed.substring(7).trim();
+            } else if (trimmed.startsWith('allowSimultaneousPlayback:')) {
+              const value = trimmed.substring(26).trim().toLowerCase();
+              allowSimultaneousPlaybackFromFile = value === 'true';
             }
           }
         }
@@ -378,6 +382,7 @@ function inferMediaType(filename) {
         media,
         ...(description ? { description } : {}),
         ...(layoutFromFile ? { layout: layoutFromFile } : {}),
+        ...(allowSimultaneousPlaybackFromFile !== null ? { allowSimultaneousPlayback: allowSimultaneousPlaybackFromFile } : {}),
       };
 
       projects.push(project);

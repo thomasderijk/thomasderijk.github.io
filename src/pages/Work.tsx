@@ -5,6 +5,7 @@ import { SegmentedBorder } from '@/components/SegmentedBorder';
 import { VideoThumbnail } from '@/components/VideoThumbnail';
 import { MediaRenderer } from '@/components/MediaRenderer';
 import { TagDisplay } from '@/components/TagDisplay';
+import { ProjectMetadata, ProjectMetadataSplit } from '@/components/ProjectMetadata';
 import { Project, MediaItem } from '@/types/project';
 import { useProjectSort } from '@/hooks/use-project-sort';
 import { useCommercial } from '@/contexts/CommercialContext';
@@ -15,206 +16,6 @@ import { AudioPlaylistMinimal } from '@/components/AudioPlaylistMinimal';
 const TOP_PADDING = 56;
 const SIDE_PADDING = 28;
 const GRID_GAP = 28;
-
-// Helper component for project metadata with colored backgrounds
-type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
-
-// Helper to generate random colors for metadata
-const generateMetadataColors = () => {
-  const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
-  const selectedColors: ColorOption[] = [];
-
-  // Title (index 0) - random choice
-  selectedColors[0] = options[Math.floor(Math.random() * options.length)];
-
-  // Description (index 1) - must differ from title (index 0)
-  let availableForDescription = options.filter(opt => opt !== selectedColors[0]);
-  selectedColors[1] = availableForDescription[Math.floor(Math.random() * availableForDescription.length)];
-
-  // Tags (index 2) - must differ from description (index 1)
-  let availableForTags = options.filter(opt => opt !== selectedColors[1]);
-  selectedColors[2] = availableForTags[Math.floor(Math.random() * availableForTags.length)];
-
-  // Year (index 3) - must differ from tags (index 2)
-  let availableForYear = options.filter(opt => opt !== selectedColors[2]);
-  selectedColors[3] = availableForYear[Math.floor(Math.random() * availableForYear.length)];
-
-  return selectedColors;
-};
-
-// Helper to get colors from variant
-const getColorsFromVariant = (variant: ColorOption) => {
-  const bgColor =
-    variant === 'white-on-black' ? 'hsl(0, 0%, 10%)' :
-    variant === 'black-on-white' ? 'hsl(0, 0%, 90%)' :
-    variant === 'white-on-dark' ? 'hsl(0, 0%, 20%)' :
-    'hsl(0, 0%, 80%)';
-  const textColor =
-    variant === 'white-on-black' || variant === 'white-on-dark'
-      ? 'hsl(0, 0%, 100%)'
-      : 'hsl(0, 0%, 0%)';
-  return { bgColor, textColor };
-};
-
-const ProjectMetadata = ({ project }: { project: Project }) => {
-  // Generate 4 random colors ensuring adjacent colors are different (same logic as nav bar)
-  const [colors] = useState<ColorOption[]>(() => generateMetadataColors());
-
-  const titleColors = getColorsFromVariant(colors[0]);
-  const descriptionColors = getColorsFromVariant(colors[1]);
-  const tagsColors = getColorsFromVariant(colors[2]);
-  const yearColors = getColorsFromVariant(colors[3]);
-
-  return (
-    <div style={{ fontSize: 0, lineHeight: 0 }}>
-      {/* Title */}
-      <div>
-        <span style={{
-          backgroundColor: titleColors.bgColor,
-          color: titleColors.textColor,
-          padding: '2px 4px',
-          display: 'inline-block',
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 300,
-          fontSize: '16px',
-          lineHeight: 1.5,
-        }}>
-          {project.title}
-        </span>
-      </div>
-
-      {/* Description */}
-      {project.description && (
-        <div>
-          <span style={{
-            backgroundColor: descriptionColors.bgColor,
-            color: descriptionColors.textColor,
-            padding: '2px 4px',
-            display: 'inline-block',
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 300,
-            fontSize: '16px',
-            lineHeight: 1.5,
-          }}>
-            {project.description}
-          </span>
-        </div>
-      )}
-
-      {/* Tags */}
-      <div>
-        <span style={{
-          backgroundColor: tagsColors.bgColor,
-          color: tagsColors.textColor,
-          padding: '2px 4px',
-          display: 'inline-block',
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 300,
-          fontSize: '16px',
-          lineHeight: 1.5,
-        }}>
-          {project.tags.map((tag, index) => (
-            <span key={tag}>
-              {index > 0 && " / "}
-              {tag.toLowerCase()}
-            </span>
-          ))}
-        </span>
-      </div>
-
-      {/* Year */}
-      <div>
-        <span style={{
-          backgroundColor: yearColors.bgColor,
-          color: yearColors.textColor,
-          padding: '2px 4px',
-          display: 'inline-block',
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 300,
-          fontSize: '16px',
-          lineHeight: 1.5,
-        }}>
-          {new Date(project.date).getFullYear()}
-        </span>
-      </div>
-    </div>
-  );
-};
-
-// Component for split metadata (title separate, rest together) - used in side-by-side audio layout
-const ProjectMetadataSplit = ({ project, showTitle }: { project: Project; showTitle: boolean }) => {
-  // Generate colors once and store them
-  const [colors] = useState<ColorOption[]>(() => generateMetadataColors());
-
-  const titleColors = getColorsFromVariant(colors[0]);
-  const descriptionColors = getColorsFromVariant(colors[1]);
-  const tagsColors = getColorsFromVariant(colors[2]);
-  const yearColors = getColorsFromVariant(colors[3]);
-
-  const spanStyle = {
-    padding: '2px 4px',
-    display: 'inline-block' as const,
-    fontFamily: "'Inter', sans-serif",
-    fontWeight: 300,
-    fontSize: '16px',
-    lineHeight: 1.5,
-  };
-
-  if (showTitle) {
-    // Just the title
-    return (
-      <div style={{ fontSize: 0, lineHeight: 0 }}>
-        <span style={{
-          ...spanStyle,
-          backgroundColor: titleColors.bgColor,
-          color: titleColors.textColor,
-        }}>
-          {project.title}
-        </span>
-      </div>
-    );
-  }
-
-  // Description, tags, and year
-  return (
-    <div style={{ fontSize: 0, lineHeight: 0 }}>
-      {project.description && (
-        <div>
-          <span style={{
-            ...spanStyle,
-            backgroundColor: descriptionColors.bgColor,
-            color: descriptionColors.textColor,
-          }}>
-            {project.description}
-          </span>
-        </div>
-      )}
-      <div>
-        <span style={{
-          ...spanStyle,
-          backgroundColor: tagsColors.bgColor,
-          color: tagsColors.textColor,
-        }}>
-          {project.tags.map((tag, index) => (
-            <span key={tag}>
-              {index > 0 && " / "}
-              {tag.toLowerCase()}
-            </span>
-          ))}
-        </span>
-      </div>
-      <div>
-        <span style={{
-          ...spanStyle,
-          backgroundColor: yearColors.bgColor,
-          color: yearColors.textColor,
-        }}>
-          {new Date(project.date).getFullYear()}
-        </span>
-      </div>
-    </div>
-  );
-};
 
 // Simple helper to get a random thumbnail from project
 const getThumbnailMedia = (project: Project): MediaItem | null => {
@@ -541,9 +342,13 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                   </div>
                 )}
                 <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-3 rounded-xl pointer-events-auto" style={{ gap: `${GRID_GAP}px` }}>
-                  {audioProjects.map((project) => {
+                  {audioProjects.map((project, index) => {
                     const key = `${project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${project.date}-${shuffleCount}`;
                     const isHovered = hoveredCard === key;
+                    const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    const shouldShowInfo = isHovered || isMobile;
+
+                    const cappedDelay = Math.min(index * 30, 300);
 
                     return (
                       <div
@@ -560,6 +365,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                             src={project.thumbnailMedia.url}
                             alt={project.title}
                             className="block w-full h-auto object-cover"
+                            loadDelay={cappedDelay}
                           />
                         ) : (
                           <div className="w-full aspect-square bg-background flex items-center justify-center">
@@ -569,14 +375,15 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
 
                         <SegmentedBorder isHovered={isHovered} />
 
-                        {/* Tags in top-right corner */}
-                        <TagDisplay tags={project.tags} isHovered={isHovered} />
+                        {/* Tags in top-right corner - always show on mobile */}
+                        <TagDisplay tags={project.tags} isHovered={shouldShowInfo} />
 
                         <div className="absolute inset-0 flex items-end justify-start pointer-events-none">
-                          {isHovered && (
+                          {/* Title - always show on mobile */}
+                          {shouldShowInfo && (
                             <GridCardTitle
                               text={project.title}
-                              isHovered={isHovered}
+                              isHovered={shouldShowInfo}
                               className="text-sm font-sans font-light text-foreground text-left leading-tight"
                             />
                           )}

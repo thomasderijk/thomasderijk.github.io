@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
-import { getCachedVideoDimensions } from '@/hooks/use-video-preloader';
+import { getCachedVideoDimensions, getVideoPoster } from '@/hooks/use-video-preloader';
 
 interface VideoPlayerProps {
   url: string;
@@ -12,8 +12,9 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Try to get cached dimensions immediately for instant sizing
+  // Try to get cached dimensions and poster immediately for instant sizing
   const cachedDimensions = getCachedVideoDimensions(url);
+  const posterUrl = getVideoPoster(url);
   const initialAspectRatio = cachedDimensions
     ? cachedDimensions.width / cachedDimensions.height
     : 16/9;
@@ -165,6 +166,7 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
           <video
             ref={videoRef}
             src={url}
+            poster={posterUrl || undefined}
             controls={showControls}
             loop
             controlsList="nodownload noplaybackrate"

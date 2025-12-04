@@ -165,6 +165,10 @@ export const HoverableTrackTitle = ({
         height: `${height}px`,
         display: 'flex',
         alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        maxWidth: '100%',
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

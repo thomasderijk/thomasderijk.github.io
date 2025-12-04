@@ -64,8 +64,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [isPlayerHovered, setIsPlayerHovered] = useState(false);
   const { isInverted, toggleInvert } = useInvert();
   const { triggerShuffle } = useShuffle();
-  // Show shuffle button on all pages when project is not open
-  const showShuffleButton = !isProjectOpen;
+  // Show shuffle button when close button is not visible (inverse of close button condition)
+  const isOnWorkPage = location.pathname === '/work' || location.pathname === '/audio' || location.pathname === '/visual' || location.pathname === '/' || location.pathname === '/list';
+  const showCloseButton = isProjectOpen && closeHandler && isOnWorkPage;
+  const showShuffleButton = !showCloseButton;
   const allowScroll = location.pathname === '/work' || location.pathname === '/audio' || location.pathname === '/visual' || location.pathname === '/' || location.pathname === '/links' || location.pathname === '/list';
   const iframeLoaded = true; // No iframe anymore, always show content
   const [workMenuOpen, setWorkMenuOpen] = useState(false);
@@ -75,8 +77,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
 
   // Generate nav colors with proper adjacency rules
-  // Index mapping: 0=work, 1=audio, 2=visual, 3=list, 4=about, 5=links
-  // Adjacency rules: work≠audio, audio≠visual, visual≠list, work≠about, about≠links
+  // Index mapping: 0=work, 1=overview, 2=audio, 3=visual, 4=about, 5=links
+  // Adjacency rules: work≠overview, overview≠audio, audio≠visual, work≠about, about≠links
   const generateNavColors = (): ColorOption[] => {
     const options: ColorOption[] = ['white-on-black', 'black-on-white', 'white-on-dark', 'black-on-light'];
     const colors: ColorOption[] = [];
@@ -84,17 +86,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     // 0: work - random choice
     colors[0] = options[Math.floor(Math.random() * options.length)];
 
-    // 1: audio - must differ from work (index 0)
-    let availableForAudio = options.filter(opt => opt !== colors[0]);
-    colors[1] = availableForAudio[Math.floor(Math.random() * availableForAudio.length)];
+    // 1: overview - must differ from work (index 0)
+    let availableForOverview = options.filter(opt => opt !== colors[0]);
+    colors[1] = availableForOverview[Math.floor(Math.random() * availableForOverview.length)];
 
-    // 2: visual - must differ from audio (index 1)
-    let availableForVisual = options.filter(opt => opt !== colors[1]);
-    colors[2] = availableForVisual[Math.floor(Math.random() * availableForVisual.length)];
+    // 2: audio - must differ from overview (index 1)
+    let availableForAudio = options.filter(opt => opt !== colors[1]);
+    colors[2] = availableForAudio[Math.floor(Math.random() * availableForAudio.length)];
 
-    // 3: list - must differ from visual (index 2)
-    let availableForList = options.filter(opt => opt !== colors[2]);
-    colors[3] = availableForList[Math.floor(Math.random() * availableForList.length)];
+    // 3: visual - must differ from audio (index 2)
+    let availableForVisual = options.filter(opt => opt !== colors[2]);
+    colors[3] = availableForVisual[Math.floor(Math.random() * availableForVisual.length)];
 
     // 4: about - must differ from work (index 0), since it's horizontally adjacent
     let availableForAbout = options.filter(opt => opt !== colors[0]);
@@ -395,6 +397,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   onMouseLeave={() => setWorkMenuOpen(false)}
                 >
                   <NavLink
+                    to="/list"
+                    className="font-display font-light whitespace-nowrap pointer-events-auto"
+                    onClick={(e) => {
+                      // Don't close menu on click, keep it open while still hovering
+                      e.stopPropagation();
+                    }}
+                  >
+                    <StaggeredMirrorText text="overview" isActive={location.pathname === '/list'} forcedVariant={topNavColors[1]} />
+                  </NavLink>
+                  <NavLink
                     to="/audio"
                     className="font-display font-light whitespace-nowrap pointer-events-auto"
                     onClick={(e) => {
@@ -402,7 +414,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                       e.stopPropagation();
                     }}
                   >
-                    <StaggeredMirrorText text="audio" isActive={location.pathname === '/audio'} forcedVariant={topNavColors[1]} />
+                    <StaggeredMirrorText text="audio" isActive={location.pathname === '/audio'} forcedVariant={topNavColors[2]} />
                   </NavLink>
                   <NavLink
                     to="/visual"
@@ -412,17 +424,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                       e.stopPropagation();
                     }}
                   >
-                    <StaggeredMirrorText text="visual" isActive={location.pathname === '/visual'} forcedVariant={topNavColors[2]} />
-                  </NavLink>
-                  <NavLink
-                    to="/list"
-                    className="font-display font-light whitespace-nowrap pointer-events-auto"
-                    onClick={(e) => {
-                      // Don't close menu on click, keep it open while still hovering
-                      e.stopPropagation();
-                    }}
-                  >
-                    <StaggeredMirrorText text="list" isActive={location.pathname === '/list'} forcedVariant={topNavColors[3]} />
+                    <StaggeredMirrorText text="visual" isActive={location.pathname === '/visual'} forcedVariant={topNavColors[3]} />
                   </NavLink>
                 </div>
               )}
@@ -519,73 +521,79 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </span>
               </button>
             )}
-            {isProjectOpen && closeHandler && (
-              <button
-                onClick={closeHandler}
-                className="icon-button pointer-events-auto group"
-                aria-label="Close project"
-                style={{
-                  backgroundColor: getIconBackground(closeIconColor),
-                  fontSize: `${ICON_BUTTON_STYLES.fontSize}px`,
-                  lineHeight: ICON_BUTTON_STYLES.lineHeight,
-                  width: `${ICON_BUTTON_STYLES.size}px`,
-                  height: `${ICON_BUTTON_STYLES.size}px`,
-                  padding: ICON_BUTTON_STYLES.padding,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = closeIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
-                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                  if (iconContent) iconContent.style.color = closeIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
-                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                  if (iconContent) iconContent.style.color = closeIconColor;
-                  // Clear any pending mousedown timer
-                  if (closeMouseDownTimerRef.current) {
-                    clearTimeout(closeMouseDownTimerRef.current);
-                    closeMouseDownTimerRef.current = null;
-                  }
-                }}
-                onMouseDown={(e) => {
-                  // Clear any existing timer
-                  if (closeMouseDownTimerRef.current) {
-                    clearTimeout(closeMouseDownTimerRef.current);
-                  }
-                  e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
-                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                  if (iconContent) iconContent.style.color = closeIconColor;
-                }}
-                onMouseUp={(e) => {
-                  // Hold the inverted state for 100ms after release
-                  e.currentTarget.style.backgroundColor = closeIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
-                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                  if (iconContent) iconContent.style.color = closeIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
-
-                  closeMouseDownTimerRef.current = setTimeout(() => {
-                    e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
-                    const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                    if (iconContent) iconContent.style.color = closeIconColor;
-                  }, 100);
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: `${ICON_BUTTON_STYLES.iconSize}px`,
-                    color: closeIconColor,
-                    lineHeight: ICON_BUTTON_STYLES.lineHeight,
-                  }}
-                  className="icon-content"
-                >
-                  ✕
-                </span>
-              </button>
-            )}
           </div>
         </nav>
+
+        {/* Close button - fixed to top right when project is open and on work pages */}
+        {showCloseButton && (
+          <button
+            onClick={closeHandler}
+            className="icon-button pointer-events-auto group"
+            aria-label="Close project"
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              zIndex: 30,
+              backgroundColor: getIconBackground(closeIconColor),
+              fontSize: `${ICON_BUTTON_STYLES.fontSize}px`,
+              lineHeight: ICON_BUTTON_STYLES.lineHeight,
+              width: `${ICON_BUTTON_STYLES.size}px`,
+              height: `${ICON_BUTTON_STYLES.size}px`,
+              padding: ICON_BUTTON_STYLES.padding,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = closeIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
+              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+              if (iconContent) iconContent.style.color = closeIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
+              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+              if (iconContent) iconContent.style.color = closeIconColor;
+              // Clear any pending mousedown timer
+              if (closeMouseDownTimerRef.current) {
+                clearTimeout(closeMouseDownTimerRef.current);
+                closeMouseDownTimerRef.current = null;
+              }
+            }}
+            onMouseDown={(e) => {
+              // Clear any existing timer
+              if (closeMouseDownTimerRef.current) {
+                clearTimeout(closeMouseDownTimerRef.current);
+              }
+              e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
+              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+              if (iconContent) iconContent.style.color = closeIconColor;
+            }}
+            onMouseUp={(e) => {
+              // Hold the inverted state for 100ms after release
+              e.currentTarget.style.backgroundColor = closeIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
+              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+              if (iconContent) iconContent.style.color = closeIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
+
+              closeMouseDownTimerRef.current = setTimeout(() => {
+                e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
+                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
+                if (iconContent) iconContent.style.color = closeIconColor;
+              }, 100);
+            }}
+          >
+            <span
+              style={{
+                fontSize: `${ICON_BUTTON_STYLES.iconSize}px`,
+                color: closeIconColor,
+                lineHeight: ICON_BUTTON_STYLES.lineHeight,
+              }}
+              className="icon-content"
+            >
+              ✕
+            </span>
+          </button>
+        )}
 
       {children}
 

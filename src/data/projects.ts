@@ -935,7 +935,8 @@ export const projects: Project[] = [
       }
     ],
     "description": "pls let me assimilate into the hivemind",
-    "layout": "sidebyside"
+    "layout": "sidebyside",
+    "allowSimultaneousPlayback": true
   },
   {
     "title": "P.L.M.A.I.T.H. vids",
@@ -1220,8 +1221,7 @@ export const projects: Project[] = [
   {
     "title": "Travis Scott viz",
     "tags": [
-      "animation",
-      "visuals"
+      "animation"
     ],
     "categories": [
       "visual"
