@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
+const execFileAsync = promisify(execFile);
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -32,6 +34,40 @@ function inferMediaType(filename) {
   if (AUDIO_EXT.includes(ext)) return 'audio';
   if (VIDEO_EXT.includes(ext)) return 'video';
   return null;
+}
+
+// Generate JPEG thumbnail from video thumbnail if it doesn't exist
+async function ensureJpegThumbnail(videoPath) {
+  if (!/\.(mov|mp4|webm|mkv)$/i.test(videoPath)) {
+    return; // Not a video file
+  }
+
+  const jpegPath = videoPath.replace(/\.(mov|mp4|webm|mkv)$/i, '.jpg');
+
+  // Check if JPEG already exists
+  try {
+    await fs.access(jpegPath);
+    return; // JPEG already exists
+  } catch {
+    // JPEG doesn't exist, generate it
+  }
+
+  try {
+    console.log(`  Generating JPEG for ${path.basename(videoPath)}...`);
+
+    // Use ffmpeg to extract first frame as JPEG with high quality
+    await execFileAsync('/opt/homebrew/bin/ffmpeg', [
+      '-i', videoPath,           // Input video
+      '-vframes', '1',            // Extract 1 frame
+      '-q:v', '2',                // High quality (2-5 is good, 2 is higher quality)
+      '-y',                       // Overwrite output file if exists
+      jpegPath                    // Output JPEG
+    ]);
+
+    console.log(`  ✓ Generated ${path.basename(jpegPath)}`);
+  } catch (error) {
+    console.error(`  ✗ Failed to generate JPEG for ${path.basename(videoPath)}:`, error.message);
+  }
 }
 
 (async () => {
@@ -145,6 +181,13 @@ function inferMediaType(filename) {
         files = await scanDirectory(folderPath, folder);
       } catch (e) {
         files = [];
+      }
+
+      // Generate JPEG thumbnails for video thumbnails
+      for (const file of files) {
+        if (file.type === 'video' && file.name.toLowerCase().includes('_thumbnail.')) {
+          await ensureJpegThumbnail(file.fullPath);
+        }
       }
 
       // read optional data.txt file with all project metadata

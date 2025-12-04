@@ -64,6 +64,22 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/barkie/barkie_480_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/barkie/barkie_480_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/barkie/barkie_480_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/barkie/barkie_480_4_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/barkie/barkie_480_thumbnail.jpg"
       }
     ],
     "description": "the classic"
@@ -126,6 +142,10 @@ export const projects: Project[] = [
       {
         "type": "image",
         "url": "/media/carakarl/Screenshot 2025-10-23 165157.png"
+      },
+      {
+        "type": "image",
+        "url": "/media/carakarl/cara_karl_thumbnail.jpg"
       }
     ],
     "description": "Character animation and still rendering for Post Neon"
@@ -156,6 +176,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/cocobryce/cocobryce_480_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/cocobryce/cocobryce_480_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/cocobryce/cocobryce_480_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/cocobryce/cocobryce_480_thumbnail.jpg"
       }
     ]
   },
@@ -228,6 +260,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/djbalantic/djbatlantic_480_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/djbalantic/djbatlantic_480_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/djbalantic/djbatlantic_480_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/djbalantic/djbatlantic_480_thumbnail.jpg"
       }
     ],
     "description": "Abusing After Effects interpolation algo's"
@@ -404,6 +448,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/duran/duran_480_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/duran/duran_480_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/duran/duran_480_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/duran/duran_480_thumbnail.jpg"
       }
     ],
     "description": "With Daan Couzijn, music by Angel Ho"
@@ -435,6 +491,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/eel/eel_480_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/eel/eel_480_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/eel/eel_480_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/eel/eel_480_thumbnail.jpg"
       }
     ]
   },
@@ -460,6 +528,10 @@ export const projects: Project[] = [
       {
         "type": "image",
         "url": "/media/estoc/134124795_397270884825962_2381295253738130395_n.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/estoc/estoc_480_thumbnail.jpg"
       }
     ],
     "description": "for Valley Recordings"
@@ -486,6 +558,14 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/flylikeabird/fly_like_a_bird_480_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/flylikeabird/fly_like_a_bird_480_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/flylikeabird/fly_like_a_bird_480_thumbnail.jpg"
       }
     ]
   },
@@ -520,6 +600,22 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/halppolar/halppolar_4_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/halppolar/halppolar_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/halppolar/halppolar_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/halppolar/halppolar_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/halppolar/halppolar_4_thumbnail.jpg"
       }
     ],
     "description": "360 vid so pump up the quality"
@@ -549,6 +645,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/horsesissues/horses_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/horsesissues/horses_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/horsesissues/horses_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/horsesissues/horses_3_thumbnail.jpg"
       }
     ]
   },
@@ -578,6 +686,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/hymonalisa/hymonalisa_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/hymonalisa/hymonalisa_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/hymonalisa/hymonalisa_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/hymonalisa/hymonalisa_thumbnail.jpg"
       }
     ]
   },
@@ -611,6 +731,22 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/hysint/hysint_4_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/hysint/hysint_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/hysint/hysint_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/hysint/hysint_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/hysint/hysint_4_thumbnail.jpg"
       }
     ]
   },
@@ -661,6 +797,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/litwokeangel/LITWOKEANIME_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/litwokeangel/LITWOKEANIME_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/litwokeangel/LITWOKEANIME_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/litwokeangel/LITWOKEANIME_3_thumbnail.jpg"
       }
     ]
   },
@@ -681,6 +829,10 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/monsbot/monsbot_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/monsbot/monsbot_thumbnail.jpg"
       }
     ]
   },
@@ -711,6 +863,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/mtv/mtv_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/mtv/mtv_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/mtv/mtv_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/mtv/mtv_3_thumbnail.jpg"
       }
     ]
   },
@@ -744,6 +908,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/notchfest/notchfest_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/notchfest/notchfest_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/notchfest/notchfest_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/notchfest/notchfest_3_thumbnail.jpg"
       }
     ],
     "description": "visuals for Notch.fest (the minecraft guy). The whole venue was a huge 360 dome."
@@ -778,6 +954,22 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/offer/offer_4_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/offer/offer_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/offer/offer_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/offer/offer_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/offer/offer_4_thumbnail.jpg"
       }
     ]
   },
@@ -809,6 +1001,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/ondersteboven/onder_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/ondersteboven/onder_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/ondersteboven/onder_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/ondersteboven/onder_3_thumbnail.jpg"
       }
     ]
   },
@@ -881,6 +1085,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/phawards/ph_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/phawards/ph_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/phawards/ph_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/phawards/ph_3_thumbnail.jpg"
       }
     ],
     "description": "small selection of stuff we made with Geoffrey Lillemon and Diane Martel (rip) and team."
@@ -912,6 +1128,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/plmaith/plmaith_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/plmaith/plmaith_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/plmaith/plmaith_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/plmaith/plmaith_3_thumbnail.jpg"
       },
       {
         "type": "audio",
@@ -989,6 +1217,34 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/plmaithvids/plmaithvids_7_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/plmaithvids/plmaithvids_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/plmaithvids/plmaithvids_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/plmaithvids/plmaithvids_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/plmaithvids/plmaithvids_4_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/plmaithvids/plmaithvids_5_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/plmaithvids/plmaithvids_6_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/plmaithvids/plmaithvids_7_thumbnail.jpg"
       }
     ],
     "description": "messed up latent self portraits"
@@ -1020,6 +1276,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/poly/poly_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/poly/poly_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/poly/poly_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/poly/poly_3_thumbnail.jpg"
       }
     ]
   },
@@ -1046,6 +1314,14 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/praisebe/praisebe_2_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/praisebe/praisebe_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/praisebe/praisebe_2_thumbnail.jpg"
       }
     ]
   },
@@ -1075,6 +1351,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/slavic/slavic_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/slavic/slavic_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/slavic/slavic_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/slavic/slavic_3_thumbnail.jpg"
       },
       {
         "type": "audio",
@@ -1109,6 +1397,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/slugwaterfalls/slugwater_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/slugwaterfalls/slugwater_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/slugwaterfalls/slugwater_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/slugwaterfalls/slugwater_3_thumbnail.jpg"
       }
     ]
   },
@@ -1137,6 +1437,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/smite/smite_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/smite/smite_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/smite/smite_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/smite/smite_3_thumbnail.jpg"
       }
     ]
   },
@@ -1171,6 +1483,22 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/superduper/superduper_4_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/superduper/superduper_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/superduper/superduper_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/superduper/superduper_3_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/superduper/superduper_4_thumbnail.jpg"
       }
     ]
   },
@@ -1215,6 +1543,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/tittswoef/woef_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/tittswoef/woef_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/tittswoef/woef_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/tittswoef/woef_3_thumbnail.jpg"
       }
     ]
   },
@@ -1281,6 +1621,18 @@ export const projects: Project[] = [
       {
         "type": "video",
         "url": "/media/ycmixtape/ycmix_3_thumbnail.mov"
+      },
+      {
+        "type": "image",
+        "url": "/media/ycmixtape/ycmix_1_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/ycmixtape/ycmix_2_thumbnail.jpg"
+      },
+      {
+        "type": "image",
+        "url": "/media/ycmixtape/ycmix_3_thumbnail.jpg"
       }
     ]
   }
