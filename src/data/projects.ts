@@ -43,7 +43,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2014",
     "media": [
       {
         "type": "video",

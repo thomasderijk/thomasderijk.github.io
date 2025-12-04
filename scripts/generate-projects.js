@@ -224,6 +224,8 @@ async function ensureJpegThumbnail(videoPath) {
             } else if (trimmed.startsWith('tags:')) {
               const tagsStr = trimmed.substring(5).trim();
               tags = tagsStr.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+            } else if (trimmed.startsWith('date:')) {
+              yearFromFile = trimmed.substring(5).trim();
             } else if (trimmed.startsWith('year:')) {
               yearFromFile = trimmed.substring(5).trim();
             } else if (trimmed.startsWith('dropbox:')) {
