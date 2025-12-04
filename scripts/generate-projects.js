@@ -73,7 +73,9 @@ async function ensureJpegThumbnail(videoPath) {
 (async () => {
   try {
     const entries = await fs.readdir(MEDIA_DIR, { withFileTypes: true });
-    const folders = entries.filter((d) => d.isDirectory()).map((d) => d.name);
+    const folders = entries
+      .filter((d) => d.isDirectory() && d.name !== 'thumbnail_mov_backup')
+      .map((d) => d.name);
 
     // Read existing projects to preserve dates
     let existingProjects = [];
