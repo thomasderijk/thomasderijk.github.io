@@ -5,9 +5,10 @@ import { getCachedVideoDimensions, getVideoPoster } from '@/hooks/use-video-prel
 interface VideoPlayerProps {
   url: string;
   autoPlay?: boolean;
+  allowSimultaneousPlayback?: boolean;
 }
 
-export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
+export const VideoPlayer = ({ url, autoPlay = true, allowSimultaneousPlayback = false }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -39,20 +40,25 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
 
     const handlePlay = () => {
       setIsPaused(false);
-      // Pause the main audio player (remembers if it was playing)
-      pauseForMediaRef.current();
-      // Pause all other video elements when this one plays
+
+      // Only pause audio if simultaneous playback is not allowed
+      if (!allowSimultaneousPlayback) {
+        // Pause the main audio player (remembers if it was playing)
+        pauseForMediaRef.current();
+        // Also pause all audio elements
+        const allAudioElements = document.querySelectorAll('audio');
+        allAudioElements.forEach((audio) => {
+          if (!audio.paused) {
+            audio.pause();
+          }
+        });
+      }
+
+      // Always pause all other video elements when this one plays
       const allVideoElements = document.querySelectorAll('video');
       allVideoElements.forEach((otherVideo) => {
         if (otherVideo !== video && !otherVideo.paused) {
           otherVideo.pause();
-        }
-      });
-      // Also pause all audio elements
-      const allAudioElements = document.querySelectorAll('audio');
-      allAudioElements.forEach((audio) => {
-        if (!audio.paused) {
-          audio.pause();
         }
       });
     };
@@ -122,8 +128,8 @@ export const VideoPlayer = ({ url, autoPlay = true }: VideoPlayerProps) => {
       }
     }, 50);
 
-    // If video is already playing (autoPlay fired before effect), pause main audio
-    if (!video.paused) {
+    // If video is already playing (autoPlay fired before effect), pause main audio unless simultaneous playback is allowed
+    if (!video.paused && !allowSimultaneousPlayback) {
       pauseForMediaRef.current();
     }
 

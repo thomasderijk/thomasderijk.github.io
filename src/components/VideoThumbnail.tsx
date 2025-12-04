@@ -27,11 +27,38 @@ export function VideoThumbnail({ src, alt, className = '', loadDelay = 0 }: Vide
   // Estimate aspect ratio for placeholder
   const aspectRatio = estimateAspectRatio(src);
 
-  // Load all thumbnails immediately with stagger delay
+  // Check if element is visible in viewport (simple check)
+  const isVisible = () => {
+    if (!containerRef.current) return false;
+    const rect = containerRef.current.getBoundingClientRect();
+    const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+    const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+
+    // Check if element is in viewport
+    return (
+      rect.top < windowHeight &&
+      rect.bottom > 0 &&
+      rect.left < windowWidth &&
+      rect.right > 0
+    );
+  };
+
+  // Load visible thumbnails immediately, others with stagger delay
   useEffect(() => {
-    loadingBatchRef.current = setTimeout(() => {
-      setIsLoaded(true);
-    }, loadDelay);
+    const checkAndLoad = () => {
+      if (isVisible()) {
+        // Visible: load immediately (no delay)
+        setIsLoaded(true);
+      } else {
+        // Not visible: load with stagger delay
+        loadingBatchRef.current = setTimeout(() => {
+          setIsLoaded(true);
+        }, loadDelay);
+      }
+    };
+
+    // Check on mount
+    checkAndLoad();
 
     return () => {
       if (loadingBatchRef.current) {

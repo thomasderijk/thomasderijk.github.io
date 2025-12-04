@@ -15,7 +15,7 @@ export const MediaRenderer = ({ media, isFirstVideo = false, allowSimultaneousPl
     case 'audio':
       return <AudioPlayer url={media.url} allowSimultaneousPlayback={allowSimultaneousPlayback} />;
     case 'video':
-      return <VideoPlayer url={media.url} autoPlay={isFirstVideo} />;
+      return <VideoPlayer url={media.url} autoPlay={isFirstVideo} allowSimultaneousPlayback={allowSimultaneousPlayback} />;
     case 'image':
       return <ImageGallery url={media.url} />;
     case 'youtube':
