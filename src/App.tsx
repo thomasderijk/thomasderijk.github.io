@@ -72,6 +72,38 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const iframeLoaded = true; // No iframe anymore, always show content
   const [workMenuOpen, setWorkMenuOpen] = useState(false);
   const isWorkPage = location.pathname === '/work' || location.pathname === '/audio' || location.pathname === '/visual' || location.pathname === '/';
+  const workMenuTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-close work menu on mobile after 10 seconds or on scroll
+  useEffect(() => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (!isMobile || !workMenuOpen) return;
+
+    // Set 10 second timer to close menu
+    workMenuTimerRef.current = setTimeout(() => {
+      setWorkMenuOpen(false);
+    }, 10000);
+
+    // Close menu on scroll
+    const handleScroll = () => {
+      setWorkMenuOpen(false);
+    };
+
+    // Listen to scroll on the main scrollable container
+    const scrollableElement = document.querySelector('.scrollable-content');
+    if (scrollableElement) {
+      scrollableElement.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (workMenuTimerRef.current) {
+        clearTimeout(workMenuTimerRef.current);
+      }
+      if (scrollableElement) {
+        scrollableElement.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [workMenuOpen]);
 
   // Top nav colors - ensuring adjacent items don't match
   type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
@@ -918,14 +950,22 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               justifyContent: 'center',
             }}
             onMouseEnter={(e) => {
-              setIsCycleIconHovered(true);
+              // Disable hover pause on mobile devices
+              const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+              if (!isMobile) {
+                setIsCycleIconHovered(true);
+              }
               const colors = getColorFromVariant(cycleIconColor);
               e.currentTarget.style.backgroundColor = colors.text;
               const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
               if (iconContent) iconContent.style.color = colors.bg;
             }}
             onMouseLeave={(e) => {
-              setIsCycleIconHovered(false);
+              // Disable hover pause on mobile devices
+              const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+              if (!isMobile) {
+                setIsCycleIconHovered(false);
+              }
               const colors = getColorFromVariant(cycleIconColor);
               e.currentTarget.style.backgroundColor = colors.bg;
               const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;

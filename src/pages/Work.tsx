@@ -228,7 +228,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                             <>
                               {useSideBySide ? (
                                 /* Side-by-side layout */
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-[28px] md:gap-x-[28px] md:gap-y-0 md:items-start">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-0 md:gap-x-[28px] md:gap-y-0 md:items-start">
                                   {/* First visual media */}
                                   <div className="min-w-0">
                                     <MediaRenderer media={nonAudioMedia[0]} isFirstVideo={nonAudioMedia[0].type === 'video'} allowSimultaneousPlayback={selectedProject.allowSimultaneousPlayback} />
@@ -341,7 +341,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                     </div>
                   </div>
                 )}
-                <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-3 rounded-xl pointer-events-auto" style={{ gap: `${GRID_GAP}px` }}>
+                <div className="columns-1 grid-sm:columns-2 grid-md:columns-3 rounded-xl pointer-events-auto" style={{ gap: `${GRID_GAP}px` }}>
                   {audioProjects.map((project, index) => {
                     const key = `${project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${project.date}-${shuffleCount}`;
                     const isHovered = hoveredCard === key;

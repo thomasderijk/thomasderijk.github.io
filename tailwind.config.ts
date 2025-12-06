@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      screens: {
+        'grid-sm': '640px',  // Custom breakpoint for grid 1→2 columns (same as default sm)
+        'grid-md': '1000px',  // Custom breakpoint for grid 2→3 columns (~60% of MacBook width)
+      },
       fontFamily: {
         // Use Inter for all text
         sans: ['Inter', 'sans-serif'],
