@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Project } from '@/types/project';
 import { tagIcons } from '@/config/tagIcons';
+import { SvgIcon } from '@/components/icons/SvgIcon';
 
 type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
 
@@ -116,13 +117,15 @@ export const ProjectMetadata = ({ project }: { project: Project }) => {
               backgroundColor: tagColor.bgColor,
               color: tagColor.textColor,
               padding: '2px 4px',
-              display: 'inline-block',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
               fontFamily: "'Inter', sans-serif",
               fontWeight: 300,
               fontSize: '16px',
               lineHeight: 1.5,
             }}>
-              {tag.toLowerCase()} {icon}
+              {tag.toLowerCase()} <SvgIcon char={icon} size={16} color={tagColor.textColor} />
             </span>
           );
         })}
@@ -223,8 +226,11 @@ export const ProjectMetadataSplit = ({ project, showTitle }: { project: Project;
               ...spanStyle,
               backgroundColor: tagColor.bgColor,
               color: tagColor.textColor,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
             }}>
-              {tag.toLowerCase()} {icon}
+              {tag.toLowerCase()} <SvgIcon char={icon} size={16} color={tagColor.textColor} />
             </span>
           );
         })}

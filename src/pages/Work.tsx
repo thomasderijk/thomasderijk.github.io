@@ -341,7 +341,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
                     </div>
                   </div>
                 )}
-                <div className="columns-1 grid-sm:columns-2 grid-md:columns-3 rounded-xl pointer-events-auto" style={{ gap: `${GRID_GAP}px` }}>
+                <div className="columns-1 grid-sm:columns-2 grid-md:columns-3 grid-lg:columns-4 rounded-xl pointer-events-auto" style={{ gap: `${GRID_GAP}px` }}>
                   {audioProjects.map((project, index) => {
                     const key = `${project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${project.date}-${shuffleCount}`;
                     const isHovered = hoveredCard === key;

@@ -8,6 +8,7 @@ import { ProjectMetadata, ProjectMetadataSplit } from '@/components/ProjectMetad
 import { tagIcons } from '@/config/tagIcons';
 import { MediaRenderer } from '@/components/MediaRenderer';
 import { AudioPlaylistMinimal } from '@/components/AudioPlaylistMinimal';
+import { SvgIcon } from '@/components/icons/SvgIcon';
 
 type ColorOption = 'white-on-black' | 'black-on-white' | 'white-on-dark' | 'black-on-light';
 
@@ -54,8 +55,14 @@ const List = () => {
     return options[Math.floor(Math.random() * options.length)];
   };
 
-  // Filter out commercial projects
-  const filteredProjects = projects.filter(project => !project.categories.includes('commercial'));
+  // Filter out commercial projects and sort by date (newest first)
+  const filteredProjects = projects
+    .filter(project => !project.categories.includes('commercial'))
+    .sort((a, b) => {
+      // Sort by date descending (newest first)
+      // Dates are in ISO format (YYYY-MM-DD), so string comparison works
+      return b.date.localeCompare(a.date);
+    });
 
   const [rowColors] = useState<Map<string, { year: ColorOption; tags: ColorOption[] }>>(() => {
     const colorMap = new Map<string, { year: ColorOption; tags: ColorOption[] }>();
@@ -330,7 +337,7 @@ const List = () => {
                         }}
                       >
                         {!isMobile && tag}
-                        <span>{icon}</span>
+                        <SvgIcon char={icon} size={16} color={tagColors.text} />
                       </div>
                     );
                   })}
@@ -354,7 +361,7 @@ const List = () => {
                   whiteSpace: 'nowrap',
                 }}
               >
-                {project.date}
+                {project.date.slice(0, 4)}
               </div>
               </div>
 

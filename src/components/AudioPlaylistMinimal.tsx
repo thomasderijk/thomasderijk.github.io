@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from 'react';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { PlaylistNavSpacer } from './PlaylistNavSpacer';
+import { SvgIcon } from '@/components/icons/SvgIcon';
+import { IconButton, ICON_BUTTON_STYLES } from '@/components/IconButton';
 
 interface AudioPlaylistMinimalProps {
   urls: string[];
@@ -322,105 +324,42 @@ export const AudioPlaylistMinimal = ({ urls, allowSimultaneousPlayback = false }
                   }}
                 >
                   {/* Previous button */}
-                  <button
+                  <IconButton
+                    icon={<SvgIcon char="⏮" size={ICON_BUTTON_STYLES.iconSize} color={getColors(trackColors[index][2]).text} />}
                     onClick={handlePrevious}
+                    backgroundColor="transparent"
+                    textColor={getColors(trackColors[index][2]).text}
+                    onHoverBackgroundColor={getColors(trackColors[index][2]).text}
+                    aria-label="Previous"
                     disabled={currentTrack === 0}
-                    onMouseEnter={(e) => {
-                      if (currentTrack !== 0) {
-                        const colors = getColors(trackColors[index][2]);
-                        e.currentTarget.style.backgroundColor = colors.text;
-                        e.currentTarget.style.color = colors.bg;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      const colors = getColors(trackColors[index][2]);
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = colors.text;
-                    }}
-                    style={{
-                      width: '28px',
-                      height: '28px',
-                      backgroundColor: 'transparent',
-                      color: getColors(trackColors[index][2]).text,
-                      border: 'none',
-                      cursor: currentTrack === 0 ? 'default' : 'pointer',
-                      opacity: currentTrack === 0 ? 0.3 : 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      flexShrink: 0,
-                      transition: 'background-color 0s, color 0s',
-                    }}
-                  >
-                    ⏮
-                  </button>
+                  />
 
                   {/* Play/Pause button */}
-                  <button
+                  <IconButton
+                    icon={
+                      isPlaying ? (
+                        <SvgIcon char="❚❚" size={ICON_BUTTON_STYLES.iconSize} color={getColors(trackColors[index][2]).text} />
+                      ) : (
+                        <SvgIcon char="▶" size={ICON_BUTTON_STYLES.iconSize} color={getColors(trackColors[index][2]).text} />
+                      )
+                    }
                     onClick={togglePlay}
-                    onMouseEnter={(e) => {
-                      const colors = getColors(trackColors[index][2]);
-                      e.currentTarget.style.backgroundColor = colors.text;
-                      e.currentTarget.style.color = colors.bg;
-                    }}
-                    onMouseLeave={(e) => {
-                      const colors = getColors(trackColors[index][2]);
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = colors.text;
-                    }}
-                    style={{
-                      width: '28px',
-                      height: '28px',
-                      backgroundColor: 'transparent',
-                      color: getColors(trackColors[index][2]).text,
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      flexShrink: 0,
-                      transition: 'background-color 0s, color 0s',
-                    }}
-                  >
-                    {isPlaying ? '❚❚' : '▶'}
-                  </button>
+                    backgroundColor="transparent"
+                    textColor={getColors(trackColors[index][2]).text}
+                    onHoverBackgroundColor={getColors(trackColors[index][2]).text}
+                    aria-label={isPlaying ? "Pause" : "Play"}
+                  />
 
                   {/* Next button */}
-                  <button
+                  <IconButton
+                    icon={<SvgIcon char="⏭" size={ICON_BUTTON_STYLES.iconSize} color={getColors(trackColors[index][2]).text} />}
                     onClick={handleNext}
+                    backgroundColor="transparent"
+                    textColor={getColors(trackColors[index][2]).text}
+                    onHoverBackgroundColor={getColors(trackColors[index][2]).text}
+                    aria-label="Next"
                     disabled={currentTrack === urls.length - 1}
-                    onMouseEnter={(e) => {
-                      if (currentTrack !== urls.length - 1) {
-                        const colors = getColors(trackColors[index][2]);
-                        e.currentTarget.style.backgroundColor = colors.text;
-                        e.currentTarget.style.color = colors.bg;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      const colors = getColors(trackColors[index][2]);
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = colors.text;
-                    }}
-                    style={{
-                      width: '28px',
-                      height: '28px',
-                      backgroundColor: 'transparent',
-                      color: getColors(trackColors[index][2]).text,
-                      border: 'none',
-                      cursor: currentTrack === urls.length - 1 ? 'default' : 'pointer',
-                      opacity: currentTrack === urls.length - 1 ? 0.3 : 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      flexShrink: 0,
-                      transition: 'background-color 0s, color 0s',
-                    }}
-                  >
-                    ⏭
-                  </button>
+                  />
                 </div>
               </div>
             ) : (

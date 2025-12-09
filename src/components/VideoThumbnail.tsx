@@ -133,7 +133,7 @@ export function VideoThumbnail({ src, alt, className = '' }: VideoThumbnailProps
     }
   }, [isMobile, showVideo, isVisible]);
 
-  // Set random start time for videos
+  // Set start time to match JPEG thumbnail (first frame)
   useEffect(() => {
     if (!showVideo) return;
 
@@ -141,9 +141,9 @@ export function VideoThumbnail({ src, alt, className = '' }: VideoThumbnailProps
     if (!video) return;
 
     const handleLoadedMetadata = () => {
-      if (video.duration && isFinite(video.duration)) {
-        video.currentTime = Math.random() * video.duration * 0.8;
-      }
+      // Start at first frame (0s) to match JPEG thumbnail generation
+      // This ensures the first frame shown matches the JPEG
+      video.currentTime = 0;
     };
 
     video.addEventListener('loadedmetadata', handleLoadedMetadata);

@@ -152,7 +152,7 @@ async function ensureJpegThumbnail(videoPath) {
 
     for (const folder of folders) {
       const folderPath = path.join(MEDIA_DIR, folder);
-      
+
       // Recursively scan for all media files
       async function scanDirectory(dir, baseFolder) {
         let allFiles = [];
@@ -413,8 +413,45 @@ async function ensureJpegThumbnail(videoPath) {
         ? categoriesFromFile 
         : (existingProject?.categories || Array.from(categories));
       
-      // Determine the final date/year: data.txt year > existing project date > 2025
-      const finalDate = yearFromFile || existingProject?.date || '2025';
+      // Determine the final date: data.txt year/date > existing project date > 2025 (default)
+      // Support multiple date formats: YYYY, MM-YYYY, DD-MM-YYYY, YYYY-MM-DD
+      // Always convert to ISO format YYYY-MM-DD
+      let finalDate;
+
+      // Helper function to parse date string to ISO format
+      const parseToIsoDate = (dateStr) => {
+        if (!dateStr) return '2025-12-31';
+
+        if (/^\d{4}$/.test(dateStr)) {
+          // Just a year (e.g., "2014"), use December 31st for sorting (newest first)
+          return `${dateStr}-12-31`;
+        } else if (/^\d{2}-\d{4}$/.test(dateStr)) {
+          // Month-Year format (e.g., "03-2025"), convert to YYYY-MM-DD
+          const [month, year] = dateStr.split('-');
+          // Use last day of the month
+          const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+          return `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+        } else if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+          // DD-MM-YYYY format (e.g., "15-03-2025"), convert to YYYY-MM-DD
+          const [day, month, year] = dateStr.split('-');
+          return `${year}-${month}-${day}`;
+        } else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+          // Already ISO format YYYY-MM-DD
+          return dateStr;
+        } else {
+          // Invalid format
+          return null;
+        }
+      };
+
+      if (yearFromFile) {
+        finalDate = parseToIsoDate(yearFromFile) || '2025-12-31';
+      } else if (existingProject?.date) {
+        // Convert existing date to ISO format if it's not already
+        finalDate = parseToIsoDate(existingProject.date) || '2025-12-31';
+      } else {
+        finalDate = '2025-12-31';
+      }
       
       // Determine the final tags: data.txt > existing project > empty
       const finalTags = tags.length > 0 ? tags : (existingProject?.tags || []);

@@ -10,7 +10,7 @@ export const projects: Project[] = [
     "categories": [
       "commercial"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "image",
@@ -43,7 +43,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2014",
+    "date": "2014-12-31",
     "media": [
       {
         "type": "video",
@@ -92,7 +92,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "image",
@@ -113,7 +113,7 @@ export const projects: Project[] = [
       "visual",
       "commercial"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -159,7 +159,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -197,7 +197,7 @@ export const projects: Project[] = [
     "categories": [
       "commercial"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "image",
@@ -243,7 +243,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -284,7 +284,7 @@ export const projects: Project[] = [
     "categories": [
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "image",
@@ -310,7 +310,7 @@ export const projects: Project[] = [
     "categories": [
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "image",
@@ -374,7 +374,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "image",
@@ -431,7 +431,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -474,7 +474,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -515,7 +515,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -545,7 +545,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -579,7 +579,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "youtube",
@@ -628,7 +628,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -669,7 +669,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -710,7 +710,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -758,7 +758,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "image",
@@ -780,7 +780,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -820,7 +820,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -846,7 +846,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -887,7 +887,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -933,7 +933,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -984,7 +984,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -1024,7 +1024,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -1111,7 +1111,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -1176,7 +1176,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -1259,7 +1259,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -1301,7 +1301,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -1334,7 +1334,7 @@ export const projects: Project[] = [
     "categories": [
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -1380,7 +1380,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -1420,7 +1420,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -1462,7 +1462,7 @@ export const projects: Project[] = [
       "visual",
       "audio"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",
@@ -1509,7 +1509,7 @@ export const projects: Project[] = [
       "commercial",
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "image",
@@ -1526,7 +1526,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2014",
+    "date": "2014-12-31",
     "media": [
       {
         "type": "video",
@@ -1566,7 +1566,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "image",
@@ -1604,7 +1604,7 @@ export const projects: Project[] = [
     "categories": [
       "visual"
     ],
-    "date": "2025",
+    "date": "2025-12-31",
     "media": [
       {
         "type": "video",

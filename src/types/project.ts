@@ -9,7 +9,7 @@ export interface Project {
   categories: ('audio' | 'visual' | 'commercial')[];
   media: MediaItem[];
   description?: string;
-  date: string; // ISO date string for sorting (YYYY-MM-DD)
+  date: string; // ISO date string for sorting (YYYY-MM-DD), but displays only the year
   layout?: 'default' | 'sidebyside'; // Optional layout mode for detail view
   allowSimultaneousPlayback?: boolean; // Allow audio and video to play at the same time
 }

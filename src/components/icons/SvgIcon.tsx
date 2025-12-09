@@ -10,8 +10,9 @@ interface SvgIconProps {
 }
 
 export const SvgIcon = ({ char, size = 20, color = 'currentColor', className }: SvgIconProps) => {
-  // Calculate font size - slightly larger than viewBox to match UTF-8 character appearance
-  const fontSize = size * 1.5;
+  // Calculate font size - use same ratio as favicons (30/32 = 0.9375)
+  // This keeps the characters properly contained within the viewBox
+  const fontSize = Math.round(size * 0.9375);
 
   return (
     <svg

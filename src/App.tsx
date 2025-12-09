@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 // SVG Icons - embeds UTF-8 characters in SVG to prevent emoji rendering on iOS
 import { SvgIcon, createIconArray } from "@/components/icons/SvgIcon";
+import { IconButton, ICON_BUTTON_STYLES } from "@/components/IconButton";
 import { useProjectSort } from "@/hooks/use-project-sort";
 import { useVideoPreloader } from "@/hooks/use-video-preloader";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
@@ -38,19 +39,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-// Centralized icon button styling - ADJUST THESE VALUES TO CHANGE ALL ICON BUTTONS
-const ICON_BUTTON_STYLES = {
-  size: 28, // Width and height in pixels
-  iconSize: 20, // Icon font size in pixels
-  fontSize: 16, // Base font size for alignment
-  lineHeight: 1,
-  padding: 0,
-  // Alignment options - control how icons align vertically
-  display: 'inline-flex' as const,
-  alignItems: 'center' as const,
-  justifyContent: 'center' as const,
-} as const;
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -278,14 +266,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const musicNoiseRef = useRef<number>(Math.random() * 1000); // Random seed for music icon noise
   const [isMusicIconHovered, setIsMusicIconHovered] = useState(false);
 
-  // Timer refs for mousedown delay
-  const shuffleMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const closeMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const previousMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const playMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const nextMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const cycleMouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
-
   // Simple noise function using sine waves with different frequencies
   const getNoise = (seed: number): number => {
     const time = Date.now() / 1000; // Time in seconds
@@ -482,155 +462,44 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex items-center gap-0">
             <NavSpacer regenerateKey={navSpacerKey3} />
             {showShuffleButton && (
-              <button
+              <IconButton
+                icon={(() => {
+                  const ShuffleIconComponent = shuffleIcons[currentShuffleIndex];
+                  return <ShuffleIconComponent size={ICON_BUTTON_STYLES.iconSize} color={shuffleIconColor} />;
+                })()}
                 onClick={() => {
                   toggleRandomize();
                   triggerShuffle();
-                  // Randomize the shuffle button's own color
                   setShuffleIconColor(Math.random() < 0.5 ? 'white' : 'black');
                 }}
-                className="icon-button pointer-events-auto group"
+                backgroundColor={getIconBackground(shuffleIconColor)}
+                textColor={shuffleIconColor}
+                onHoverBackgroundColor={shuffleIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)'}
                 aria-label="Randomize projects"
                 title={isRandomized ? 'Sorted randomly' : 'Sort by date'}
-                style={{
-                  backgroundColor: getIconBackground(shuffleIconColor),
-                  fontSize: `${ICON_BUTTON_STYLES.fontSize}px`,
-                  lineHeight: ICON_BUTTON_STYLES.lineHeight,
-                  width: `${ICON_BUTTON_STYLES.size}px`,
-                  height: `${ICON_BUTTON_STYLES.size}px`,
-                  padding: ICON_BUTTON_STYLES.padding,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                onMouseEnter={(e) => {
-                  setIsShuffleIconHovered(true);
-                  e.currentTarget.style.backgroundColor = shuffleIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
-                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                  if (iconContent) iconContent.style.color = shuffleIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
-                }}
-                onMouseLeave={(e) => {
-                  setIsShuffleIconHovered(false);
-                  e.currentTarget.style.backgroundColor = getIconBackground(shuffleIconColor);
-                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                  if (iconContent) iconContent.style.color = shuffleIconColor;
-                  // Clear any pending mousedown timer
-                  if (shuffleMouseDownTimerRef.current) {
-                    clearTimeout(shuffleMouseDownTimerRef.current);
-                    shuffleMouseDownTimerRef.current = null;
-                  }
-                }}
-                onMouseDown={(e) => {
-                  // Clear any existing timer
-                  if (shuffleMouseDownTimerRef.current) {
-                    clearTimeout(shuffleMouseDownTimerRef.current);
-                  }
-                  e.currentTarget.style.backgroundColor = getIconBackground(shuffleIconColor);
-                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                  if (iconContent) iconContent.style.color = shuffleIconColor;
-                }}
-                onMouseUp={(e) => {
-                  // Hold the inverted state for 100ms after release
-                  e.currentTarget.style.backgroundColor = shuffleIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
-                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                  if (iconContent) iconContent.style.color = shuffleIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
-
-                  shuffleMouseDownTimerRef.current = setTimeout(() => {
-                    e.currentTarget.style.backgroundColor = getIconBackground(shuffleIconColor);
-                    const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                    if (iconContent) iconContent.style.color = shuffleIconColor;
-                  }, 100);
-                }}
-              >
-                <span
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    lineHeight: ICON_BUTTON_STYLES.lineHeight,
-                  }}
-                  className="icon-content"
-                >
-                  {(() => {
-                    const ShuffleIconComponent = shuffleIcons[currentShuffleIndex];
-                    return <ShuffleIconComponent size={ICON_BUTTON_STYLES.iconSize} color={shuffleIconColor} />;
-                  })()}
-                </span>
-              </button>
+                onMouseEnterExtra={() => setIsShuffleIconHovered(true)}
+                onMouseLeaveExtra={() => setIsShuffleIconHovered(false)}
+              />
             )}
           </div>
         </nav>
 
         {/* Close button - fixed to top right when project is open and on work pages */}
         {showCloseButton && (
-          <button
-            onClick={closeHandler}
-            className="icon-button pointer-events-auto group"
+          <IconButton
+            icon={<SvgIcon char="✕" size={ICON_BUTTON_STYLES.iconSize} color={closeIconColor} />}
+            onClick={closeHandler!}
+            backgroundColor={getIconBackground(closeIconColor)}
+            textColor={closeIconColor}
+            onHoverBackgroundColor={closeIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)'}
             aria-label="Close project"
             style={{
               position: 'fixed',
               top: 0,
               right: 0,
               zIndex: 30,
-              backgroundColor: getIconBackground(closeIconColor),
-              fontSize: `${ICON_BUTTON_STYLES.fontSize}px`,
-              lineHeight: ICON_BUTTON_STYLES.lineHeight,
-              width: `${ICON_BUTTON_STYLES.size}px`,
-              height: `${ICON_BUTTON_STYLES.size}px`,
-              padding: ICON_BUTTON_STYLES.padding,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = closeIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = closeIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = closeIconColor;
-              // Clear any pending mousedown timer
-              if (closeMouseDownTimerRef.current) {
-                clearTimeout(closeMouseDownTimerRef.current);
-                closeMouseDownTimerRef.current = null;
-              }
-            }}
-            onMouseDown={(e) => {
-              // Clear any existing timer
-              if (closeMouseDownTimerRef.current) {
-                clearTimeout(closeMouseDownTimerRef.current);
-              }
-              e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = closeIconColor;
-            }}
-            onMouseUp={(e) => {
-              // Hold the inverted state for 100ms after release
-              e.currentTarget.style.backgroundColor = closeIconColor === 'white' ? 'hsl(0, 0%, 90%)' : 'hsl(0, 0%, 10%)';
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = closeIconColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
-
-              closeMouseDownTimerRef.current = setTimeout(() => {
-                e.currentTarget.style.backgroundColor = getIconBackground(closeIconColor);
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = closeIconColor;
-              }, 100);
-            }}
-          >
-            <span
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                lineHeight: ICON_BUTTON_STYLES.lineHeight,
-              }}
-              className="icon-content"
-            >
-              <SvgIcon char="✕" size={ICON_BUTTON_STYLES.iconSize} color={closeIconColor} />
-            </span>
-          </button>
+          />
         )}
 
       {children}
@@ -720,149 +589,20 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
           {/* Previous button - shows when track is loaded */}
           {currentTrack && (
-            <button
+            <IconButton
+              icon={<SvgIcon char="⏮" size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />}
               onClick={previousTrack}
-              className="icon-button pointer-events-auto group"
+              backgroundColor={getColorFromVariant(audioPlayerColors.controls).bg}
+              textColor={getColorFromVariant(audioPlayerColors.controls).text}
+              onHoverBackgroundColor={getColorFromVariant(audioPlayerColors.controls).text}
               aria-label="Previous"
-              style={{
-                backgroundColor: getColorFromVariant(audioPlayerColors.controls).bg,
-                fontSize: `${ICON_BUTTON_STYLES.fontSize}px`,
-                lineHeight: ICON_BUTTON_STYLES.lineHeight,
-                width: `${ICON_BUTTON_STYLES.size}px`,
-                height: `${ICON_BUTTON_STYLES.size}px`,
-                padding: ICON_BUTTON_STYLES.padding,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              onMouseEnter={(e) => {
-                const colors = getColorFromVariant(audioPlayerColors.controls);
-                e.currentTarget.style.backgroundColor = colors.text;
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = colors.bg;
-              }}
-              onMouseLeave={(e) => {
-                const colors = getColorFromVariant(audioPlayerColors.controls);
-                e.currentTarget.style.backgroundColor = colors.bg;
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = colors.text;
-                // Clear any pending mousedown timer
-                if (previousMouseDownTimerRef.current) {
-                  clearTimeout(previousMouseDownTimerRef.current);
-                  previousMouseDownTimerRef.current = null;
-                }
-              }}
-              onMouseDown={(e) => {
-                // Clear any existing timer
-                if (previousMouseDownTimerRef.current) {
-                  clearTimeout(previousMouseDownTimerRef.current);
-                }
-                const colors = getColorFromVariant(audioPlayerColors.controls);
-                e.currentTarget.style.backgroundColor = colors.bg;
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = colors.text;
-              }}
-              onMouseUp={(e) => {
-                // Hold the inverted state for 100ms after release
-                const colors = getColorFromVariant(audioPlayerColors.controls);
-                e.currentTarget.style.backgroundColor = colors.text;
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = colors.bg;
-
-                previousMouseDownTimerRef.current = setTimeout(() => {
-                  const colors = getColorFromVariant(audioPlayerColors.controls);
-                  e.currentTarget.style.backgroundColor = colors.bg;
-                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                  if (iconContent) iconContent.style.color = colors.text;
-                }, 100);
-              }}
-            >
-              <span
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  lineHeight: ICON_BUTTON_STYLES.lineHeight,
-                }}
-                className="icon-content"
-              >
-                <SvgIcon char="⏮" size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />
-              </span>
-            </button>
+            />
           )}
 
           {/* Play/Pause button - shows music note when not playing, play when hovered, pause when playing */}
-          <button
-            onClick={togglePlay}
-            className="icon-button pointer-events-auto group"
-            aria-label={isPlaying ? "Pause" : "Play"}
-            style={{
-              backgroundColor: getColorFromVariant(audioPlayerColors.controls).bg,
-              fontSize: `${ICON_BUTTON_STYLES.fontSize}px`,
-              lineHeight: ICON_BUTTON_STYLES.lineHeight,
-              width: `${ICON_BUTTON_STYLES.size}px`,
-              height: `${ICON_BUTTON_STYLES.size}px`,
-              padding: ICON_BUTTON_STYLES.padding,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onMouseEnter={(e) => {
-              setIsPlayerHovered(true);
-              setIsMusicIconHovered(true);
-              const colors = getColorFromVariant(audioPlayerColors.controls);
-              e.currentTarget.style.backgroundColor = colors.text;
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = colors.bg;
-            }}
-            onMouseLeave={(e) => {
-              setIsPlayerHovered(false);
-              setIsMusicIconHovered(false);
-              const colors = getColorFromVariant(audioPlayerColors.controls);
-              e.currentTarget.style.backgroundColor = colors.bg;
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = colors.text;
-              // Clear any pending mousedown timer
-              if (playMouseDownTimerRef.current) {
-                clearTimeout(playMouseDownTimerRef.current);
-                playMouseDownTimerRef.current = null;
-              }
-            }}
-            onMouseDown={(e) => {
-              // Clear any existing timer
-              if (playMouseDownTimerRef.current) {
-                clearTimeout(playMouseDownTimerRef.current);
-              }
-              const colors = getColorFromVariant(audioPlayerColors.controls);
-              e.currentTarget.style.backgroundColor = colors.bg;
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = colors.text;
-            }}
-            onMouseUp={(e) => {
-              // Hold the inverted state for 100ms after release
-              const colors = getColorFromVariant(audioPlayerColors.controls);
-              e.currentTarget.style.backgroundColor = colors.text;
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = colors.bg;
-
-              playMouseDownTimerRef.current = setTimeout(() => {
-                const colors = getColorFromVariant(audioPlayerColors.controls);
-                e.currentTarget.style.backgroundColor = colors.bg;
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = colors.text;
-              }, 100);
-            }}
-          >
-            <span
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                lineHeight: ICON_BUTTON_STYLES.lineHeight,
-              }}
-              className="icon-content"
-            >
-              {isPlaying ? (
+          <IconButton
+            icon={
+              isPlaying ? (
                 <SvgIcon char="❚❚" size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />
               ) : isPlayerHovered ? (
                 <SvgIcon char="▶" size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />
@@ -871,169 +611,62 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   const MusicIconComponent = musicIcons[currentMusicIndex];
                   return <MusicIconComponent size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />;
                 })()
-              )}
-            </span>
-          </button>
+              )
+            }
+            onClick={togglePlay}
+            backgroundColor={getColorFromVariant(audioPlayerColors.controls).bg}
+            textColor={getColorFromVariant(audioPlayerColors.controls).text}
+            onHoverBackgroundColor={getColorFromVariant(audioPlayerColors.controls).text}
+            aria-label={isPlaying ? "Pause" : "Play"}
+            onMouseEnterExtra={() => {
+              setIsPlayerHovered(true);
+              setIsMusicIconHovered(true);
+            }}
+            onMouseLeaveExtra={() => {
+              setIsPlayerHovered(false);
+              setIsMusicIconHovered(false);
+            }}
+          />
 
           {/* Next button - shows when track is loaded */}
           {currentTrack && (
-            <button
+            <IconButton
+              icon={<SvgIcon char="⏭" size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />}
               onClick={nextTrack}
-              className="icon-button pointer-events-auto group"
+              backgroundColor={getColorFromVariant(audioPlayerColors.controls).bg}
+              textColor={getColorFromVariant(audioPlayerColors.controls).text}
+              onHoverBackgroundColor={getColorFromVariant(audioPlayerColors.controls).text}
               aria-label="Next"
-              style={{
-                backgroundColor: getColorFromVariant(audioPlayerColors.controls).bg,
-                fontSize: `${ICON_BUTTON_STYLES.fontSize}px`,
-                lineHeight: ICON_BUTTON_STYLES.lineHeight,
-                width: `${ICON_BUTTON_STYLES.size}px`,
-                height: `${ICON_BUTTON_STYLES.size}px`,
-                padding: ICON_BUTTON_STYLES.padding,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              onMouseEnter={(e) => {
-                const colors = getColorFromVariant(audioPlayerColors.controls);
-                e.currentTarget.style.backgroundColor = colors.text;
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = colors.bg;
-              }}
-              onMouseLeave={(e) => {
-                const colors = getColorFromVariant(audioPlayerColors.controls);
-                e.currentTarget.style.backgroundColor = colors.bg;
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = colors.text;
-                // Clear any pending mousedown timer
-                if (nextMouseDownTimerRef.current) {
-                  clearTimeout(nextMouseDownTimerRef.current);
-                  nextMouseDownTimerRef.current = null;
-                }
-              }}
-              onMouseDown={(e) => {
-                // Clear any existing timer
-                if (nextMouseDownTimerRef.current) {
-                  clearTimeout(nextMouseDownTimerRef.current);
-                }
-                const colors = getColorFromVariant(audioPlayerColors.controls);
-                e.currentTarget.style.backgroundColor = colors.bg;
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = colors.text;
-              }}
-              onMouseUp={(e) => {
-                // Hold the inverted state for 100ms after release
-                const colors = getColorFromVariant(audioPlayerColors.controls);
-                e.currentTarget.style.backgroundColor = colors.text;
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = colors.bg;
-
-                nextMouseDownTimerRef.current = setTimeout(() => {
-                  const colors = getColorFromVariant(audioPlayerColors.controls);
-                  e.currentTarget.style.backgroundColor = colors.bg;
-                  const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                  if (iconContent) iconContent.style.color = colors.text;
-                }, 100);
-              }}
-            >
-              <span
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  lineHeight: ICON_BUTTON_STYLES.lineHeight,
-                }}
-                className="icon-content"
-              >
-                <SvgIcon char="⏭" size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />
-              </span>
-            </button>
+            />
           )}
 
           {/* Spacer between controls and cycle icon */}
           <BottomNavSpacer regenerateKey={bottomNavSpacerKey3} />
 
           {/* Cycle icon */}
-          <button
+          <IconButton
+            icon={(() => {
+              const TrigramIconComponent = trigramIcons[currentIconIndex];
+              return <TrigramIconComponent size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(cycleIconColor).text} />;
+            })()}
             onClick={handleCycleIconClick}
-            className="icon-button pointer-events-auto group"
+            backgroundColor={getColorFromVariant(cycleIconColor).bg}
+            textColor={getColorFromVariant(cycleIconColor).text}
+            onHoverBackgroundColor={getColorFromVariant(cycleIconColor).text}
             aria-label="Cycle icon"
-            style={{
-              backgroundColor: getColorFromVariant(cycleIconColor).bg,
-              fontSize: `${ICON_BUTTON_STYLES.fontSize}px`,
-              lineHeight: ICON_BUTTON_STYLES.lineHeight,
-              width: `${ICON_BUTTON_STYLES.size}px`,
-              height: `${ICON_BUTTON_STYLES.size}px`,
-              padding: ICON_BUTTON_STYLES.padding,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onMouseEnter={(e) => {
-              // Disable hover pause on mobile devices
+            onMouseEnterExtra={() => {
               const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
               if (!isMobile) {
                 setIsCycleIconHovered(true);
               }
-              const colors = getColorFromVariant(cycleIconColor);
-              e.currentTarget.style.backgroundColor = colors.text;
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = colors.bg;
             }}
-            onMouseLeave={(e) => {
-              // Disable hover pause on mobile devices
+            onMouseLeaveExtra={() => {
               const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
               if (!isMobile) {
                 setIsCycleIconHovered(false);
               }
-              const colors = getColorFromVariant(cycleIconColor);
-              e.currentTarget.style.backgroundColor = colors.bg;
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = colors.text;
-              // Clear any pending mousedown timer
-              if (cycleMouseDownTimerRef.current) {
-                clearTimeout(cycleMouseDownTimerRef.current);
-                cycleMouseDownTimerRef.current = null;
-              }
             }}
-            onMouseDown={(e) => {
-              // Clear any existing timer
-              if (cycleMouseDownTimerRef.current) {
-                clearTimeout(cycleMouseDownTimerRef.current);
-              }
-              const colors = getColorFromVariant(cycleIconColor);
-              e.currentTarget.style.backgroundColor = colors.bg;
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = colors.text;
-            }}
-            onMouseUp={(e) => {
-              // Hold the inverted state for 100ms after release
-              const colors = getColorFromVariant(cycleIconColor);
-              e.currentTarget.style.backgroundColor = colors.text;
-              const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-              if (iconContent) iconContent.style.color = colors.bg;
-
-              cycleMouseDownTimerRef.current = setTimeout(() => {
-                const colors = getColorFromVariant(cycleIconColor);
-                e.currentTarget.style.backgroundColor = colors.bg;
-                const iconContent = e.currentTarget.querySelector('.icon-content') as HTMLElement;
-                if (iconContent) iconContent.style.color = colors.text;
-              }, 100);
-            }}
-          >
-            <span
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                lineHeight: ICON_BUTTON_STYLES.lineHeight,
-              }}
-              className="icon-content"
-            >
-              {(() => {
-                const TrigramIconComponent = trigramIcons[currentIconIndex];
-                return <TrigramIconComponent size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(cycleIconColor).text} />;
-              })()}
-            </span>
-          </button>
+          />
         </div>
       </nav>
 

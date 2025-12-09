@@ -16,6 +16,7 @@ export default {
       screens: {
         'grid-sm': '640px',  // Custom breakpoint for grid 1→2 columns (same as default sm)
         'grid-md': '1000px',  // Custom breakpoint for grid 2→3 columns (~60% of MacBook width)
+        'grid-lg': '1600px',  // Custom breakpoint for grid 3→4 columns (larger than MacBook max width)
       },
       fontFamily: {
         // Use Inter for all text
