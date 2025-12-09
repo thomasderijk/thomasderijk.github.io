@@ -7,7 +7,7 @@ interface ProjectSortState {
 }
 
 export const useProjectSort = create<ProjectSortState>((set) => ({
-  isRandomized: false,
+  isRandomized: true, // Default to randomized on load
   toggleRandomize: () => set((state) => ({ isRandomized: !state.isRandomized })),
-  resetSort: () => set({ isRandomized: false }),
+  resetSort: () => set({ isRandomized: true }), // Reset to randomized instead of sorted
 }));

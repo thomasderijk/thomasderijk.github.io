@@ -11,6 +11,7 @@ import { useProjectSort } from '@/hooks/use-project-sort';
 import { useCommercial } from '@/contexts/CommercialContext';
 import { useProjectDetail } from '@/contexts/ProjectDetailContext';
 import { AudioPlaylistMinimal } from '@/components/AudioPlaylistMinimal';
+import { TopRightMenu } from '@/components/TopRightMenu';
 
 // Unified padding for both grid and project detail views
 const TOP_PADDING = 56;
@@ -197,6 +198,7 @@ const Work = ({ categoryFilter = null }: WorkProps) => {
 
   return (
     <>
+      <TopRightMenu />
       {selectedProject ? (
         /* Project Detail View - Full Page */
         <div

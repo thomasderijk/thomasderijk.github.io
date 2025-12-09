@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useInvert } from '@/contexts/InvertContext';
 import { useShuffle } from '@/contexts/ShuffleContext';
 import { StaggeredMirrorText } from '@/components/StaggeredMirrorText';
+import { TopRightMenu } from '@/components/TopRightMenu';
 
 interface LetterState {
   char: string;
@@ -203,8 +204,10 @@ const Links = () => {
   };
 
   return (
-    <div className="relative z-10 flex items-start justify-center px-4 pointer-events-none" style={{ minHeight: 'calc(100vh - 64px)', paddingTop: 'calc(50vh - 32px - 6em)', paddingBottom: '80px' }}>
-      <div className="w-full max-w-md pointer-events-auto">
+    <>
+      <TopRightMenu />
+      <div className="relative z-10 flex items-start justify-center px-4 pointer-events-none" style={{ minHeight: 'calc(100vh - 64px)', paddingTop: 'calc(50vh - 32px - 6em)', paddingBottom: '80px' }}>
+        <div className="w-full max-w-md pointer-events-auto">
         <div className="flex flex-col items-center gap-8">
           <div className="flex flex-col items-center">
             {links.map((link, linkIndex) => {
@@ -283,6 +286,7 @@ const Links = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

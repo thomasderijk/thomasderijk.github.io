@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useInvert } from '@/contexts/InvertContext';
 import { useShuffle } from '@/contexts/ShuffleContext';
+import { TopRightMenu } from '@/components/TopRightMenu';
 
 const About = () => {
   const { isInverted } = useInvert();
@@ -31,22 +32,25 @@ const About = () => {
       : 'hsl(0, 0%, 0%)';
 
   return (
-    <div className="relative z-10 flex items-center justify-center px-4 pointer-events-none" style={{ height: 'calc(100vh - 64px)' }}>
-      <div className="w-full max-w-xs text-center pointer-events-auto" style={{ lineHeight: 1.4 }}>
-        <p className="font-display font-light" style={{
-          backgroundColor: bgColor,
-          color: textColor,
-          padding: '2px 4px',
-          display: 'inline',
-          boxDecorationBreak: 'clone',
-          WebkitBoxDecorationBreak: 'clone',
-          lineHeight: 1.4,
-          fontWeight: 300,
-        }}>
-          Thomas de Rijk is an Amsterdam based audiovisual artist, 3D generalist, director, musician and sound designer.
-        </p>
+    <>
+      <TopRightMenu />
+      <div className="relative z-10 flex items-center justify-center px-4 pointer-events-none" style={{ height: 'calc(100vh - 64px)' }}>
+        <div className="w-full max-w-xs text-center pointer-events-auto" style={{ lineHeight: 1.4 }}>
+          <p className="font-display font-light" style={{
+            backgroundColor: bgColor,
+            color: textColor,
+            padding: '2px 4px',
+            display: 'inline',
+            boxDecorationBreak: 'clone',
+            WebkitBoxDecorationBreak: 'clone',
+            lineHeight: 1.4,
+            fontWeight: 300,
+          }}>
+            Thomas de Rijk is an Amsterdam based audiovisual artist, 3D generalist, director, musician and sound designer.
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
