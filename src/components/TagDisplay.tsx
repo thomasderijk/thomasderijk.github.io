@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { tagIcons } from '@/config/tagIcons';
+import { SvgIcon } from '@/components/icons/SvgIcon';
 
 interface TagDisplayProps {
   tags: string[];
@@ -67,17 +68,15 @@ export const TagDisplay = ({ tags, isHovered }: TagDisplayProps) => {
             key={index}
             style={{
               backgroundColor: colors.bgColor,
-              color: colors.textColor,
               width: '28px',
               height: '28px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '16px',
               lineHeight: 1,
             }}
           >
-            {icon}
+            <SvgIcon char={icon} size={20} color={colors.textColor} />
           </div>
         );
       })}

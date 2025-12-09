@@ -4,7 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
-// Icons replaced with Unicode symbols - no dependencies needed
+// SVG Icons - embeds UTF-8 characters in SVG to prevent emoji rendering on iOS
+import { SvgIcon, createIconArray } from "@/components/icons/SvgIcon";
 import { useProjectSort } from "@/hooks/use-project-sort";
 import { useVideoPreloader } from "@/hooks/use-video-preloader";
 import { StaggeredMirrorText } from "@/components/StaggeredMirrorText";
@@ -250,27 +251,27 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     return textColor === 'white' ? 'hsl(0, 0%, 10%)' : 'hsl(0, 0%, 90%)';
   };
 
-  // Cycling icon state - specific trigrams in order
-  const trigramIcons = ['☰', '☱', '☳', '☷', '☶', '☴'];
+  // Cycling icon state - specific trigrams in order (SVG components)
+  const trigramIcons = createIconArray(['☰', '☱', '☳', '☷', '☶', '☴']);
   const [currentIconIndex, setCurrentIconIndex] = useState(0);
   const cycleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const cycleNoiseRef = useRef<number>(Math.random() * 1000); // Random seed for cycle icon noise
   const [isCycleIconHovered, setIsCycleIconHovered] = useState(false);
 
-  // Shuffle icon state - asterisks and stars cycling
-  const shuffleIcons = [
+  // Shuffle icon state - asterisks and stars cycling (SVG components)
+  const shuffleIcons = createIconArray([
     '✢', '✣', '✤', '✥', '✦', '✧',
     '✱', '✲', '✳', '✴', '✵', '✶',
     '✻', '✼', '✽', '✾', '✿', '❀',
     '❃', '❄', '❅', '❆', '❇', '❈', '❉', '❊', '❋'
-  ];
+  ]);
   const [currentShuffleIndex, setCurrentShuffleIndex] = useState(0);
   const shuffleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const shuffleNoiseRef = useRef<number>(Math.random() * 1000); // Random seed for shuffle icon noise
   const [isShuffleIconHovered, setIsShuffleIconHovered] = useState(false);
 
-  // Music icon state - ping pong through music notes
-  const musicIcons = ['♪', '♫', '♬'];
+  // Music icon state - ping pong through music notes (SVG components)
+  const musicIcons = createIconArray(['♪', '♫', '♬']);
   const [currentMusicIndex, setCurrentMusicIndex] = useState(0);
   const musicDirectionRef = useRef<1 | -1>(1); // 1 = forward, -1 = backward
   const musicTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -543,13 +544,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               >
                 <span
                   style={{
-                    fontSize: `${ICON_BUTTON_STYLES.iconSize}px`,
-                    color: shuffleIconColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     lineHeight: ICON_BUTTON_STYLES.lineHeight,
                   }}
                   className="icon-content"
                 >
-                  {shuffleIcons[currentShuffleIndex]}
+                  {(() => {
+                    const ShuffleIconComponent = shuffleIcons[currentShuffleIndex];
+                    return <ShuffleIconComponent size={ICON_BUTTON_STYLES.iconSize} color={shuffleIconColor} />;
+                  })()}
                 </span>
               </button>
             )}
@@ -616,13 +621,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           >
             <span
               style={{
-                fontSize: `${ICON_BUTTON_STYLES.iconSize}px`,
-                color: closeIconColor,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 lineHeight: ICON_BUTTON_STYLES.lineHeight,
               }}
               className="icon-content"
             >
-              ✕
+              <SvgIcon char="✕" size={ICON_BUTTON_STYLES.iconSize} color={closeIconColor} />
             </span>
           </button>
         )}
@@ -773,13 +779,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             >
               <span
                 style={{
-                  fontSize: `${ICON_BUTTON_STYLES.iconSize}px`,
-                  color: getColorFromVariant(audioPlayerColors.controls).text,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   lineHeight: ICON_BUTTON_STYLES.lineHeight,
                 }}
                 className="icon-content"
               >
-                ⏮
+                <SvgIcon char="⏮" size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />
               </span>
             </button>
           )}
@@ -848,13 +855,23 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           >
             <span
               style={{
-                fontSize: `${ICON_BUTTON_STYLES.iconSize}px`,
-                color: getColorFromVariant(audioPlayerColors.controls).text,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 lineHeight: ICON_BUTTON_STYLES.lineHeight,
               }}
               className="icon-content"
             >
-              {isPlaying ? '❚❚' : (isPlayerHovered ? '▶' : musicIcons[currentMusicIndex])}
+              {isPlaying ? (
+                <SvgIcon char="❚❚" size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />
+              ) : isPlayerHovered ? (
+                <SvgIcon char="▶" size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />
+              ) : (
+                (() => {
+                  const MusicIconComponent = musicIcons[currentMusicIndex];
+                  return <MusicIconComponent size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />;
+                })()
+              )}
             </span>
           </button>
 
@@ -919,13 +936,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             >
               <span
                 style={{
-                  fontSize: `${ICON_BUTTON_STYLES.iconSize}px`,
-                  color: getColorFromVariant(audioPlayerColors.controls).text,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   lineHeight: ICON_BUTTON_STYLES.lineHeight,
                 }}
                 className="icon-content"
               >
-                ⏭
+                <SvgIcon char="⏭" size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(audioPlayerColors.controls).text} />
               </span>
             </button>
           )}
@@ -1003,13 +1021,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           >
             <span
               style={{
-                fontSize: `${ICON_BUTTON_STYLES.iconSize}px`,
-                color: getColorFromVariant(cycleIconColor).text,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 lineHeight: ICON_BUTTON_STYLES.lineHeight,
               }}
               className="icon-content"
             >
-              {trigramIcons[currentIconIndex]}
+              {(() => {
+                const TrigramIconComponent = trigramIcons[currentIconIndex];
+                return <TrigramIconComponent size={ICON_BUTTON_STYLES.iconSize} color={getColorFromVariant(cycleIconColor).text} />;
+              })()}
             </span>
           </button>
         </div>
